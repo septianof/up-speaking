@@ -43,7 +43,7 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas |
 |---|---|---|---|---|---|
-| `[ ]` | `DB-01` | Buat skrip DDL SQL migration Supabase untuk 6 tabel: `settings`, `levels`, `questions`, `question_options`, `test_sessions`, dan `student_answers` | `ENV-04` | 1 jam | 🔴 Wajib |
+| `[x]` | `DB-01` | Buat skrip DDL SQL migration Supabase untuk 6 tabel: `settings`, `levels`, `questions`, `question_options`, `test_sessions`, dan `student_answers` | `ENV-04` | 1 jam | 🔴 Wajib |
 | `[ ]` | `DB-02` | Terapkan proteksi Row Level Security (RLS) & indeks performa pada tabel `test_sessions` dan `question_options` | `DB-01` | 30 menit | 🔴 Wajib |
 | `[ ]` | `DB-03` | Buat seeder SQL data awal: durasi tes (45 menit), 3 konfigurasi level default (Beginner, Intermediate, Advanced), dan 5-10 butir soal uji coba dummy | `DB-01` | 45 menit | 🔴 Wajib |
 | `[ ]` | `DB-04` | Buat Server Action / API `startSession`: validasi format WA (normalisasi ke `628xxx`), cek fraud 24 jam/sesi berjalan, buat sesi baru, dan return daftar soal teracak (tanpa field `is_correct`) | `DB-02`, `DB-03` | 1.5 jam | 🔴 Wajib |
