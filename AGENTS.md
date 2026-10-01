@@ -69,7 +69,6 @@ up-speaking/
 ├── TASK_BREAKDOWN.md
 ├── AGENTS.md
 ├── CLAUDE.md
-├── DATA.md
 ├── assets/logo/              ← Logo resmi Up Speaking (.png)
 ├── public/                   ← Favicon, logo public, manifest.json PWA
 ├── src/
