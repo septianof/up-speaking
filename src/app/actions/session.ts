@@ -6,6 +6,7 @@ import type {
   StartSessionResult,
   SanitizedQuestion,
   SanitizedOption,
+  SaveAnswerResult,
 } from '@/types';
 
 /**
@@ -318,3 +319,109 @@ export async function startSession(
     };
   }
 }
+
+/**
+ * Server Action: saveAnswer
+ * 
+ * Tanggung Jawab:
+ * 1. Validasi ID parameter (sessionId, questionId, selectedOptionId).
+ * 2. Memastikan sesi ujian masih aktif (in_progress & end_time > now).
+ * 3. Memverifikasi bahwa pilihan jawaban terdaftar untuk butir soal tersebut.
+ * 4. Melakukan upsert jawaban siswa ke tabel student_answers secara aman.
+ */
+export async function saveAnswer(
+  sessionId: string,
+  questionId: string,
+  selectedOptionId: string
+): Promise<SaveAnswerResult> {
+  try {
+    if (!sessionId || !questionId || !selectedOptionId) {
+      return {
+        success: false,
+        error: 'Parameter penyimpanan jawaban tidak lengkap.',
+      };
+    }
+
+    const supabase = createClient();
+    const nowIso = new Date().toISOString();
+
+    // 1. Verifikasi status sesi ujian
+    const { data: session, error: sessionErr } = await supabase
+      .from('test_sessions')
+      .select('id, status, end_time')
+      .eq('id', sessionId)
+      .maybeSingle();
+
+    if (sessionErr || !session) {
+      return {
+        success: false,
+        error: 'Sesi ujian tidak ditemukan.',
+      };
+    }
+
+    if (session.status !== 'in_progress') {
+      return {
+        success: false,
+        error: 'Sesi ujian sudah diselesaikan atau ditutup.',
+      };
+    }
+
+    if (new Date(session.end_time) <= new Date(nowIso)) {
+      return {
+        success: false,
+        error: 'Waktu ujian telah berakhir.',
+      };
+    }
+
+    // 2. Verifikasi kesesuaian opsi jawaban dengan butir soal
+    const { data: validOption, error: optErr } = await supabase
+      .from('question_options')
+      .select('id')
+      .eq('id', selectedOptionId)
+      .eq('question_id', questionId)
+      .maybeSingle();
+
+    if (optErr || !validOption) {
+      return {
+        success: false,
+        error: 'Pilihan jawaban tidak valid untuk butir soal ini.',
+      };
+    }
+
+    // 3. Upsert jawaban ke tabel student_answers
+    const { error: upsertErr } = await supabase
+      .from('student_answers')
+      .upsert(
+        {
+          session_id: sessionId,
+          question_id: questionId,
+          selected_option_id: selectedOptionId,
+          updated_at: nowIso,
+        },
+        {
+          onConflict: 'session_id,question_id',
+        }
+      );
+
+    if (upsertErr) {
+      console.error('Error saat menyimpan jawaban siswa:', upsertErr);
+      return {
+        success: false,
+        error: 'Gagal menyimpan jawaban ke database.',
+      };
+    }
+
+    return {
+      success: true,
+      questionId,
+      selectedOptionId,
+    };
+  } catch (error) {
+    console.error('Unexpected error di saveAnswer:', error);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat menyimpan jawaban.',
+    };
+  }
+}
+
