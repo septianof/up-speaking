@@ -7,10 +7,21 @@
   --foreground: #0f172a;
 }
 
-body {
+/* Sembunyikan scrollbar bawaan browser secara global (halaman tetap bisa di-scroll) */
+html, body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Sembunyikan scrollbar untuk WebKit (Chrome, Safari, Opera, Edge baru) */
+::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
+  background: transparent;
 }
 
 @layer utilities {

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import RegisterModal from '@/components/student/RegisterModal';
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,35 +196,11 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Placeholder trigger feedback for STU-02 modal */}
-      {isModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 text-center animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center text-2xl mb-4">
-              📝
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Formulir Pendaftaran Siswa</h3>
-            <p className="text-sm text-slate-500 mb-6">
-              Modal pendaftaran lengkap (Nama &amp; WhatsApp) akan disempurnakan pada task berikutnya (<code>STU-02</code>).
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-sm transition-colors"
-            >
-              Tutup Pratinjau
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Modal / Bottom Sheet Pendaftaran Siswa (STU-02) */}
+      <RegisterModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
