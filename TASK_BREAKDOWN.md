@@ -56,7 +56,7 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas |
 |---|---|---|---|---|---|
-| `[ ]` | `STU-01` | Buat halaman Landing Page (`/`): Navbar logo, Hero section, info fitur tes, panduan, dan tombol CTA | `ENV-03` | 1.5 jam | 🔴 Wajib |
+| `[x]` | `STU-01` | Buat halaman Landing Page (`/`): Navbar logo, Hero section, info fitur tes, panduan, dan tombol CTA | `ENV-03` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `STU-02` | Buat Modal / Bottom Sheet pendaftaran: input Nama Lengkap & Nomor WhatsApp, integrasi start session, dan deteksi pemulihan sesi aktif | `STU-01`, `DB-04` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `STU-03` | Buat layout Ruang Ujian (`/exam`): Sticky Header (Nama, Countdown Timer tersinkronisasi server, badge auto-save hijau) | `STU-02` | 1 jam | 🔴 Wajib |
 | `[ ]` | `STU-04` | Buat komponen Soal & Opsi Jawaban: Radio Card interaktif yang ramah sentuhan layar ponsel (mobile tap-friendly) | `STU-03` | 1 jam | 🔴 Wajib |
