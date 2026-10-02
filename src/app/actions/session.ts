@@ -1,0 +1,320 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
+import type {
+  StartSessionResult,
+  SanitizedQuestion,
+  SanitizedOption,
+} from '@/types';
+
+/**
+ * Algoritma Fisher-Yates (Knuth) Shuffle untuk mengacak urutan elemen array secara merata.
+ */
+function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
+ * Server Action: startSession
+ * 
+ * Tanggung Jawab:
+ * 1. Validasi nama siswa & normalisasi nomor WhatsApp ke format internasional 628xxx.
+ * 2. Cek apakah ada sesi berjalan (in_progress & end_time > now) untuk Crash Recovery.
+ * 3. Cek pencegahan fraud 24 jam (siswa tidak boleh tes ulang dalam 24 jam kecuali can_retest = true).
+ * 4. Buat sesi ujian baru di test_sessions dengan batas waktu server-side.
+ * 5. Kembalikan daftar soal aktif & opsi jawaban teracak TANPA kolom is_correct.
+ */
+export async function startSession(
+  rawName: string,
+  rawWhatsApp: string
+): Promise<StartSessionResult> {
+  try {
+    // --------------------------------------------------------------------------
+    // 1. VALIDASI NAMA & NORMALISASI WHATSAPP
+    // --------------------------------------------------------------------------
+    const studentName = rawName?.trim();
+    if (!studentName || studentName.length < 2) {
+      return {
+        success: false,
+        error: 'Nama lengkap wajib diisi minimal 2 karakter.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    if (studentName.length > 150) {
+      return {
+        success: false,
+        error: 'Nama lengkap maksimal 150 karakter.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    const normalizedWA = normalizeWhatsAppNumber(rawWhatsApp);
+    if (!normalizedWA) {
+      return {
+        success: false,
+        error:
+          'Nomor WhatsApp tidak valid. Masukkan nomor ponsel aktif dengan format yang benar (contoh: 081234567890).',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    const supabase = createClient();
+    const nowIso = new Date().toISOString();
+
+    // --------------------------------------------------------------------------
+    // 2. CEK SESI BERJALAN (CRASH RECOVERY)
+    // --------------------------------------------------------------------------
+    const { data: activeSessions, error: activeErr } = await supabase
+      .from('test_sessions')
+      .select('*')
+      .eq('whatsapp_number', normalizedWA)
+      .eq('status', 'in_progress')
+      .gt('end_time', nowIso)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (activeErr) {
+      console.error('Error saat memeriksa sesi aktif:', activeErr);
+      return {
+        success: false,
+        error: 'Terjadi gangguan saat memeriksa sesi ujian. Silakan coba kembali.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    // Jika siswa masih memiliki sesi yang sedang berjalan dan belum habis waktu
+    if (activeSessions && activeSessions.length > 0) {
+      const activeSession = activeSessions[0];
+
+      // Ambil jawaban yang sebelumnya sudah disimpan (auto-saved)
+      const { data: answersData } = await supabase
+        .from('student_answers')
+        .select('question_id, selected_option_id')
+        .eq('session_id', activeSession.id);
+
+      const savedAnswers: Record<string, string> = {};
+      answersData?.forEach((ans) => {
+        if (ans.selected_option_id) {
+          savedAnswers[ans.question_id] = ans.selected_option_id;
+        }
+      });
+
+      // Ambil seluruh butir pertanyaan aktif tanpa menyertakan kolom is_correct
+      const { data: questionsData, error: qErr } = await supabase
+        .from('questions')
+        .select(`
+          id,
+          question_text,
+          question_options (
+            id,
+            question_id,
+            option_text,
+            order_index
+          )
+        `)
+        .eq('is_active', true);
+
+      if (qErr || !questionsData) {
+        console.error('Error saat mengambil soal untuk sesi recovery:', qErr);
+        return {
+          success: false,
+          error: 'Gagal memuat soal ujian.',
+          code: 'SERVER_ERROR',
+        };
+      }
+
+      const resumedQuestions: SanitizedQuestion[] = questionsData.map((q) => {
+        const rawOptions = (q.question_options as Array<{
+          id: string;
+          question_id: string;
+          option_text: string;
+          order_index: number;
+        }>) || [];
+
+        // Urutkan opsi sesuai order_index yang ada
+        const sortedOptions: SanitizedOption[] = [...rawOptions]
+          .sort((a, b) => a.order_index - b.order_index)
+          .map((opt) => ({
+            id: opt.id,
+            question_id: opt.question_id,
+            option_text: opt.option_text,
+          }));
+
+        return {
+          id: q.id,
+          question_text: q.question_text,
+          options: sortedOptions,
+        };
+      });
+
+      return {
+        success: true,
+        isResumed: true,
+        session: {
+          id: activeSession.id,
+          student_name: activeSession.student_name,
+          whatsapp_number: activeSession.whatsapp_number,
+          start_time: activeSession.start_time,
+          end_time: activeSession.end_time,
+          total_questions: activeSession.total_questions,
+        },
+        questions: resumedQuestions,
+        savedAnswers,
+      };
+    }
+
+    // --------------------------------------------------------------------------
+    // 3. CEK FRAUD 24 JAM
+    // --------------------------------------------------------------------------
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: recentSessions, error: recentErr } = await supabase
+      .from('test_sessions')
+      .select('id, status, can_retest, created_at, completed_at')
+      .eq('whatsapp_number', normalizedWA)
+      .in('status', ['completed', 'expired'])
+      .gte('created_at', twentyFourHoursAgo)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (recentErr) {
+      console.error('Error saat memeriksa riwayat sesi 24 jam:', recentErr);
+      return {
+        success: false,
+        error: 'Terjadi gangguan saat memverifikasi data peserta.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    // Jika sudah pernah tes dalam 24 jam terakhir dan belum mendapat izin tes ulang
+    if (recentSessions && recentSessions.length > 0) {
+      const latestSession = recentSessions[0];
+      if (!latestSession.can_retest) {
+        return {
+          success: false,
+          error:
+            'Nomor WhatsApp ini telah menyelesaikan tes penempatan dalam kurun 24 jam terakhir. Anda hanya dapat mengikuti tes 1 kali per hari. Silakan hubungi admin Up Speaking jika Anda membutuhkan izin tes ulang.',
+          code: 'SESSION_BLOCKED',
+        };
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 4. AMBIL PENGATURAN DURASI & BANK SOAL
+    // --------------------------------------------------------------------------
+    const { data: settingData } = await supabase
+      .from('settings')
+      .select('test_duration_minutes')
+      .eq('id', 1)
+      .maybeSingle();
+
+    const durationMinutes = settingData?.test_duration_minutes ?? 45;
+
+    // Ambil butir soal aktif dan pilihan opsi (TIDAK menyertakan is_correct)
+    const { data: questionsData, error: qErr } = await supabase
+      .from('questions')
+      .select(`
+        id,
+        question_text,
+        question_options (
+          id,
+          question_id,
+          option_text,
+          order_index
+        )
+      `)
+      .eq('is_active', true);
+
+    if (qErr || !questionsData || questionsData.length === 0) {
+      console.error('Error atau soal kosong:', qErr);
+      return {
+        success: false,
+        error: 'Belum ada butir soal ujian yang aktif di sistem. Silakan hubungi admin.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    // --------------------------------------------------------------------------
+    // 5. BUAT SESI BARU DI TEST_SESSIONS
+    // --------------------------------------------------------------------------
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
+
+    const { data: createdSession, error: createSessionErr } = await supabase
+      .from('test_sessions')
+      .insert({
+        student_name: studentName,
+        whatsapp_number: normalizedWA,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: 'in_progress',
+        total_questions: questionsData.length,
+        correct_answers: 0,
+        can_retest: false,
+      })
+      .select()
+      .single();
+
+    if (createSessionErr || !createdSession) {
+      console.error('Error saat membuat sesi baru:', createSessionErr);
+      return {
+        success: false,
+        error: 'Gagal memulai sesi ujian baru. Silakan coba sesaat lagi.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    // --------------------------------------------------------------------------
+    // 6. ACAK URUTAN SOAL & PILIHAN OPSI (FISHER-YATES SHUFFLE)
+    // --------------------------------------------------------------------------
+    const sanitizedQuestions: SanitizedQuestion[] = shuffle(questionsData).map((q) => {
+      const rawOptions = (q.question_options as Array<{
+        id: string;
+        question_id: string;
+        option_text: string;
+        order_index: number;
+      }>) || [];
+
+      // Acak urutan opsi jawaban untuk setiap butir soal
+      const shuffledOptions: SanitizedOption[] = shuffle(rawOptions).map((opt) => ({
+        id: opt.id,
+        question_id: opt.question_id,
+        option_text: opt.option_text,
+      }));
+
+      return {
+        id: q.id,
+        question_text: q.question_text,
+        options: shuffledOptions,
+      };
+    });
+
+    return {
+      success: true,
+      isResumed: false,
+      session: {
+        id: createdSession.id,
+        student_name: createdSession.student_name,
+        whatsapp_number: createdSession.whatsapp_number,
+        start_time: createdSession.start_time,
+        end_time: createdSession.end_time,
+        total_questions: createdSession.total_questions,
+      },
+      questions: sanitizedQuestions,
+    };
+  } catch (error) {
+    console.error('Unexpected error di startSession:', error);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem yang tidak terduga. Silakan coba lagi nanti.',
+      code: 'SERVER_ERROR',
+    };
+  }
+}
