@@ -118,6 +118,9 @@ Setiap pengerjaan task wajib mematuhi alur kerja (*standard operating procedure*
    * Jika ada langkah yang **lebih aman, lebih tepat, atau wajib dilakukan secara manual oleh developer** (contoh: mendaftar proyek Supabase di dashboard web, menyalin API Key/kredensial rahasia, atau pengujian fisik di perangkat HP), AI **wajib memberi tahu developer secara proaktif** disertai panduan langkah demi langkah yang mudah diikuti.
 5. **Simpel, Bersih, dan Tanpa Bloatware:**
    * Utamakan kode yang bersih, mudah dipahami, dan langsung menjawab kebutuhan pengguna tanpa menambah kompleksitas yang tidak diminta.
+6. **Konfirmasi Referensi Desain UI (Figma / Mockup First):**
+   * Untuk setiap pengerjaan task yang berkaitan dengan tampilan antarmuka pengguna (UI/Frontend), AI **wajib menanyakan terlebih dahulu** apakah developer memiliki referensi visual, tangkapan layar (*screenshot*), atau desain dari Figma sebelum mulai mengoding.
+   * Jika ada, AI wajib menggunakan tangkapan layar tersebut sebagai acuan utama agar implementasi tata letak (*layout*), warna, tipografi, dan hierarki komponen sesuai 100% dengan rancangan desain.
 ---
 
 ## 8. Panduan & SOP Git Workflow (Branching & Commit)
