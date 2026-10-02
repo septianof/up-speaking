@@ -48,7 +48,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `DB-03` | Buat seeder SQL data awal: durasi tes (45 menit), 3 konfigurasi level default (Beginner, Intermediate, Advanced), dan 5-10 butir soal uji coba dummy | `DB-01` | 45 menit | 🔴 Wajib |
 | `[x]` | `DB-04` | Buat Server Action / API `startSession`: validasi format WA (normalisasi ke `628xxx`), cek fraud 24 jam/sesi berjalan, buat sesi baru, dan return daftar soal teracak (tanpa field `is_correct`) | `DB-02`, `DB-03` | 1.5 jam | 🔴 Wajib |
 | `[x]` | `DB-05` | Buat Server Action / API `saveAnswer`: upsert pilihan jawaban siswa ke tabel `student_answers` di background | `DB-04` | 45 menit | 🔴 Wajib |
-| `[ ]` | `DB-06` | Buat Server Action / API `submitExam`: validasi jawaban terhadap kunci di DB, hitung persentase skor, tentukan level, dan tandai sesi `completed` | `DB-04`, `DB-05` | 1.5 jam | 🔴 Wajib |
+| `[x]` | `DB-06` | Buat Server Action / API `submitExam`: validasi jawaban terhadap kunci di DB, hitung persentase skor, tentukan level, dan tandai sesi `completed` | `DB-04`, `DB-05` | 1.5 jam | 🔴 Wajib |
 
 ---
 

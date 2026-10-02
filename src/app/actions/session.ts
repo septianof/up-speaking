@@ -7,6 +7,8 @@ import type {
   SanitizedQuestion,
   SanitizedOption,
   SaveAnswerResult,
+  SubmitExamResult,
+  GetSessionResultResponse,
 } from '@/types';
 
 /**
@@ -424,4 +426,274 @@ export async function saveAnswer(
     };
   }
 }
+
+/**
+ * Server Action: submitExam
+ * 
+ * Tanggung Jawab:
+ * 1. Validasi sesi pengerjaan siswa.
+ * 2. Penanganan idempotensi: jika sesi sudah 'completed', langsung kembalikan hasil sebelumnya.
+ * 3. Ambil seluruh jawaban siswa pada sesi dan cocokkan dengan kunci jawaban di question_options.
+ * 4. Hitung jumlah benar dan persentase skor akhir (0.00% - 100.00%).
+ * 5. Tentukan level penempatan berdasarkan rentang level di tabel levels.
+ * 6. Update status sesi menjadi 'completed', catat correct_answers, final_score_percent, assigned_level_id, dan completed_at.
+ * 7. Kembalikan detail pencapaian untuk halaman hasil siswa.
+ */
+export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
+  try {
+    if (!sessionId) {
+      return {
+        success: false,
+        error: 'ID sesi ujian tidak valid.',
+      };
+    }
+
+    const supabase = createClient();
+
+    // 1. Ambil data sesi ujian saat ini beserta level jika sudah ada
+    const { data: session, error: sessionErr } = await supabase
+      .from('test_sessions')
+      .select(`
+        id,
+        student_name,
+        whatsapp_number,
+        status,
+        total_questions,
+        correct_answers,
+        final_score_percent,
+        assigned_level_id,
+        completed_at,
+        levels:assigned_level_id (
+          id,
+          name,
+          description
+        )
+      `)
+      .eq('id', sessionId)
+      .maybeSingle();
+
+    if (sessionErr || !session) {
+      console.error('Error saat mengambil sesi ujian:', sessionErr);
+      return {
+        success: false,
+        error: 'Sesi ujian tidak ditemukan.',
+      };
+    }
+
+    // Penanganan Idempotensi: Jika sesi sudah berstatus completed sebelumnya
+    if (session.status === 'completed') {
+      const assignedLevel = Array.isArray(session.levels) ? session.levels[0] : session.levels;
+      return {
+        success: true,
+        result: {
+          sessionId: session.id,
+          studentName: session.student_name,
+          whatsappNumber: session.whatsapp_number,
+          totalQuestions: session.total_questions,
+          correctAnswers: session.correct_answers,
+          finalScorePercent: Number(session.final_score_percent ?? 0),
+          level: {
+            id: assignedLevel?.id ?? 0,
+            name: assignedLevel?.name ?? 'Level Selesai',
+            description: assignedLevel?.description ?? null,
+          },
+          completedAt: session.completed_at || new Date().toISOString(),
+        },
+      };
+    }
+
+    // 2. Ambil seluruh jawaban siswa untuk sesi ini
+    const { data: answersData, error: answersErr } = await supabase
+      .from('student_answers')
+      .select(`
+        question_id,
+        selected_option_id,
+        question_options:selected_option_id (
+          id,
+          is_correct
+        )
+      `)
+      .eq('session_id', sessionId);
+
+    if (answersErr) {
+      console.error('Error saat mengambil jawaban siswa:', answersErr);
+      return {
+        success: false,
+        error: 'Gagal memuat jawaban ujian untuk dinilai.',
+      };
+    }
+
+    // 3. Hitung jumlah jawaban benar
+    let correctCount = 0;
+    if (answersData) {
+      for (const ans of answersData) {
+        const option = Array.isArray(ans.question_options)
+          ? ans.question_options[0]
+          : ans.question_options;
+
+        if (option && option.is_correct === true) {
+          correctCount++;
+        }
+      }
+    }
+
+    const totalQuestions = session.total_questions > 0 ? session.total_questions : 10;
+    const finalScorePercent = Number(((correctCount / totalQuestions) * 100).toFixed(2));
+
+    // 4. Ambil daftar konfigurasi level dan tentukan level penempatan
+    const { data: levelsData, error: levelsErr } = await supabase
+      .from('levels')
+      .select('id, name, min_score_percent, max_score_percent, description')
+      .order('min_score_percent', { ascending: true });
+
+    if (levelsErr || !levelsData || levelsData.length === 0) {
+      console.error('Error saat mengambil data level:', levelsErr);
+      return {
+        success: false,
+        error: 'Konfigurasi level belum diatur dalam sistem.',
+      };
+    }
+
+    // Cocokkan persentase nilai dengan rentang level yang sesuai
+    let matchedLevel = levelsData.find(
+      (lvl) =>
+        finalScorePercent >= lvl.min_score_percent &&
+        finalScorePercent <= lvl.max_score_percent
+    );
+
+    // Fallback jika tidak pas (misal karena batas pembulatan)
+    if (!matchedLevel) {
+      if (finalScorePercent >= 100) {
+        matchedLevel = levelsData[levelsData.length - 1];
+      } else {
+        matchedLevel = levelsData[0];
+      }
+    }
+
+    const completedAt = new Date().toISOString();
+
+    // 5. Update data sesi menjadi 'completed'
+    const { error: updateErr } = await supabase
+      .from('test_sessions')
+      .update({
+        status: 'completed',
+        correct_answers: correctCount,
+        final_score_percent: finalScorePercent,
+        assigned_level_id: matchedLevel.id,
+        completed_at: completedAt,
+      })
+      .eq('id', sessionId);
+
+    if (updateErr) {
+      console.error('Error saat memperbarui status sesi completed:', updateErr);
+      return {
+        success: false,
+        error: 'Gagal menyimpan hasil penilaian ujian.',
+      };
+    }
+
+    return {
+      success: true,
+      result: {
+        sessionId: session.id,
+        studentName: session.student_name,
+        whatsappNumber: session.whatsapp_number,
+        totalQuestions,
+        correctAnswers: correctCount,
+        finalScorePercent,
+        level: {
+          id: matchedLevel.id,
+          name: matchedLevel.name,
+          description: matchedLevel.description,
+        },
+        completedAt,
+      },
+    };
+  } catch (error) {
+    console.error('Unexpected error di submitExam:', error);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat memproses pengumpulan ujian.',
+    };
+  }
+}
+
+/**
+ * Server Action: getSessionResult
+ * 
+ * Digunakan oleh Halaman Hasil (/result) untuk memuat data penilaian sesi yang telah berstatus completed.
+ */
+export async function getSessionResult(sessionId: string): Promise<GetSessionResultResponse> {
+  try {
+    if (!sessionId) {
+      return {
+        success: false,
+        error: 'ID sesi tidak valid.',
+      };
+    }
+
+    const supabase = createClient();
+
+    const { data: session, error: sessionErr } = await supabase
+      .from('test_sessions')
+      .select(`
+        id,
+        student_name,
+        whatsapp_number,
+        status,
+        total_questions,
+        correct_answers,
+        final_score_percent,
+        completed_at,
+        levels:assigned_level_id (
+          id,
+          name,
+          description
+        )
+      `)
+      .eq('id', sessionId)
+      .maybeSingle();
+
+    if (sessionErr || !session) {
+      return {
+        success: false,
+        error: 'Sesi ujian tidak ditemukan.',
+      };
+    }
+
+    if (session.status !== 'completed') {
+      return {
+        success: false,
+        error: 'Sesi ujian ini belum diselesaikan.',
+      };
+    }
+
+    const assignedLevel = Array.isArray(session.levels) ? session.levels[0] : session.levels;
+
+    return {
+      success: true,
+      result: {
+        sessionId: session.id,
+        studentName: session.student_name,
+        whatsappNumber: session.whatsapp_number,
+        totalQuestions: session.total_questions,
+        correctAnswers: session.correct_answers,
+        finalScorePercent: Number(session.final_score_percent ?? 0),
+        level: {
+          id: assignedLevel?.id ?? 0,
+          name: assignedLevel?.name ?? 'Level Selesai',
+          description: assignedLevel?.description ?? null,
+        },
+        completedAt: session.completed_at || new Date().toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error('Unexpected error di getSessionResult:', error);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat mengambil hasil ujian.',
+    };
+  }
+}
+
 

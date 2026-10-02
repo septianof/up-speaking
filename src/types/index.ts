@@ -121,23 +121,35 @@ export type SaveAnswerResult =
       error: string;
     };
 
+export interface ExamResultData {
+  sessionId: string;
+  studentName: string;
+  whatsappNumber: string;
+  totalQuestions: number;
+  correctAnswers: number;
+  finalScorePercent: number;
+  level: {
+    id: number;
+    name: string;
+    description: string | null;
+  };
+  completedAt: string;
+}
+
 export type SubmitExamResult =
   | {
       success: true;
-      result: {
-        sessionId: string;
-        studentName: string;
-        whatsappNumber: string;
-        totalQuestions: number;
-        correctAnswers: number;
-        finalScorePercent: number;
-        level: {
-          id: number;
-          name: string;
-          description: string | null;
-        };
-        completedAt: string;
-      };
+      result: ExamResultData;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export type GetSessionResultResponse =
+  | {
+      success: true;
+      result: ExamResultData;
     }
   | {
       success: false;
