@@ -118,9 +118,10 @@ Setiap pengerjaan task wajib mematuhi alur kerja (*standard operating procedure*
    * Jika ada langkah yang **lebih aman, lebih tepat, atau wajib dilakukan secara manual oleh developer** (contoh: mendaftar proyek Supabase di dashboard web, menyalin API Key/kredensial rahasia, atau pengujian fisik di perangkat HP), AI **wajib memberi tahu developer secara proaktif** disertai panduan langkah demi langkah yang mudah diikuti.
 5. **Simpel, Bersih, dan Tanpa Bloatware:**
    * Utamakan kode yang bersih, mudah dipahami, dan langsung menjawab kebutuhan pengguna tanpa menambah kompleksitas yang tidak diminta.
-6. **Konfirmasi Referensi Desain UI (Figma / Mockup First):**
+6. **Konfirmasi Referensi Desain UI & Penyempurnaan Terarah (Design-First & UI/UX Refinement):**
    * Untuk setiap pengerjaan task yang berkaitan dengan tampilan antarmuka pengguna (UI/Frontend), AI **wajib menanyakan terlebih dahulu** apakah developer memiliki referensi visual, tangkapan layar (*screenshot*), atau desain dari Figma sebelum mulai mengoding.
-   * Jika ada, AI wajib menggunakan tangkapan layar tersebut sebagai acuan utama agar implementasi tata letak (*layout*), warna, tipografi, dan hierarki komponen sesuai 100% dengan rancangan desain.
+   * Jika ada, AI wajib menggunakan tangkapan layar tersebut sebagai acuan utama agar implementasi tata letak (*layout*), warna, tipografi, dan hierarki komponen sesuai dengan rancangan desain.
+   * **Inisiatif Penyempurnaan UI/UX (*Proactive Polish & Micro-Enhancements*):** AI **sangat diperbolehkan memberikan inisiatif penyempurnaan** (contoh: animasi transisi halus, *micro-interactions*, kenyamanan *spacing*, kontras warna yang lebih ramah mata, atau responsivitas layar kecil) **SELAMA** perubahan tersebut terbukti lebih baik dan estetis, **tanpa mengubah struktur alur (*user flow*), fungsionalitas inti, atau kebutuhan sistem** yang telah ditetapkan di [PRD.md](PRD.md) dan [UI_FLOW.md](UI_FLOW.md).
 ---
 
 ## 8. Panduan & SOP Git Workflow (Branching & Commit)
