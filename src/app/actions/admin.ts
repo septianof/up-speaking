@@ -191,3 +191,83 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
     };
   }
 }
+
+export interface ToggleRetestResult {
+  success: boolean;
+  canRetest?: boolean;
+  error?: string;
+  message?: string;
+}
+
+/**
+ * Server Action: toggleRetestPermission
+ * Memberikan atau mencabut izin 1x tes ulang untuk sesi peserta tertentu tanpa menghapus riwayat lama.
+ */
+export async function toggleRetestPermission(
+  sessionId: string,
+  canRetest: boolean
+): Promise<ToggleRetestResult> {
+  try {
+    if (!sessionId) {
+      return { success: false, error: 'ID sesi tidak valid.' };
+    }
+
+    const supabase = createClient();
+
+    // 1. Verifikasi bahwa user yang memanggil adalah admin terotentikasi
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return {
+        success: false,
+        error: 'Akses ditolak. Anda harus login sebagai admin terlebih dahulu.',
+      };
+    }
+
+    // 2. Ambil data sesi untuk memastikan sesi ada
+    const { data: sessionData, error: fetchErr } = await supabase
+      .from('test_sessions')
+      .select('id, student_name, whatsapp_number')
+      .eq('id', sessionId)
+      .maybeSingle();
+
+    if (fetchErr || !sessionData) {
+      return {
+        success: false,
+        error: 'Sesi ujian siswa tidak ditemukan di database.',
+      };
+    }
+
+    // 3. Update can_retest pada record test_sessions
+    const { error: updateErr } = await supabase
+      .from('test_sessions')
+      .update({ can_retest: canRetest })
+      .eq('id', sessionId);
+
+    if (updateErr) {
+      console.error('Error saat update can_retest:', updateErr);
+      return {
+        success: false,
+        error: 'Gagal memperbarui status izin tes ulang di database.',
+      };
+    }
+
+    return {
+      success: true,
+      canRetest,
+      message: canRetest
+        ? `Izin tes ulang berhasil diberikan untuk ${sessionData.student_name}. Siswa sekarang dapat membuka web dan memulai 1x tes baru.`
+        : `Izin tes ulang untuk ${sessionData.student_name} telah dicabut.`,
+    };
+  } catch (err) {
+    console.error('Unexpected error di toggleRetestPermission:', err);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat memperbarui izin tes ulang.',
+    };
+  }
+}
+

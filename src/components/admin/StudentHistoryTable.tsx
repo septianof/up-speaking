@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -13,12 +13,13 @@ import {
   RotateCcw,
   CheckCircle2,
   Calendar,
-  User,
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
+  XCircle,
 } from 'lucide-react';
 import { StudentHistoryRecord } from '@/app/actions/admin';
+import { RetestConfirmModal } from '@/components/admin/RetestConfirmModal';
 
 interface StudentHistoryTableProps {
   data: StudentHistoryRecord[];
@@ -37,6 +38,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   isRefreshing = false,
   onAllowRetest,
 }) => {
+  const [localData, setLocalData] = useState<StudentHistoryRecord[]>(data);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,18 +46,31 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'name'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // State Modal Retest & Toast
+  const [selectedRecordForRetest, setSelectedRecordForRetest] =
+    useState<StudentHistoryRecord | null>(null);
+  const [isRetestModalOpen, setIsRetestModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Selaraskan localData jika data dari parent diperbarui
+  useEffect(() => {
+    setLocalData(data);
+  }, [data]);
+
   // Format Tanggal & Jam (WIB)
   const formatDateTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      }).format(date) + ' WIB';
+      return (
+        new Intl.DateTimeFormat('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        }).format(date) + ' WIB'
+      );
     } catch {
       return dateString;
     }
@@ -78,9 +93,37 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Buka modal retest
+  const handleOpenRetestModal = (record: StudentHistoryRecord) => {
+    if (onAllowRetest) {
+      onAllowRetest(record);
+      return;
+    }
+    setSelectedRecordForRetest(record);
+    setIsRetestModalOpen(true);
+  };
+
+  // Callback sukses setelah izin retest diubah di server
+  const handleRetestSuccess = (
+    sessionId: string,
+    newCanRetest: boolean,
+    message: string
+  ) => {
+    setLocalData((prev) =>
+      prev.map((item) =>
+        item.id === sessionId ? { ...item, canRetest: newCanRetest } : item
+      )
+    );
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+    onRefresh?.();
+  };
+
   // Filter & Pengurutan Data
   const filteredAndSortedData = useMemo(() => {
-    let result = [...data];
+    let result = [...localData];
 
     // Filter Level
     if (selectedLevel !== 'all') {
@@ -97,7 +140,8 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
         const matchName = item.studentName.toLowerCase().includes(q);
         const matchWA =
           item.whatsappNumber.includes(q) ||
-          (qCleanNum && item.whatsappNumber.replace(/\D/g, '').includes(qCleanNum));
+          (qCleanNum &&
+            item.whatsappNumber.replace(/\D/g, '').includes(qCleanNum));
         return matchName || matchWA;
       });
     }
@@ -123,7 +167,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     });
 
     return result;
-  }, [data, selectedLevel, searchTerm, sortBy, sortOrder]);
+  }, [localData, selectedLevel, searchTerm, sortBy, sortOrder]);
 
   // Pagination calculation
   const totalPages = Math.ceil(filteredAndSortedData.length / PAGE_SIZE) || 1;
@@ -169,7 +213,26 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6">
+    <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6 relative">
+      {/* Toast Notifikasi Berhasil (Retest Permission Toast) */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-800 flex items-start gap-3 animate-fade-in">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-xs sm:text-sm">
+            <p className="font-bold text-white">Status Izin Diperbarui</p>
+            <p className="text-slate-300 mt-0.5 leading-relaxed">{toastMessage}</p>
+          </div>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="p-1 text-slate-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header Bagian Atas: Judul, Info Rekap, dan Tombol Ekspor */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
         <div>
@@ -178,7 +241,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
             <span>Riwayat Hasil Siswa & Rekapitulasi</span>
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Menampilkan data peserta yang telah menyelesaikan ujian penempatan.
+            Menampilkan data peserta yang telah menyelesaikan ujian penempatan beserta kontrol izin tes ulang.
           </p>
         </div>
 
@@ -297,7 +360,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           <strong className="text-slate-800 font-bold">
             {filteredAndSortedData.length}
           </strong>{' '}
-          dari {data.length} hasil ujian siswa
+          dari {localData.length} hasil ujian siswa
         </span>
       </div>
 
@@ -313,7 +376,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
               <th className="py-3.5 px-4 min-w-[120px] text-center">Benar / Total</th>
               <th className="py-3.5 px-4 min-w-[110px] text-center">Skor Akhir</th>
               <th className="py-3.5 px-4 min-w-[130px] text-center">Level Siswa</th>
-              <th className="py-3.5 px-4 min-w-[140px] text-center">Aksi Retest</th>
+              <th className="py-3.5 px-4 min-w-[160px] text-center">Aksi Retest</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -469,22 +532,24 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     {/* Aksi Retest */}
                     <td className="py-4 px-4 text-center">
                       {row.canRetest ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80">
-                          <Check className="w-3 h-3" />
-                          <span>Izin Aktif</span>
-                        </span>
+                        <div className="inline-flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80">
+                            <Check className="w-3 h-3" />
+                            <span>Izin Aktif</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenRetestModal(row)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Cabut izin tes ulang"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => {
-                            if (onAllowRetest) {
-                              onAllowRetest(row);
-                            } else {
-                              alert(
-                                `Fitur Izinkan Tes Ulang untuk siswa "${row.studentName}" akan dihubungkan secara penuh pada task ADM-05.`
-                              );
-                            }
-                          }}
+                          onClick={() => handleOpenRetestModal(row)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200/80 hover:border-sky-200 text-xs font-bold transition-all shadow-2xs"
                           title="Buka izin 1x tes baru untuk siswa ini"
                         >
@@ -530,6 +595,14 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal Dialog Konfirmasi Retest Permission (ADM-05) */}
+      <RetestConfirmModal
+        isOpen={isRetestModalOpen}
+        onClose={() => setIsRetestModalOpen(false)}
+        record={selectedRecordForRetest}
+        onSuccess={handleRetestSuccess}
+      />
     </div>
   );
 };

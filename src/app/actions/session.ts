@@ -274,6 +274,14 @@ export async function startSession(
       };
     }
 
+    // Konsumsi izin tes ulang jika sebelumnya siswa diberikan akses retest
+    if (recentSessions && recentSessions.length > 0 && recentSessions[0].can_retest) {
+      await supabase
+        .from('test_sessions')
+        .update({ can_retest: false })
+        .eq('id', recentSessions[0].id);
+    }
+
     // --------------------------------------------------------------------------
     // 6. ACAK URUTAN SOAL & PILIHAN OPSI (FISHER-YATES SHUFFLE)
     // --------------------------------------------------------------------------
