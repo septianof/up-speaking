@@ -5,6 +5,7 @@ import { StudentHistoryRecord } from '@/app/actions/admin';
 
 interface ExportFilterInfo {
   level?: string;
+  educationLevel?: string;
   search?: string;
 }
 
@@ -55,6 +56,8 @@ export function exportToExcel(
     'Waktu Selesai': formatDateTimeIndonesia(item.completedAt),
     'Nama Lengkap Siswa': item.studentName,
     'Nomor WhatsApp': item.whatsappNumber,
+    'Jenjang Pendidikan': item.educationLevel === 'high_school' ? 'High School' : 'Elementary',
+    'Durasi Pengerjaan': item.durationMinutes ? `${item.durationMinutes} Menit` : '-',
     'Jawaban Benar': item.correctAnswers,
     'Total Soal': item.totalQuestions,
     'Skor Akhir (%)': item.finalScorePercent,
@@ -71,6 +74,8 @@ export function exportToExcel(
     { wch: 22 }, // Waktu Selesai
     { wch: 28 }, // Nama Lengkap Siswa
     { wch: 18 }, // Nomor WhatsApp
+    { wch: 18 }, // Jenjang Pendidikan
+    { wch: 16 }, // Durasi Pengerjaan
     { wch: 14 }, // Jawaban Benar
     { wch: 12 }, // Total Soal
     { wch: 14 }, // Skor Akhir (%)
@@ -87,7 +92,11 @@ export function exportToExcel(
     filterInfo?.level && filterInfo.level !== 'all'
       ? `_${filterInfo.level}`
       : '';
-  const fileName = `Rekap_Placement_Test_Up_Speaking${filterLabel}_${dateStamp}.xlsx`;
+  const eduLabel =
+    filterInfo?.educationLevel && filterInfo.educationLevel !== 'all'
+      ? `_${filterInfo.educationLevel}`
+      : '';
+  const fileName = `Rekap_Placement_Test_Up_Speaking${eduLabel}${filterLabel}_${dateStamp}.xlsx`;
 
   // Download file
   XLSX.writeFile(workbook, fileName);
@@ -152,10 +161,14 @@ export function exportToPDF(
     filterInfo?.level && filterInfo.level !== 'all'
       ? filterInfo.level
       : 'Semua Level';
+  const filterEduText =
+    filterInfo?.educationLevel && filterInfo.educationLevel !== 'all'
+      ? filterInfo.educationLevel === 'high_school' ? 'High School' : 'Elementary'
+      : 'Semua Jenjang';
   const searchText = filterInfo?.search ? `"${filterInfo.search}"` : 'Semua Data';
 
   doc.text(`Waktu Cetak: ${printDateStr}`, 40, 84);
-  doc.text(`Filter Level: ${filterText}   |   Pencarian: ${searchText}`, 40, 97);
+  doc.text(`Jenjang: ${filterEduText}   |   Level: ${filterText}   |   Pencarian: ${searchText}`, 40, 97);
   doc.text(
     `Total Peserta Terfilter: ${data.length} Orang`,
     pageWidth - 40,
@@ -170,10 +183,12 @@ export function exportToPDF(
       'Waktu Ujian',
       'Nama Lengkap Siswa',
       'Nomor WhatsApp',
-      'Benar / Total',
-      'Skor Akhir',
-      'Level Penempatan',
-      'Izin Retest',
+      'Jenjang',
+      'Durasi',
+      'Benar/Total',
+      'Skor',
+      'Level',
+      'Retest',
     ],
   ];
 
@@ -182,6 +197,8 @@ export function exportToPDF(
     formatDateTimeIndonesia(item.completedAt),
     item.studentName,
     formatWhatsAppNumber(item.whatsappNumber),
+    item.educationLevel === 'high_school' ? 'High School' : 'Elementary',
+    item.durationMinutes ? `${item.durationMinutes} mnt` : '-',
     `${item.correctAnswers} / ${item.totalQuestions}`,
     `${item.finalScorePercent}%`,
     item.levelName,
@@ -199,12 +216,12 @@ export function exportToPDF(
       fillColor: [14, 38, 62],
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8.5,
+      fontSize: 8,
       halign: 'center',
       valign: 'middle',
     },
     bodyStyles: {
-      fontSize: 8,
+      fontSize: 7.5,
       textColor: [30, 41, 59],
       valign: 'middle',
     },
@@ -212,14 +229,16 @@ export function exportToPDF(
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { halign: 'center', cellWidth: 30 }, // No
-      1: { halign: 'left', cellWidth: 105 },  // Waktu Ujian
-      2: { halign: 'left', fontStyle: 'bold' }, // Nama
-      3: { halign: 'left', cellWidth: 110 },  // WA
-      4: { halign: 'center', cellWidth: 70 }, // Benar/Total
-      5: { halign: 'center', cellWidth: 65, fontStyle: 'bold' }, // Skor
-      6: { halign: 'center', cellWidth: 95 }, // Level
-      7: { halign: 'center', cellWidth: 65 }, // Retest
+      0: { halign: 'center', cellWidth: 26 }, // No
+      1: { halign: 'left', cellWidth: 95 },   // Waktu Ujian
+      2: { halign: 'left', fontStyle: 'bold' }, // Nama Lengkap Siswa
+      3: { halign: 'left', cellWidth: 95 },   // WA
+      4: { halign: 'center', cellWidth: 70 }, // Jenjang
+      5: { halign: 'center', cellWidth: 50 }, // Durasi
+      6: { halign: 'center', cellWidth: 60 }, // Benar/Total
+      7: { halign: 'center', cellWidth: 45, fontStyle: 'bold' }, // Skor
+      8: { halign: 'center', cellWidth: 75 }, // Level
+      9: { halign: 'center', cellWidth: 45 }, // Retest
     },
     didDrawPage: (hookData) => {
       // Footer Halaman
@@ -244,6 +263,10 @@ export function exportToPDF(
     filterInfo?.level && filterInfo.level !== 'all'
       ? `_${filterInfo.level}`
       : '';
-  const fileName = `Laporan_Placement_Test_Up_Speaking${filterLabel}_${dateStamp}.pdf`;
+  const eduLabel =
+    filterInfo?.educationLevel && filterInfo.educationLevel !== 'all'
+      ? `_${filterInfo.educationLevel}`
+      : '';
+  const fileName = `Laporan_Placement_Test_Up_Speaking${eduLabel}${filterLabel}_${dateStamp}.pdf`;
   doc.save(fileName);
 }

@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { EducationLevel } from '@/types';
 
 export interface DashboardMetrics {
   totalParticipants: number;
@@ -27,6 +28,8 @@ export interface StudentHistoryRecord {
   id: string;
   studentName: string;
   whatsappNumber: string;
+  educationLevel: EducationLevel;
+  durationMinutes: number | null;
   completedAt: string;
   totalQuestions: number;
   correctAnswers: number;
@@ -140,6 +143,8 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
         id,
         student_name,
         whatsapp_number,
+        education_level,
+        duration_minutes,
         total_questions,
         correct_answers,
         final_score_percent,
@@ -169,6 +174,11 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
         id: s.id,
         studentName: s.student_name,
         whatsappNumber: s.whatsapp_number,
+        educationLevel: (s.education_level as EducationLevel) || 'elementary',
+        durationMinutes:
+          s.duration_minutes !== null && s.duration_minutes !== undefined
+            ? Number(s.duration_minutes)
+            : null,
         completedAt: s.completed_at || s.created_at,
         totalQuestions: s.total_questions || 0,
         correctAnswers: s.correct_answers || 0,

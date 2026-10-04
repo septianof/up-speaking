@@ -19,10 +19,13 @@ import {
   XCircle,
   Loader2,
   RefreshCw,
+  GraduationCap,
+  Clock,
 } from 'lucide-react';
 import { StudentHistoryRecord } from '@/app/actions/admin';
 import { RetestConfirmModal } from '@/components/admin/RetestConfirmModal';
 import { exportToExcel, exportToPDF } from '@/lib/export';
+import { EducationLevel } from '@/types';
 
 interface StudentHistoryTableProps {
   data: StudentHistoryRecord[];
@@ -44,9 +47,11 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   const [localData, setLocalData] = useState<StudentHistoryRecord[]>(data);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  const [selectedEducationLevel, setSelectedEducationLevel] =
+    useState<'all' | EducationLevel>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'date' | 'score' | 'name'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'score' | 'name' | 'duration'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // State Modal Retest & Toast
@@ -136,6 +141,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     try {
       exportToExcel(filteredAndSortedData, {
         level: selectedLevel,
+        educationLevel: selectedEducationLevel,
         search: searchTerm,
       });
       setToastMessage(
@@ -160,6 +166,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     try {
       exportToPDF(filteredAndSortedData, {
         level: selectedLevel,
+        educationLevel: selectedEducationLevel,
         search: searchTerm,
       });
       setToastMessage(
@@ -178,7 +185,14 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   const filteredAndSortedData = useMemo(() => {
     let result = [...localData];
 
-    // Filter Level
+    // Filter Jenjang Pendidikan (Elementary vs High School)
+    if (selectedEducationLevel !== 'all') {
+      result = result.filter(
+        (item) => item.educationLevel === selectedEducationLevel
+      );
+    }
+
+    // Filter Level Penempatan
     if (selectedLevel !== 'all') {
       result = result.filter(
         (item) => item.levelName.toLowerCase() === selectedLevel.toLowerCase()
@@ -216,11 +230,16 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           ? a.studentName.localeCompare(b.studentName)
           : b.studentName.localeCompare(a.studentName);
       }
+      if (sortBy === 'duration') {
+        const durA = a.durationMinutes ?? 0;
+        const durB = b.durationMinutes ?? 0;
+        return sortOrder === 'asc' ? durA - durB : durB - durA;
+      }
       return 0;
     });
 
     return result;
-  }, [localData, selectedLevel, searchTerm, sortBy, sortOrder]);
+  }, [localData, selectedEducationLevel, selectedLevel, searchTerm, sortBy, sortOrder]);
 
   // Pagination calculation
   const totalPages = Math.ceil(filteredAndSortedData.length / PAGE_SIZE) || 1;
@@ -232,6 +251,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   const handleResetFilters = () => {
     setSearchTerm('');
     setSelectedLevel('all');
+    setSelectedEducationLevel('all');
     setCurrentPage(1);
   };
 
@@ -370,8 +390,25 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           )}
         </div>
 
-        {/* Dropdown Filter Level & Urutan */}
+        {/* Dropdown Filter Level, Jenjang & Urutan */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Filter Jenjang Pendidikan */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={selectedEducationLevel}
+              onChange={(e) => {
+                setSelectedEducationLevel(e.target.value as 'all' | EducationLevel);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer pr-1"
+            >
+              <option value="all">Semua Jenjang</option>
+              <option value="elementary">Elementary (SD)</option>
+              <option value="high_school">High School</option>
+            </select>
+          </div>
+
           {/* Filter Level */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
@@ -397,7 +434,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
               value={`${sortBy}-${sortOrder}`}
               onChange={(e) => {
                 const [sb, so] = e.target.value.split('-') as [
-                  'date' | 'score' | 'name',
+                  'date' | 'score' | 'name' | 'duration',
                   'asc' | 'desc',
                 ];
                 setSortBy(sb);
@@ -409,12 +446,14 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
               <option value="date-asc">Terlama (Waktu)</option>
               <option value="score-desc">Skor Tertinggi</option>
               <option value="score-asc">Skor Terendah</option>
+              <option value="duration-asc">Durasi Tercepat</option>
+              <option value="duration-desc">Durasi Terlama</option>
               <option value="name-asc">Nama (A - Z)</option>
               <option value="name-desc">Nama (Z - A)</option>
             </select>
           </div>
 
-          {(searchTerm || selectedLevel !== 'all') && (
+          {(searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
             <button
               onClick={handleResetFilters}
               className="px-2.5 py-1.5 text-xs font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200/80 transition-colors"
@@ -442,13 +481,15 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           <thead>
             <tr className="bg-slate-50/80 text-slate-600 text-xs font-bold border-b border-slate-100">
               <th className="py-3.5 px-4 w-12 text-center">#</th>
-              <th className="py-3.5 px-4 min-w-[140px]">Waktu Ujian</th>
-              <th className="py-3.5 px-4 min-w-[180px]">Nama Lengkap</th>
-              <th className="py-3.5 px-4 min-w-[170px]">Nomor WhatsApp</th>
-              <th className="py-3.5 px-4 min-w-[120px] text-center">Benar / Total</th>
-              <th className="py-3.5 px-4 min-w-[110px] text-center">Skor Akhir</th>
-              <th className="py-3.5 px-4 min-w-[130px] text-center">Level Siswa</th>
-              <th className="py-3.5 px-4 min-w-[160px] text-center">Aksi Retest</th>
+              <th className="py-3.5 px-4 min-w-[130px]">Waktu Ujian</th>
+              <th className="py-3.5 px-4 min-w-[170px]">Nama Lengkap</th>
+              <th className="py-3.5 px-4 min-w-[150px]">Nomor WhatsApp</th>
+              <th className="py-3.5 px-4 min-w-[120px] text-center">Jenjang</th>
+              <th className="py-3.5 px-4 min-w-[100px] text-center">Durasi</th>
+              <th className="py-3.5 px-4 min-w-[110px] text-center">Benar / Total</th>
+              <th className="py-3.5 px-4 min-w-[90px] text-center">Skor Akhir</th>
+              <th className="py-3.5 px-4 min-w-[120px] text-center">Level Siswa</th>
+              <th className="py-3.5 px-4 min-w-[140px] text-center">Aksi Retest</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -470,6 +511,12 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     <div className="w-24 h-4 bg-slate-200 rounded" />
                   </td>
                   <td className="py-4 px-4 text-center">
+                    <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-16 h-6 bg-slate-200 rounded-lg mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
                     <div className="w-16 h-4 bg-slate-200 rounded mx-auto" />
                   </td>
                   <td className="py-4 px-4 text-center">
@@ -486,7 +533,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
             ) : paginatedData.length === 0 ? (
               // Empty State
               <tr>
-                <td colSpan={8} className="py-12 px-4 text-center">
+                <td colSpan={10} className="py-12 px-4 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                     <Search className="w-6 h-6" />
                   </div>
@@ -494,11 +541,11 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     Tidak Ada Hasil Ditemukan
                   </h4>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
-                    {searchTerm || selectedLevel !== 'all'
+                    {searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all'
                       ? 'Tidak ada data peserta yang cocok dengan kriteria pencarian atau filter yang dipilih.'
                       : 'Belum ada siswa yang menyelesaikan placement test.'}
                   </p>
-                  {(searchTerm || selectedLevel !== 'all') && (
+                  {(searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
                     <button
                       onClick={handleResetFilters}
                       className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0e263e] text-white font-bold text-xs hover:bg-[#1a385c] transition-colors"
@@ -577,6 +624,33 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                           </a>
                         </div>
                       </div>
+                    </td>
+
+                    {/* Jenjang Pendidikan */}
+                    <td className="py-4 px-4 text-center">
+                      {row.educationLevel === 'high_school' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs whitespace-nowrap">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                          <span>High School</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs whitespace-nowrap">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                          <span>Elementary</span>
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Durasi Pengerjaan Riil */}
+                    <td className="py-4 px-4 text-center">
+                      {row.durationMinutes !== null && row.durationMinutes !== undefined ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <span>{row.durationMinutes} mnt</span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-mono">-</span>
+                      )}
                     </td>
 
                     {/* Benar / Total */}
