@@ -6,7 +6,8 @@ import { Loader2 } from 'lucide-react';
 import ExamHeader from '@/components/exam/ExamHeader';
 import QuestionCard from '@/components/exam/QuestionCard';
 import QuestionPaletteModal from '@/components/exam/QuestionPaletteModal';
-import { saveAnswer } from '@/app/actions/session';
+import SubmitConfirmModal from '@/components/exam/SubmitConfirmModal';
+import { saveAnswer, submitExam } from '@/app/actions/session';
 import type { SessionInfo, SanitizedQuestion } from '@/types';
 
 export default function ExamPage() {
@@ -18,6 +19,9 @@ export default function ExamPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | 'offline'>('saved');
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTimeUp, setIsTimeUp] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Inisialisasi data ujian dari LocalStorage saat halaman dimuat (Crash Recovery STU-06)
@@ -113,10 +117,11 @@ export default function ExamPage() {
     };
   }, [session]);
 
-  // Handler saat waktu ujian habis
+  // Handler saat waktu ujian habis (00:00 - STU-07)
   const handleTimeUp = () => {
-    alert('Waktu ujian telah berakhir! Lembar jawaban akan otomatis dikumpulkan.');
-    // Pada STU-07 aksi submit otomatis akan dipanggil di sini
+    setIsTimeUp(true);
+    setIsSubmitModalOpen(true);
+    executeExamSubmission();
   };
 
   // Handler pemilihan opsi jawaban (STU-04 & DB-05 Auto-save)
@@ -157,24 +162,45 @@ export default function ExamPage() {
     }
   };
 
-  // Handler klik tombol Kumpulkan Ujian di soal terakhir
+  // Handler klik tombol Kumpulkan Ujian di soal terakhir (STU-07)
   const handleSubmitClick = () => {
-    const unansweredCount = totalQuestions - answeredCount;
-    if (unansweredCount > 0) {
-      const confirmSubmit = window.confirm(
-        `Perhatian: Masih ada ${unansweredCount} butir pertanyaan yang belum Anda jawab!\n\nApakah Anda yakin ingin menyelesaikan dan mengumpulkan ujian sekarang?`
-      );
-      if (confirmSubmit) {
-        alert('Lembar jawaban berhasil dikirim! Menyiapkan hasil...');
+    setIsTimeUp(false);
+    setIsSubmitModalOpen(true);
+  };
+
+  // Eksekusi pengumpulan lembar ujian ke Server Action submitExam (STU-07 & DB-06)
+  const executeExamSubmission = async () => {
+    if (!session?.id || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await submitExam(session.id);
+      if (res.success) {
+        // 1. Simpan data hasil evaluasi ke LocalStorage untuk halaman /result (STU-08)
+        localStorage.setItem('upspeaking_result', JSON.stringify(res.result));
+
+        // 2. Bersihkan sesi ujian aktif dari LocalStorage
+        localStorage.removeItem('upspeaking_session');
+        localStorage.removeItem('upspeaking_answers');
+        localStorage.removeItem('upspeaking_current_index');
+
+        // 3. Arahkan siswa ke Halaman Hasil (/result)
+        router.replace('/result');
+      } else {
+        alert(`Gagal mengumpulkan ujian: ${res.error}`);
+        setIsSubmitting(false);
       }
-    } else {
-      const confirmSubmit = window.confirm(
-        'Seluruh pertanyaan telah Anda jawab dengan lengkap!\n\nApakah Anda yakin ingin mengakhiri dan mengumpulkan ujian sekarang?'
-      );
-      if (confirmSubmit) {
-        alert('Lembar jawaban berhasil dikirim! Menyiapkan hasil...');
-      }
+    } catch (err) {
+      console.error('Error saat submit ujian:', err);
+      alert('Terjadi kendala saat mengirim jawaban. Pastikan koneksi internet aktif lalu coba kembali.');
+      setIsSubmitting(false);
     }
+  };
+
+  // Handler aksi periksa lagi: menutup modal submit dan membuka drawer palet soal
+  const handleReviewUnanswered = () => {
+    setIsSubmitModalOpen(false);
+    setIsPaletteOpen(true);
   };
 
   if (isLoading || !session) {
@@ -287,6 +313,20 @@ export default function ExamPage() {
         currentIndex={currentIndex}
         answers={answers}
         onSelectQuestion={(idx) => setCurrentIndex(idx)}
+      />
+
+      {/* ======================================================================= */}
+      {/* 5. MODAL KONFIRMASI PENGUMPULAN & AUTO-SUBMIT (STU-07)                 */}
+      {/* ======================================================================= */}
+      <SubmitConfirmModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+        onConfirm={executeExamSubmission}
+        onReview={handleReviewUnanswered}
+        isSubmitting={isSubmitting}
+        totalQuestions={totalQuestions}
+        answeredCount={answeredCount}
+        isTimeUp={isTimeUp}
       />
     </div>
   );
