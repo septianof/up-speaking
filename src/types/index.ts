@@ -6,9 +6,15 @@
 // 1. DATABASE ENTITIES (Sesuai Skema Supabase)
 // ==============================================================================
 
+export type EducationLevel = 'elementary' | 'high_school';
+
 export interface Setting {
   id: number;
   test_duration_minutes: number;
+  tutor_elementary_name: string;
+  tutor_elementary_whatsapp: string;
+  tutor_highschool_name: string;
+  tutor_highschool_whatsapp: string;
   updated_at: string;
 }
 
@@ -17,6 +23,7 @@ export interface Level {
   name: string;
   min_score_percent: number;
   max_score_percent: number;
+  max_duration_minutes: number | null;
   description: string | null;
   created_at: string;
   updated_at: string;
@@ -25,6 +32,7 @@ export interface Level {
 export interface Question {
   id: string;
   question_text: string;
+  education_level: EducationLevel;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -45,8 +53,10 @@ export interface TestSession {
   id: string;
   student_name: string;
   whatsapp_number: string;
+  education_level: EducationLevel;
   start_time: string;
   end_time: string;
+  duration_minutes: number | null;
   status: TestSessionStatus;
   total_questions: number;
   correct_answers: number;
@@ -80,6 +90,7 @@ export interface SanitizedOption {
 export interface SanitizedQuestion {
   id: string;
   question_text: string;
+  education_level?: EducationLevel;
   options: SanitizedOption[];
 }
 
@@ -87,6 +98,7 @@ export interface SessionInfo {
   id: string;
   student_name: string;
   whatsapp_number: string;
+  education_level?: EducationLevel;
   start_time: string;
   end_time: string;
   total_questions: number;
@@ -121,10 +133,17 @@ export type SaveAnswerResult =
       error: string;
     };
 
+export interface TutorContact {
+  name: string;
+  whatsapp: string;
+}
+
 export interface ExamResultData {
   sessionId: string;
   studentName: string;
   whatsappNumber: string;
+  educationLevel?: EducationLevel;
+  durationMinutes?: number;
   totalQuestions: number;
   correctAnswers: number;
   finalScorePercent: number;
@@ -133,6 +152,7 @@ export interface ExamResultData {
     name: string;
     description: string | null;
   };
+  tutor?: TutorContact;
   completedAt: string;
 }
 
