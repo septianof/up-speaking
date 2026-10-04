@@ -2,15 +2,16 @@
 **Dokumen:** UI Flow & Screen Map Specification (Revised)  
 **Referensi Utama:** PRD Up Speaking Placement Test  
 **Platform:** Web App / PWA (Mobile-Responsive untuk Siswa, Desktop-Optimized untuk Admin)  
-**Versi:** 1.1.0  
-**Tanggal Revisi:** 30 September 2026  
+**Versi:** 1.2.0  
+**Tanggal Revisi:** 4 Oktober 2026  
+
+> **Lingkup:** Dokumen ini hanya mengatur **alur, navigasi, dan perilaku komponen**. Detail visual (warna, tipografi, spacing, animasi) tidak ditetapkan di sini dan ditangani oleh skill desain per task.
 
 ---
 
 ## Daftar Isi
 
 - [Konvensi Dokumen](#konvensi-dokumen)
-- [Design Tokens & Panduan Visual (Design System Foundation)](#design-tokens--panduan-visual-design-system-foundation)
 - [A. Alur Siswa (Peserta Placement Test)](#a-alur-siswa-peserta-placement-test)
   - [S1. Alur Masuk & Pemulihan Sesi (Anti-Close & Anti-Cheat Fraud Check)](#s1-alur-masuk--pemulihan-sesi-anti-close--anti-cheat-fraud-check)
   - [S2. Alur Pelaksanaan Ujian (Exam Room)](#s2-alur-pelaksanaan-ujian-exam-room)
@@ -35,22 +36,6 @@
 | ⚠️ | Kondisi Peringatan / Fraud Check |
 | 🔔 | Modal Dialog / Pop-up Konfirmasi |
 | ──> | Alur Navigasi / Aksi Pengguna |
-
----
-
-## Design Tokens & Panduan Visual (Design System Foundation)
-
-Untuk menjamin konsistensi antarmuka antara sisi Siswa (Mobile/PWA) dan Admin (Desktop), sistem menggunakan hierarki visual: **Modern EdTech — Friendly, Approachable & Academic Focus**, yang diselaraskan secara langsung dengan logo resmi Up Speaking ("UP"):
-
-| Kategori Token | Nilai / Deskripsi | Penggunaan Antarmuka & Relevansi Brand |
-|---|---|---|
-| **Primary Brand** | `#0f2e60` s.d. `#1e3a8a` (Deep Academic Navy) | Header siswa, topbar admin, tipografi judul, struktur utama |
-| **Brand Cyan / U-Blue** | `#0284c7` s.d. `#0ea5e9` (Up Sky Blue) | Selaras huruf "U" pada logo: badge kategori, link bantuan, status aktif |
-| **Brand Scarlet / P-Red** | `#e11d48` s.d. `#e53935` (Up Coral Red) | Selaras huruf "P" pada logo: tombol CTA utama ("Mulai Tes"), timer alert |
-| **Success Color** | `#059669` (Emerald Green) | Jawaban tersimpan otomatis, status soal terjawab, skor penempatan |
-| **Warning / Alert** | `#dc2626` (Crimson Alert) | Peringatan soal kosong, notifikasi nomor terdaftar (fraud prevention) |
-| **Neutral Surface** | `#F8FAFC` & `#FFFFFF` | Background kanvas bersih, kartu fitur, kartu soal, tabel admin |
-| **Typography** | `Plus Jakarta Sans`, `Inter`, sans-serif | Tipografi sans modern berkarakter ramah dengan legibilitas tinggi |
 
 ---
 
@@ -97,11 +82,11 @@ flowchart TD
    * **Hero Section:**
      * Headline: *"Ukur Kemampuan Bahasa Inggrismu & Temukan Level Terbaikmu"*.
      * Subheadline: Penjelasan singkat tujuan tes penempatan resmi untuk pemetaan kelas belajar yang akurat.
-     * **Tombol CTA Utama:** *"Ikuti Placement Test Sekarang 👉"* (ukuran besar, warna aksen Amber menyala, posisi strategis di hero).
+      * **Tombol CTA Utama:** *"Ikuti Placement Test Sekarang"* (posisi strategis di hero, menjadi aksi utama halaman).
    * **Kartu Informasi Cepat (3 Fitur Kunci):**
-     * ⏱️ **Durasi Ujian:** ~45 Menit (penghitung waktu mundur otomatis).
-     * 📝 **Format Tes:** Pilihan ganda interaktif dengan pengacakan soal.
-     * 🎯 **Hasil Instan:** Langsung mengetahui lencana level (Beginner, Intermediate, Advanced).
+      * **Durasi Ujian:** ~45 Menit (penghitung waktu mundur otomatis).
+      * **Format Tes:** Pilihan ganda interaktif dengan pengacakan soal.
+      * **Hasil Instan:** Langsung mengetahui lencana level (Beginner, Intermediate, Advanced).
    * **Kartu Panduan & Ketentuan:**
      * 1. Kerjakan secara mandiri & jujur tanpa alat bantu agar rekomendasi kelas sesuai kemampuan riil.
      * 2. Jawaban tersimpan otomatis secara berkala.
@@ -157,22 +142,22 @@ flowchart TD
 **Catatan Komponen Layar (S2 - Exam Screen):**
 - **Sticky Top Bar:**
   - Nama siswa yang sedang aktif.
-  - **Countdown Timer:** Menampilkan sisa waktu (MM:SS). Saat sisa waktu `< 05:00`, timer berubah menjadi warna merah dengan animasi denyut pelan (*subtle pulse*).
-  - **Auto-save Badge:** Indikator visual hijau *"Tersimpan"* setiap siswa memilih opsi jawaban.
+  - **Countdown Timer:** Menampilkan sisa waktu (MM:SS). Saat sisa waktu `< 05:00`, timer beralih ke tampilan peringatan.
+  - **Auto-save Badge:** Indikator *"Tersimpan"* setiap siswa memilih opsi jawaban.
 - **Area Pertanyaan (Content Body):**
   - Indikator nomor (misal: "Pertanyaan 12 dari 30").
   - Teks stimulus / pertanyaan soal berbahasa Inggris.
-  - Opsi jawaban (A, B, C, D) disajikan dalam bentuk **Interactive Radio Cards** (memiliki efek seleksi warna tegas, mudah di-*tap* pada layar ponsel).
+  - Opsi jawaban (A, B, C, D) disajikan dalam bentuk **kartu pilihan interaktif** yang mudah di-*tap* pada layar ponsel dan menandai opsi terpilih dengan jelas.
 - **Bottom Navigation Bar (Fixed Bottom):**
   - Tombol *"Sebelumnya"* (tombol sekunder, nonaktif di soal nomor 1).
   - Tombol *"Daftar Soal"* (membuka panel modal/drawer kisi soal).
-  - Tombol *"Selanjutnya"* / *"Kumpulkan Ujian"* (memiliki warna kontras berbeda saat berada di nomor terakhir).
+  - Tombol *"Selanjutnya"* / *"Kumpulkan Ujian"* (tombol berganti saat berada di nomor terakhir).
 - **Drawer / Sheet Palet Soal:**
   - Grid nomor 1 sampai N.
-  - Indikator status warna:
-    - 🟢 **Hijau:** Sudah terjawab.
-    - ⚪ **Abu-abu:** Belum terjawab.
-    - 🔵 **Biru Ring:** Sedang dibuka / aktif saat ini.
+  - Status nomor yang harus dapat dibedakan:
+    - **Sudah terjawab.**
+    - **Belum terjawab.**
+    - **Sedang dibuka / aktif saat ini.**
 
 ---
 
