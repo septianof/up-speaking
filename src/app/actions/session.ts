@@ -462,12 +462,14 @@ export async function saveAnswer(
  * 
  * Tanggung Jawab:
  * 1. Validasi sesi pengerjaan siswa.
- * 2. Penanganan idempotensi: jika sesi sudah 'completed', langsung kembalikan hasil sebelumnya.
+ * 2. Penanganan idempotensi: jika sesi sudah 'completed', kembalikan hasil sebelumnya beserta durasi dan tutor.
  * 3. Ambil seluruh jawaban siswa pada sesi dan cocokkan dengan kunci jawaban di question_options.
- * 4. Hitung jumlah benar dan persentase skor akhir (0.00% - 100.00%).
- * 5. Tentukan level penempatan berdasarkan rentang level di tabel levels.
- * 6. Update status sesi menjadi 'completed', catat correct_answers, final_score_percent, assigned_level_id, dan completed_at.
- * 7. Kembalikan detail pencapaian untuk halaman hasil siswa.
+ * 4. Hitung jumlah benar, persentase skor akhir (0.00% - 100.00%), dan durasi pengerjaan riil (menit).
+ * 5. Evaluasi Matrix Penentuan Level (Skor % + Waktu Pengerjaan):
+ *    - Siswa dengan skor >= 80% (Advanced), jika waktu > 25 menit -> degradasi ke Intermediate.
+ *    - Siswa dengan skor 60-79% (Intermediate), jika waktu > 20 menit -> degradasi ke Beginner.
+ * 6. Update status sesi menjadi 'completed', catat correct_answers, final_score_percent, assigned_level_id, duration_minutes, dan completed_at.
+ * 7. Kembalikan detail pencapaian, durasi pengerjaan, dan kontak WhatsApp tutor jenjang terkait.
  */
 export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
   try {
@@ -487,6 +489,9 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
         id,
         student_name,
         whatsapp_number,
+        education_level,
+        start_time,
+        duration_minutes,
         status,
         total_questions,
         correct_answers,
@@ -510,15 +515,43 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
       };
     }
 
+    // Ambil data kontak tutor dari tabel settings sesuai jenjang
+    const { data: settingData } = await supabase
+      .from('settings')
+      .select('tutor_elementary_name, tutor_elementary_whatsapp, tutor_highschool_name, tutor_highschool_whatsapp')
+      .eq('id', 1)
+      .maybeSingle();
+
+    const sessionEduLevel: EducationLevel =
+      (session.education_level as EducationLevel) || 'elementary';
+
+    const tutorContact =
+      sessionEduLevel === 'high_school'
+        ? {
+            name: settingData?.tutor_highschool_name || 'Mr. David',
+            whatsapp: settingData?.tutor_highschool_whatsapp || '6281234567891',
+          }
+        : {
+            name: settingData?.tutor_elementary_name || 'Miss Sarah',
+            whatsapp: settingData?.tutor_elementary_whatsapp || '6281234567890',
+          };
+
     // Penanganan Idempotensi: Jika sesi sudah berstatus completed sebelumnya
     if (session.status === 'completed') {
       const assignedLevel = Array.isArray(session.levels) ? session.levels[0] : session.levels;
+      const completedTime = session.completed_at || new Date().toISOString();
+      const elapsedMinutes =
+        session.duration_minutes ??
+        Math.max(1, Math.round((new Date(completedTime).getTime() - new Date(session.start_time).getTime()) / 60000));
+
       return {
         success: true,
         result: {
           sessionId: session.id,
           studentName: session.student_name,
           whatsappNumber: session.whatsapp_number,
+          educationLevel: sessionEduLevel,
+          durationMinutes: elapsedMinutes,
           totalQuestions: session.total_questions,
           correctAnswers: session.correct_answers,
           finalScorePercent: Number(session.final_score_percent ?? 0),
@@ -527,7 +560,8 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
             name: assignedLevel?.name ?? 'Level Selesai',
             description: assignedLevel?.description ?? null,
           },
-          completedAt: session.completed_at || new Date().toISOString(),
+          tutor: tutorContact,
+          completedAt: completedTime,
         },
       };
     }
@@ -570,10 +604,16 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
     const totalQuestions = session.total_questions > 0 ? session.total_questions : 10;
     const finalScorePercent = Number(((correctCount / totalQuestions) * 100).toFixed(2));
 
-    // 4. Ambil daftar konfigurasi level dan tentukan level penempatan
+    // 4. Hitung durasi pengerjaan riil siswa (dalam satuan menit)
+    const completedAt = new Date().toISOString();
+    const startMs = new Date(session.start_time).getTime();
+    const completedMs = new Date(completedAt).getTime();
+    const durationMinutes = Math.max(1, Math.round((completedMs - startMs) / 60000));
+
+    // 5. Ambil daftar konfigurasi level dan tentukan level penempatan (Matrix Evaluasi Skor + Waktu)
     const { data: levelsData, error: levelsErr } = await supabase
       .from('levels')
-      .select('id, name, min_score_percent, max_score_percent, description')
+      .select('id, name, min_score_percent, max_score_percent, max_duration_minutes, description')
       .order('min_score_percent', { ascending: true });
 
     if (levelsErr || !levelsData || levelsData.length === 0) {
@@ -584,32 +624,44 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
       };
     }
 
-    // Cocokkan persentase nilai dengan rentang level yang sesuai
-    let matchedLevel = levelsData.find(
+    // Cari index level awal berdasarkan persentase skor
+    let matchedIndex = levelsData.findIndex(
       (lvl) =>
         finalScorePercent >= lvl.min_score_percent &&
         finalScorePercent <= lvl.max_score_percent
     );
 
-    // Fallback jika tidak pas (misal karena batas pembulatan)
-    if (!matchedLevel) {
+    if (matchedIndex === -1) {
       if (finalScorePercent >= 100) {
-        matchedLevel = levelsData[levelsData.length - 1];
+        matchedIndex = levelsData.length - 1;
       } else {
-        matchedLevel = levelsData[0];
+        matchedIndex = 0;
       }
     }
 
-    const completedAt = new Date().toISOString();
+    // Terapkan evaluasi waktu: jika durasi melebihi batas waktu level, turunkan 1 level
+    const initialLevel = levelsData[matchedIndex];
+    let finalLevel = initialLevel;
 
-    // 5. Update data sesi menjadi 'completed'
+    if (
+      initialLevel.max_duration_minutes !== null &&
+      initialLevel.max_duration_minutes !== undefined &&
+      durationMinutes > initialLevel.max_duration_minutes
+    ) {
+      // Degradasi 1 level ke bawah (misal Advanced -> Intermediate, Intermediate -> Beginner)
+      const demotedIndex = Math.max(0, matchedIndex - 1);
+      finalLevel = levelsData[demotedIndex];
+    }
+
+    // 6. Update data sesi menjadi 'completed' dan simpan durasi riil
     const { error: updateErr } = await supabase
       .from('test_sessions')
       .update({
         status: 'completed',
         correct_answers: correctCount,
         final_score_percent: finalScorePercent,
-        assigned_level_id: matchedLevel.id,
+        assigned_level_id: finalLevel.id,
+        duration_minutes: durationMinutes,
         completed_at: completedAt,
       })
       .eq('id', sessionId);
@@ -628,14 +680,17 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
         sessionId: session.id,
         studentName: session.student_name,
         whatsappNumber: session.whatsapp_number,
+        educationLevel: sessionEduLevel,
+        durationMinutes,
         totalQuestions,
         correctAnswers: correctCount,
         finalScorePercent,
         level: {
-          id: matchedLevel.id,
-          name: matchedLevel.name,
-          description: matchedLevel.description,
+          id: finalLevel.id,
+          name: finalLevel.name,
+          description: finalLevel.description,
         },
+        tutor: tutorContact,
         completedAt,
       },
     };
@@ -670,6 +725,9 @@ export async function getSessionResult(sessionId: string): Promise<GetSessionRes
         id,
         student_name,
         whatsapp_number,
+        education_level,
+        start_time,
+        duration_minutes,
         status,
         total_questions,
         correct_answers,
@@ -700,12 +758,40 @@ export async function getSessionResult(sessionId: string): Promise<GetSessionRes
 
     const assignedLevel = Array.isArray(session.levels) ? session.levels[0] : session.levels;
 
+    // Ambil data kontak tutor dari tabel settings
+    const { data: settingData } = await supabase
+      .from('settings')
+      .select('tutor_elementary_name, tutor_elementary_whatsapp, tutor_highschool_name, tutor_highschool_whatsapp')
+      .eq('id', 1)
+      .maybeSingle();
+
+    const sessionEduLevel: EducationLevel =
+      (session.education_level as EducationLevel) || 'elementary';
+
+    const tutorContact =
+      sessionEduLevel === 'high_school'
+        ? {
+            name: settingData?.tutor_highschool_name || 'Mr. David',
+            whatsapp: settingData?.tutor_highschool_whatsapp || '6281234567891',
+          }
+        : {
+            name: settingData?.tutor_elementary_name || 'Miss Sarah',
+            whatsapp: settingData?.tutor_elementary_whatsapp || '6281234567890',
+          };
+
+    const completedTime = session.completed_at || new Date().toISOString();
+    const elapsedMinutes =
+      session.duration_minutes ??
+      Math.max(1, Math.round((new Date(completedTime).getTime() - new Date(session.start_time).getTime()) / 60000));
+
     return {
       success: true,
       result: {
         sessionId: session.id,
         studentName: session.student_name,
         whatsappNumber: session.whatsapp_number,
+        educationLevel: sessionEduLevel,
+        durationMinutes: elapsedMinutes,
         totalQuestions: session.total_questions,
         correctAnswers: session.correct_answers,
         finalScorePercent: Number(session.final_score_percent ?? 0),
@@ -714,7 +800,8 @@ export async function getSessionResult(sessionId: string): Promise<GetSessionRes
           name: assignedLevel?.name ?? 'Level Selesai',
           description: assignedLevel?.description ?? null,
         },
-        completedAt: session.completed_at || new Date().toISOString(),
+        tutor: tutorContact,
+        completedAt: completedTime,
       },
     };
   } catch (error) {

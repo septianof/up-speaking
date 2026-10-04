@@ -91,7 +91,7 @@ Setiap task menggunakan format checklist berikut:
 |---|---|---|---|---|---|---|
 | `[x]` | `UPD-01` | **Skema DB Kebutuhan Baru:** Migration SQL tambah kolom `education_level` di `questions` & `test_sessions`, kolom `duration_minutes` di `test_sessions`, serta kolom tutor di `settings` | `DB-01` | 45 menit | 🔴 Wajib | Kolom baru terdaftar di database Supabase |
 | `[x]` | `UPD-02` | **Server Action `startSession` Update:** Tambah parameter `education_level`, filter soal sesuai jenjang, dan fraud check permanen berbasis pasangan `(No WA + Nama)` | `UPD-01`, `DB-04` | 1 jam | 🔴 Wajib | Siswa hanya dapat soal sesuai jenjangnya; pasangan WA+Nama yang sudah tes diblokir permanen |
-| `[ ]` | `UPD-03` | **Server Action `submitExam` & Matrix Evaluasi:** Hitung durasi pengerjaan riil, evaluasi matrix level (Skor % + Waktu pengerjaan menit), dan return kontak tutor jenjang | `UPD-01`, `DB-06` | 1 jam | 🔴 Wajib | Siswa skor >= 80% durasi > 25m turun ke Intermediate; skor 60-79% durasi > 20m turun ke Beginner |
+| `[x]` | `UPD-03` | **Server Action `submitExam` & Matrix Evaluasi:** Hitung durasi pengerjaan riil, evaluasi matrix level (Skor % + Waktu pengerjaan menit), dan return kontak tutor jenjang | `UPD-01`, `DB-06` | 1 jam | 🔴 Wajib | Siswa skor >= 80% durasi > 25m turun ke Intermediate; skor 60-79% durasi > 20m turun ke Beginner |
 | `[ ]` | `UPD-04` | **UI Registrasi Siswa (`/`):** Tambah input pilihan Jenjang Pendidikan (`Elementary` / `High School`) pada modal registrasi | `UPD-02`, `STU-02` | 45 menit | 🔴 Wajib | Siswa wajib memilih jenjang sebelum tes dimulai |
 | `[ ]` | `UPD-05` | **UI Halaman Hasil (`/result`):** Tampilkan durasi pengerjaan riil, rekomendasi kelas jenjang+level, dan kartu kontak Tutor via WhatsApp | `UPD-03`, `STU-08` | 1 jam | 🔴 Wajib | Hasil menampilkan durasi pengerjaan dan tombol WA tutor jenjang terkait |
 | `[ ]` | `UPD-06` | **UI Admin Bank Soal (`/admin/questions`):** Tambah filter jenjang pada tabel soal dan pilihan jenjang pada modal form tambah/edit soal | `UPD-01`, `ADM-08` | 1 jam | 🔴 Wajib | Admin dapat memfilter dan menginput soal per jenjang |
@@ -120,9 +120,9 @@ Setiap task menggunakan format checklist berikut:
 | Database & Server (`DB`) | 6 | 0 | **6** | 6 | 0 |
 | Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
 | Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
-| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 2 | 6 |
+| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 3 | 5 |
 | PWA & Deploy (`FIN`) | 4 | 0 | **4** | 1 | 3 |
-| **Total** | **38** | **1** | **39 Task** | **30** | **9** |
+| **Total** | **38** | **1** | **39 Task** | **31** | **8** |
 
 ---
 
