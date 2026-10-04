@@ -74,7 +74,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `ADM-01` | Buat Halaman Login Admin (/admin): autentikasi email & password via Supabase Auth + proteksi rute middleware admin | `ENV-04` | 1.5 jam | 🔴 Wajib |
 | `[x]` | `ADM-02` | Buat Layout Admin Panel: Sidebar navigasi responsif, Header topbar, profil admin, dan tombol Logout | `ADM-01` | 1.5 jam | 🔴 Wajib |
 | `[x]` | `ADM-03` | Buat Halaman Dashboard (/admin/dashboard): 4 kartu ringkasan metrik (Total Peserta, Jumlah Beginner, Intermediate, Advanced) | `ADM-02`, `DB-01` | 1 jam | 🔴 Wajib |
-| `[ ]` | `ADM-04` | Buat Tabel Riwayat Hasil Siswa: kolom info sesi, nilai %, badge level, fitur search pencarian instan (Nama/WA), dan filter dropdown per level | `ADM-03` | 1.5 jam | 🔴 Wajib |
+| `[x]` | `ADM-04` | Buat Tabel Riwayat Hasil Siswa: kolom info sesi, nilai %, badge level, fitur search pencarian instan (Nama/WA), dan filter dropdown per level | `ADM-03` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `ADM-05` | Implementasikan fitur Aksi "Izinkan Tes Ulang" (*Retest Permission*): tombol buka kunci tes untuk no. WA tertentu tanpa menghapus riwayat lama | `ADM-04` | 1 jam | 🔴 Wajib |
 | `[ ]` | `ADM-06` | Implementasikan fitur Ekspor Data: tombol unduh file Excel (`.xlsx`) dan PDF cetak rapi yang otomatis mengikuti filter aktif di layar | `ADM-04` | 2 jam | 🟡 Penting |
 | `[ ]` | `ADM-07` | Buat Halaman Manajemen Bank Soal (`/admin/questions`): tabel daftar soal aktif dengan tombol aksi Edit & Soft Delete | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib |

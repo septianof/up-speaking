@@ -1,0 +1,535 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  Filter,
+  X,
+  FileSpreadsheet,
+  FileText,
+  Copy,
+  Check,
+  ExternalLink,
+  RotateCcw,
+  CheckCircle2,
+  Calendar,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+} from 'lucide-react';
+import { StudentHistoryRecord } from '@/app/actions/admin';
+
+interface StudentHistoryTableProps {
+  data: StudentHistoryRecord[];
+  isLoading?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  onAllowRetest?: (record: StudentHistoryRecord) => void;
+}
+
+const PAGE_SIZE = 10;
+
+export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
+  data = [],
+  isLoading = false,
+  onRefresh,
+  isRefreshing = false,
+  onAllowRetest,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'date' | 'score' | 'name'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Format Tanggal & Jam (WIB)
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(date) + ' WIB';
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Format Nomor WhatsApp agar mudah dibaca (+62 812-3456-7890)
+  const formatWhatsAppNumber = (num: string) => {
+    const cleaned = num.replace(/\D/g, '');
+    if (cleaned.startsWith('62')) {
+      const rest = cleaned.slice(2);
+      return `+62 ${rest.replace(/(\d{3,4})(\d{3,4})(\d+)?/, '$1-$2-$3').replace(/-$/, '')}`;
+    }
+    return num;
+  };
+
+  // Salin nomor WA ke clipboard
+  const handleCopyWA = (id: string, num: string) => {
+    navigator.clipboard.writeText(num);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Filter & Pengurutan Data
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...data];
+
+    // Filter Level
+    if (selectedLevel !== 'all') {
+      result = result.filter(
+        (item) => item.levelName.toLowerCase() === selectedLevel.toLowerCase()
+      );
+    }
+
+    // Filter Search (Nama atau No. WA)
+    if (searchTerm.trim() !== '') {
+      const q = searchTerm.toLowerCase().trim();
+      const qCleanNum = searchTerm.replace(/\D/g, '');
+      result = result.filter((item) => {
+        const matchName = item.studentName.toLowerCase().includes(q);
+        const matchWA =
+          item.whatsappNumber.includes(q) ||
+          (qCleanNum && item.whatsappNumber.replace(/\D/g, '').includes(qCleanNum));
+        return matchName || matchWA;
+      });
+    }
+
+    // Pengurutan
+    result.sort((a, b) => {
+      if (sortBy === 'date') {
+        const timeA = new Date(a.completedAt).getTime();
+        const timeB = new Date(b.completedAt).getTime();
+        return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+      if (sortBy === 'score') {
+        return sortOrder === 'asc'
+          ? a.finalScorePercent - b.finalScorePercent
+          : b.finalScorePercent - a.finalScorePercent;
+      }
+      if (sortBy === 'name') {
+        return sortOrder === 'asc'
+          ? a.studentName.localeCompare(b.studentName)
+          : b.studentName.localeCompare(a.studentName);
+      }
+      return 0;
+    });
+
+    return result;
+  }, [data, selectedLevel, searchTerm, sortBy, sortOrder]);
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredAndSortedData.length / PAGE_SIZE) || 1;
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredAndSortedData.slice(start, start + PAGE_SIZE);
+  }, [filteredAndSortedData, currentPage]);
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedLevel('all');
+    setCurrentPage(1);
+  };
+
+  const getLevelBadge = (levelName: string) => {
+    const lower = levelName.toLowerCase();
+    if (lower.includes('beginner')) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+          Beginner
+        </span>
+      );
+    }
+    if (lower.includes('intermediate')) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+          Intermediate
+        </span>
+      );
+    }
+    if (lower.includes('advanced')) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+          Advanced
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+        {levelName}
+      </span>
+    );
+  };
+
+  return (
+    <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6">
+      {/* Header Bagian Atas: Judul, Info Rekap, dan Tombol Ekspor */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+        <div>
+          <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-sky-600" />
+            <span>Riwayat Hasil Siswa & Rekapitulasi</span>
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Menampilkan data peserta yang telah menyelesaikan ujian penempatan.
+          </p>
+        </div>
+
+        {/* Tombol Ekspor (Persiapan Task ADM-06) */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs"
+            title="Ekspor ke spreadsheet Excel (.xlsx)"
+            onClick={() => {
+              alert('Fitur Ekspor Excel (.xlsx) akan aktif pada Task ADM-06.');
+            }}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Ekspor Excel</span>
+          </button>
+
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs"
+            title="Cetak & Ekspor ke dokumen PDF (.pdf)"
+            onClick={() => {
+              alert('Fitur Ekspor PDF (.pdf) akan aktif pada Task ADM-06.');
+            }}
+          >
+            <FileText className="w-4 h-4 text-rose-600" />
+            <span>Ekspor PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Toolbar Filter & Pencarian */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Search Bar Instan */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Cari nama siswa atau no. WhatsApp..."
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none text-xs sm:text-sm text-slate-800 placeholder-slate-400 transition-all"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Dropdown Filter Level & Urutan */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Filter Level */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={selectedLevel}
+              onChange={(e) => {
+                setSelectedLevel(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer pr-1"
+            >
+              <option value="all">Semua Level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+
+          {/* Pengurutan */}
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={`${sortBy}-${sortOrder}`}
+              onChange={(e) => {
+                const [sb, so] = e.target.value.split('-') as [
+                  'date' | 'score' | 'name',
+                  'asc' | 'desc',
+                ];
+                setSortBy(sb);
+                setSortOrder(so);
+              }}
+              className="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer pr-1"
+            >
+              <option value="date-desc">Terbaru (Waktu)</option>
+              <option value="date-asc">Terlama (Waktu)</option>
+              <option value="score-desc">Skor Tertinggi</option>
+              <option value="score-asc">Skor Terendah</option>
+              <option value="name-asc">Nama (A - Z)</option>
+              <option value="name-desc">Nama (Z - A)</option>
+            </select>
+          </div>
+
+          {(searchTerm || selectedLevel !== 'all') && (
+            <button
+              onClick={handleResetFilters}
+              className="px-2.5 py-1.5 text-xs font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200/80 transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Ringkasan Jumlah Filter */}
+      <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+        <span>
+          Menampilkan{' '}
+          <strong className="text-slate-800 font-bold">
+            {filteredAndSortedData.length}
+          </strong>{' '}
+          dari {data.length} hasil ujian siswa
+        </span>
+      </div>
+
+      {/* Tabel Data Responsif */}
+      <div className="overflow-x-auto rounded-2xl border border-slate-100 shadow-2xs">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50/80 text-slate-600 text-xs font-bold border-b border-slate-100">
+              <th className="py-3.5 px-4 w-12 text-center">#</th>
+              <th className="py-3.5 px-4 min-w-[140px]">Waktu Ujian</th>
+              <th className="py-3.5 px-4 min-w-[180px]">Nama Lengkap</th>
+              <th className="py-3.5 px-4 min-w-[170px]">Nomor WhatsApp</th>
+              <th className="py-3.5 px-4 min-w-[120px] text-center">Benar / Total</th>
+              <th className="py-3.5 px-4 min-w-[110px] text-center">Skor Akhir</th>
+              <th className="py-3.5 px-4 min-w-[130px] text-center">Level Siswa</th>
+              <th className="py-3.5 px-4 min-w-[140px] text-center">Aksi Retest</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
+            {isLoading ? (
+              // Loading Skeleton
+              Array.from({ length: 3 }).map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-4 h-4 bg-slate-200 rounded mx-auto" />
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="w-28 h-4 bg-slate-200 rounded mb-1" />
+                    <div className="w-16 h-3 bg-slate-100 rounded" />
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="w-32 h-4 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="w-24 h-4 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-16 h-4 bg-slate-200 rounded mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-12 h-6 bg-slate-200 rounded-full mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <div className="w-20 h-7 bg-slate-200 rounded-xl mx-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : paginatedData.length === 0 ? (
+              // Empty State
+              <tr>
+                <td colSpan={8} className="py-12 px-4 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-800">
+                    Tidak Ada Hasil Ditemukan
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
+                    {searchTerm || selectedLevel !== 'all'
+                      ? 'Tidak ada data peserta yang cocok dengan kriteria pencarian atau filter yang dipilih.'
+                      : 'Belum ada siswa yang menyelesaikan placement test.'}
+                  </p>
+                  {(searchTerm || selectedLevel !== 'all') && (
+                    <button
+                      onClick={handleResetFilters}
+                      className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0e263e] text-white font-bold text-xs hover:bg-[#1a385c] transition-colors"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Pencarian</span>
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ) : (
+              // Data Rows
+              paginatedData.map((row, index) => {
+                const rowNumber = (currentPage - 1) * PAGE_SIZE + index + 1;
+                const isCopied = copiedId === row.id;
+
+                return (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50/70 transition-colors group"
+                  >
+                    {/* # */}
+                    <td className="py-4 px-4 text-center text-xs font-semibold text-slate-400">
+                      {rowNumber}
+                    </td>
+
+                    {/* Tanggal & Waktu */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                        <span className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                          {formatDateTime(row.completedAt)}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Nama Lengkap Siswa */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-2xs">
+                          {row.studentName.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                          {row.studentName}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Nomor WhatsApp */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-slate-600 font-medium whitespace-nowrap">
+                          {formatWhatsAppNumber(row.whatsappNumber)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyWA(row.id, row.whatsappNumber)}
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                            title="Salin nomor WhatsApp"
+                          >
+                            {isCopied ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <a
+                            href={`https://wa.me/${row.whatsappNumber.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 rounded-md text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                            title="Buka chat WhatsApp"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Benar / Total */}
+                    <td className="py-4 px-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>
+                          {row.correctAnswers} / {row.totalQuestions}
+                        </span>
+                      </span>
+                    </td>
+
+                    {/* Skor Akhir (%) */}
+                    <td className="py-4 px-4 text-center">
+                      <span className="text-sm font-extrabold text-slate-900">
+                        {row.finalScorePercent}%
+                      </span>
+                    </td>
+
+                    {/* Level */}
+                    <td className="py-4 px-4 text-center">
+                      {getLevelBadge(row.levelName)}
+                    </td>
+
+                    {/* Aksi Retest */}
+                    <td className="py-4 px-4 text-center">
+                      {row.canRetest ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80">
+                          <Check className="w-3 h-3" />
+                          <span>Izin Aktif</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onAllowRetest) {
+                              onAllowRetest(row);
+                            } else {
+                              alert(
+                                `Fitur Izinkan Tes Ulang untuk siswa "${row.studentName}" akan dihubungkan secara penuh pada task ADM-05.`
+                              );
+                            }
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200/80 hover:border-sky-200 text-xs font-bold transition-all shadow-2xs"
+                          title="Buka izin 1x tes baru untuk siswa ini"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5 text-slate-500 hover:text-sky-600" />
+                          <span>Izinkan Tes</span>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Footer */}
+      {!isLoading && totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs text-slate-500">
+          <div>
+            Halaman <strong className="text-slate-800">{currentPage}</strong> dari{' '}
+            <strong className="text-slate-800">{totalPages}</strong>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Sebelumnya</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <span>Selanjutnya</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
