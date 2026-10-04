@@ -2,11 +2,51 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import RegisterModal from '@/components/student/RegisterModal';
+import { Clock } from 'lucide-react';
 
 export default function LandingPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Auto-Redirect ke /exam jika ada sesi ujian aktif yang belum selesai (Crash Recovery STU-06 & FIN-02)
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const stored = localStorage.getItem('upspeaking_session');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.end_time && new Date(parsed.end_time).getTime() > Date.now()) {
+          setIsRedirecting(true);
+          router.replace('/exam');
+          return;
+        } else {
+          // Sesi sudah kadaluarsa, bersihkan storage
+          localStorage.removeItem('upspeaking_session');
+          localStorage.removeItem('upspeaking_answers');
+          localStorage.removeItem('upspeaking_questions');
+          localStorage.removeItem('upspeaking_current_index');
+        }
+      }
+    } catch (err) {
+      console.error('Error membaca sesi aktif:', err);
+    }
+  }, [router]);
+
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mb-4 shadow-sm animate-pulse">
+          <Clock className="w-8 h-8 text-amber-600" />
+        </div>
+        <h2 className="text-base sm:text-lg font-bold text-slate-800">Melanjutkan Sesi Ujian...</h2>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">Mengarahkan kembali ke lembar pengerjaan soal</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-800 flex flex-col justify-between selection:bg-rose-100 selection:text-rose-900">

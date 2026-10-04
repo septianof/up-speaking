@@ -105,7 +105,7 @@ Setiap task menggunakan format checklist berikut:
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
 | `[x]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA agar dapat diinstal di homescreen | `STU-08` | 45 menit | 🔴 Wajib | Web App Manifest aktif dan lolos audit PWA |
-| `[ ]` | `FIN-02` | Pengujian simulasi kendala jaringan & Crash Recovery: tes tutup tab browser HP di tengah ujian dan pastikan sesi kembali utuh | `STU-06`, `UPD-02` | 1 jam | 🔴 Wajib | Sesi dan jawaban pulih setelah browser dibuka kembali |
+| `[x]` | `FIN-02` | Pengujian simulasi kendala jaringan & Crash Recovery: tes tutup tab browser HP di tengah ujian dan pastikan sesi kembali utuh | `STU-06`, `UPD-02` | 1 jam | 🔴 Wajib | Sesi dan jawaban pulih setelah browser dibuka kembali |
 | `[ ]` | `FIN-03` | Pengujian end-to-end lengkap: alur pengerjaan Elementary & High School, evaluasi matrix skor+waktu, hingga rekap dashboard admin | Semua `UPD-*` | 1.5 jam | 🔴 Wajib | Pengujian alur siswa per jenjang dan admin berjalan tanpa bug |
 | `[ ]` | `FIN-04` | Deployment aplikasi ke platform hosting (Vercel / Netlify) dan koneksi database Supabase production | `FIN-01` s/d `FIN-03` | 1 jam | 🔴 Wajib | Aplikasi live di URL produksi dan siap digunakan |
 
@@ -121,8 +121,8 @@ Setiap task menggunakan format checklist berikut:
 | Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
 | Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
 | Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 8 | 0 |
-| PWA & Deploy (`FIN`) | 4 | 0 | **4** | 1 | 3 |
-| **Total** | **38** | **1** | **39 Task** | **36** | **3** |
+| PWA & Deploy (`FIN`) | 4 | 0 | **4** | 2 | 2 |
+| **Total** | **38** | **1** | **39 Task** | **37** | **2** |
 
 ---
 
