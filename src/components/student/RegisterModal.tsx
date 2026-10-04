@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { X, Loader2, AlertCircle } from 'lucide-react';
+import { X, Loader2, AlertCircle, BookOpen, GraduationCap, CheckCircle2 } from 'lucide-react';
 import { startSession } from '@/app/actions/session';
+import type { EducationLevel } from '@/types';
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [educationLevel, setEducationLevel] = useState<EducationLevel>('elementary');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -40,7 +42,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     try {
       setIsLoading(true);
 
-      const result = await startSession(trimmedName, trimmedWA);
+      const result = await startSession(trimmedName, trimmedWA, educationLevel);
 
       if (!result.success) {
         setErrorMessage(result.error);
@@ -184,6 +186,87 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
             />
             <p className="text-xs text-slate-400 mt-1.5 leading-normal">
               Hasil skor &amp; rekomendasi level akan disesuaikan dengan nomor ini.
+            </p>
+          </div>
+
+          {/* Field: Pilihan Jenjang Pendidikan */}
+          <div>
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-2">
+              Jenjang Pendidikan <span className="text-rose-500 font-bold">*</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Card Elementary */}
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => setEducationLevel('elementary')}
+                className={`relative flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                  educationLevel === 'elementary'
+                    ? 'border-sky-500 bg-sky-50/70 ring-2 ring-sky-200 shadow-xs'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                    educationLevel === 'elementary'
+                      ? 'bg-sky-500 text-white'
+                      : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                      Elementary
+                    </p>
+                    {educationLevel === 'elementary' && (
+                      <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
+                    Tingkat Sekolah Dasar (SD)
+                  </p>
+                </div>
+              </button>
+
+              {/* Card High School */}
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => setEducationLevel('high_school')}
+                className={`relative flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                  educationLevel === 'high_school'
+                    ? 'border-sky-500 bg-sky-50/70 ring-2 ring-sky-200 shadow-xs'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                    educationLevel === 'high_school'
+                      ? 'bg-sky-500 text-white'
+                      : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                      High School
+                    </p>
+                    {educationLevel === 'high_school' && (
+                      <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
+                    SMP, SMA, &amp; Umum
+                  </p>
+                </div>
+              </button>
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5 leading-normal">
+              Butir soal tes penempatan dan tutor akan disesuaikan dengan jenjang ini.
             </p>
           </div>
 
