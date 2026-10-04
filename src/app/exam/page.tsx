@@ -16,11 +16,11 @@ export default function ExamPage() {
   const [questions, setQuestions] = useState<SanitizedQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | 'offline'>('saved');
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Inisialisasi data ujian dari LocalStorage saat halaman dimuat
+  // Inisialisasi data ujian dari LocalStorage saat halaman dimuat (Crash Recovery STU-06)
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
@@ -28,6 +28,7 @@ export default function ExamPage() {
       const storedSession = localStorage.getItem('upspeaking_session');
       const storedQuestions = localStorage.getItem('upspeaking_questions');
       const storedAnswers = localStorage.getItem('upspeaking_answers');
+      const storedCurrentIndex = localStorage.getItem('upspeaking_current_index');
 
       // Jika tidak ada data sesi aktif, arahkan siswa kembali ke Landing Page
       if (!storedSession) {
@@ -39,6 +40,7 @@ export default function ExamPage() {
 
       // Cek apakah waktu sesi sudah kadaluarsa
       if (new Date(parsedSession.end_time).getTime() <= Date.now()) {
+        localStorage.removeItem('upspeaking_session');
         router.replace('/');
         return;
       }
@@ -53,12 +55,63 @@ export default function ExamPage() {
         setAnswers(JSON.parse(storedAnswers));
       }
 
+      // Restorasi posisi nomor soal terakhir yang dibuka
+      if (storedCurrentIndex !== null) {
+        const parsedIdx = parseInt(storedCurrentIndex, 10);
+        if (!isNaN(parsedIdx) && parsedIdx >= 0) {
+          setCurrentIndex(parsedIdx);
+        }
+      }
+
       setIsLoading(false);
     } catch (err) {
       console.error('Error saat inisialisasi sesi ujian:', err);
       router.replace('/');
     }
   }, [router]);
+
+  // Simpan posisi nomor soal aktif ke LocalStorage agar tidak reset saat refresh (STU-06)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isLoading) {
+      localStorage.setItem('upspeaking_current_index', currentIndex.toString());
+    }
+  }, [currentIndex, isLoading]);
+
+  // Deteksi status koneksi internet & auto-sync jawaban saat online kembali (STU-06)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOffline = () => {
+      setAutoSaveStatus('offline');
+    };
+
+    const handleOnline = async () => {
+      if (!session?.id) return;
+      try {
+        setAutoSaveStatus('saving');
+        const storedAnswersStr = localStorage.getItem('upspeaking_answers');
+        if (storedAnswersStr) {
+          const currentAnswers: Record<string, string> = JSON.parse(storedAnswersStr);
+          const syncPromises = Object.entries(currentAnswers).map(([qId, optId]) =>
+            saveAnswer(session.id, qId, optId)
+          );
+          await Promise.all(syncPromises);
+        }
+        setAutoSaveStatus('saved');
+      } catch (err) {
+        console.error('Error saat sinkronisasi offline-ke-online:', err);
+        setAutoSaveStatus('error');
+      }
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [session]);
 
   // Handler saat waktu ujian habis
   const handleTimeUp = () => {
@@ -72,7 +125,7 @@ export default function ExamPage() {
     const nextAnswers = { ...answers, [questionId]: optionId };
     setAnswers(nextAnswers);
 
-    // 2. Simpan ke LocalStorage untuk crash recovery instan
+    // 2. Simpan ke LocalStorage untuk crash recovery instan (STU-06)
     try {
       localStorage.setItem('upspeaking_answers', JSON.stringify(nextAnswers));
     } catch (err) {
@@ -81,6 +134,12 @@ export default function ExamPage() {
 
     // 3. Auto-save ke database di background
     if (session?.id) {
+      // Jika browser offline, tandai bahwa data aman di HP
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setAutoSaveStatus('offline');
+        return;
+      }
+
       setAutoSaveStatus('saving');
       saveAnswer(session.id, questionId, optionId)
         .then((res) => {

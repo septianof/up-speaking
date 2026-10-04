@@ -6,7 +6,7 @@ import Image from 'next/image';
 interface ExamHeaderProps {
   studentName: string;
   endTime: string;
-  autoSaveStatus?: 'saved' | 'saving' | 'error';
+  autoSaveStatus?: 'saved' | 'saving' | 'error' | 'offline';
   currentQuestionIndex: number;
   totalQuestions: number;
   answeredCount: number;
@@ -102,6 +102,12 @@ export default function ExamHeader({
                   <span className="inline-flex items-center gap-1.5 text-sky-400 font-medium animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
                     <span>Menyimpan...</span>
+                  </span>
+                )}
+                {autoSaveStatus === 'offline' && (
+                  <span className="inline-flex items-center gap-1.5 text-amber-300 font-medium" title="Koneksi internet terputus. Jawaban Anda tetap tersimpan aman di browser/HP dan akan disinkronkan saat online kembali.">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span>Offline (Aman di HP)</span>
                   </span>
                 )}
                 {autoSaveStatus === 'error' && (
