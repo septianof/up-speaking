@@ -87,7 +87,7 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas |
 |---|---|---|---|---|---|
-| `[ ]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA: aplikasi dapat diinstal di homescreen ponsel tanpa lewat Play Store | `STU-08` | 45 menit | 🔴 Wajib |
+| `[x]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA: aplikasi dapat diinstal di homescreen ponsel tanpa lewat Play Store | `STU-08` | 45 menit | 🔴 Wajib |
 | `[ ]` | `FIN-02` | Pengujian simulasi kendala jaringan & Crash Recovery: tes tutup tab browser HP di tengah ujian dan pastikan sesi serta jawaban kembali utuh | `STU-06` | 1 jam | 🔴 Wajib |
 | `[ ]` | `FIN-03` | Pengujian end-to-end lengkap: alur pengerjaan siswa hingga rekap nilai dan ekspor laporan di dashboard admin | Semua `STU-*`, `ADM-*` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `FIN-04` | Deployment aplikasi ke platform hosting (Vercel / Netlify) dan koneksi database Supabase production | `FIN-01` s/d `FIN-03` | 1 jam | 🔴 Wajib |
