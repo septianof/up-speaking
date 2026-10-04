@@ -17,16 +17,31 @@ import {
   Check,
   X,
   ShieldCheck,
+  GraduationCap,
+  Phone,
+  User,
+  MessageCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   getExamSettings,
   updateExamSettings,
   LevelSetting,
+  TutorContactSetting,
 } from '@/app/actions/settings';
 
 export default function AdminSettingsPage() {
   const [durationMinutes, setDurationMinutes] = useState<number>(45);
   const [levels, setLevels] = useState<LevelSetting[]>([]);
+  const [tutorElementary, setTutorElementary] = useState<TutorContactSetting>({
+    name: 'Miss Sarah',
+    whatsapp: '6281234567890',
+  });
+  const [tutorHighSchool, setTutorHighSchool] = useState<TutorContactSetting>({
+    name: 'Mr. David',
+    whatsapp: '6289876543210',
+  });
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -47,6 +62,8 @@ export default function AdminSettingsPage() {
       if (res.success) {
         setDurationMinutes(res.durationMinutes);
         setLevels(res.levels);
+        setTutorElementary(res.tutorElementary);
+        setTutorHighSchool(res.tutorHighSchool);
       } else {
         setErrorMessage(res.error || 'Gagal memuat pengaturan.');
       }
@@ -95,35 +112,53 @@ export default function AdminSettingsPage() {
     });
   };
 
+  // Handler ubah batas waktu menit level (Intermediate / Advanced)
+  const handleLevelDurationChange = (levelId: number, durationVal: number | null) => {
+    setLevels((prev) =>
+      prev.map((l) => (l.id === levelId ? { ...l, maxDurationMinutes: durationVal } : l))
+    );
+  };
+
   // Preset Durasi Cepat
   const handlePresetDuration = (mins: number) => {
     setDurationMinutes(mins);
   };
 
-  // Reset ke Default Pabrik (45 menit, 0-49, 50-74, 75-100)
+  // Reset ke Default Standar Up Speaking
   const handleResetToDefault = () => {
     if (confirm('Kembalikan seluruh konfigurasi ke nilai default standar Up Speaking?')) {
       setDurationMinutes(45);
+      setTutorElementary({
+        name: 'Miss Sarah',
+        whatsapp: '6281234567890',
+      });
+      setTutorHighSchool({
+        name: 'Mr. David',
+        whatsapp: '6289876543210',
+      });
       setLevels((prev) => [
         {
           id: 1,
           name: 'Beginner',
           minScore: 0,
-          maxScore: 49,
+          maxScore: 59,
+          maxDurationMinutes: null,
           description: prev.find((l) => l.id === 1)?.description || '',
         },
         {
           id: 2,
           name: 'Intermediate',
-          minScore: 50,
-          maxScore: 74,
+          minScore: 60,
+          maxScore: 79,
+          maxDurationMinutes: 20,
           description: prev.find((l) => l.id === 2)?.description || '',
         },
         {
           id: 3,
           name: 'Advanced',
-          minScore: 75,
+          minScore: 80,
           maxScore: 100,
+          maxDurationMinutes: 25,
           description: prev.find((l) => l.id === 3)?.description || '',
         },
       ]);
@@ -139,10 +174,14 @@ export default function AdminSettingsPage() {
     try {
       const res = await updateExamSettings({
         durationMinutes,
+        tutorElementary,
+        tutorHighSchool,
         levels: levels.map((l) => ({
           id: l.id,
           minScore: l.minScore,
           maxScore: l.maxScore,
+          maxDurationMinutes: l.maxDurationMinutes,
+          description: l.description,
         })),
       });
 
@@ -164,21 +203,24 @@ export default function AdminSettingsPage() {
     id: 1,
     name: 'Beginner',
     minScore: 0,
-    maxScore: 49,
+    maxScore: 59,
+    maxDurationMinutes: null,
     description: '',
   };
   const intermediate = levels.find((l) => l.id === 2) || {
     id: 2,
     name: 'Intermediate',
-    minScore: 50,
-    maxScore: 74,
+    minScore: 60,
+    maxScore: 79,
+    maxDurationMinutes: 20,
     description: '',
   };
   const advanced = levels.find((l) => l.id === 3) || {
     id: 3,
     name: 'Advanced',
-    minScore: 75,
+    minScore: 80,
     maxScore: 100,
+    maxDurationMinutes: 25,
     description: '',
   };
 
@@ -212,10 +254,10 @@ export default function AdminSettingsPage() {
               <span>Konfigurasi Global</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Pengaturan Ujian Placement Test
+              Pengaturan Sistem & Penilaian Ujian
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
-              Atur parameter durasi pengerjaan ujian siswa dan konfigurasi ambang batas persentase 3 level penempatan kelas secara akurat.
+              Atur parameter durasi ujian, matrix evaluasi level penempatan berbasis skor & waktu, serta kontak WhatsApp tutor pembimbing per jenjang pendidikan.
             </p>
           </div>
 
@@ -268,7 +310,9 @@ export default function AdminSettingsPage() {
       )}
 
       <form onSubmit={handleSave} className="space-y-6 sm:space-y-8">
-        {/* BAGIAN 1: DURASI UJIAN */}
+        {/* ========================================================================= */}
+        {/* BAGIAN 1: DURASI UJIAN GLOBAL */}
+        {/* ========================================================================= */}
         <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-5">
           <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
             <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shadow-2xs">
@@ -276,10 +320,10 @@ export default function AdminSettingsPage() {
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                1. Durasi Waktu Pengerjaan Ujian
+                1. Batas Durasi Ujian Global
               </h3>
               <p className="text-xs text-slate-500">
-                Waktu yang diberikan kepada peserta untuk menjawab seluruh butir soal.
+                Alokasi waktu total yang diberikan kepada peserta untuk menyelesaikan lembar ujian.
               </p>
             </div>
           </div>
@@ -343,7 +387,9 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* BAGIAN 2: RENTANG PERSENTASE 3 LEVEL (0% - 100%) */}
+        {/* ========================================================================= */}
+        {/* BAGIAN 2: MATRIX EVALUASI LEVEL (SKOR % & BATAS WAKTU MENIT) */}
+        {/* ========================================================================= */}
         <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
@@ -352,25 +398,44 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                  2. Ambang Batas Persentase & Level Penempatan (0% – 100%)
+                  2. Matrix Evaluasi Level Penempatan (Skor % & Waktu Pengerjaan)
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Konfigurasi rentang skor bersambung untuk penentuan level kelas otomatis peserta.
+                  Kombinasi ambang batas skor (0% – 100%) dan batas durasi riil pengerjaan untuk menentukan rekomendasi kelas siswa.
                 </p>
               </div>
             </div>
 
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
               <Check className="w-3.5 h-3.5" />
-              <span>Validasi Bersambung Aktif</span>
+              <span>Aturan Degradasi Waktu Aktif</span>
             </span>
+          </div>
+
+          {/* Banner Aturan Matrix Waktu */}
+          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-amber-900">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span>Aturan Degradasi Evaluasi Waktu (Dual Matrix Evaluation):</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-amber-900/90 pl-1 leading-relaxed">
+              <li>
+                Siswa dengan skor <strong>Advanced (≥ {advanced.minScore}%)</strong> yang menyelesaikan tes melebihi <strong>{advanced.maxDurationMinutes ?? 25} menit</strong> otomatis diturunkan ke level <strong>Intermediate</strong>.
+              </li>
+              <li>
+                Siswa dengan skor <strong>Intermediate ({intermediate.minScore}% – {intermediate.maxScore}%)</strong> yang menyelesaikan tes melebihi <strong>{intermediate.maxDurationMinutes ?? 20} menit</strong> otomatis diturunkan ke level <strong>Beginner</strong>.
+              </li>
+              <li>
+                Level <strong>Beginner</strong> tidak memiliki batas waktu pengerjaan khusus (fondasi dasar).
+              </li>
+            </ul>
           </div>
 
           {/* Visual Spectrum Bar (0% - 100%) */}
           <div className="space-y-2 pt-2">
             <div className="flex justify-between text-xs font-bold text-slate-500">
               <span>0% (Skor Terendah)</span>
-              <span>Proporsi Spektrum Level Penempatan</span>
+              <span>Proporsi Spektrum Skor Level</span>
               <span>100% (Sempurna)</span>
             </div>
 
@@ -411,166 +476,383 @@ export default function AdminSettingsPage() {
           {/* 3 Kartu Level Konfigurasi */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
             {/* KARTU 1: BEGINNER */}
-            <div className="p-5 rounded-3xl border border-emerald-200 bg-emerald-50/20 space-y-4 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5" />
+            <div className="p-5 rounded-3xl border border-emerald-200 bg-emerald-50/20 space-y-4 shadow-2xs flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900">
+                        Level 1: Beginner
+                      </h4>
+                      <span className="text-[11px] font-bold text-emerald-700">
+                        Fondasi Dasar
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    0% – {beginner.maxScore}%
+                  </span>
+                </div>
+
+                {/* Input Batas Skor */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500">
+                      Batas Bawah
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="0%"
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
+                    />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-sm text-slate-900">
-                      Level 1: Beginner
-                    </h4>
-                    <span className="text-[11px] font-bold text-emerald-700">
-                      Fondasi Dasar
-                    </span>
+                    <label className="text-[11px] font-bold text-slate-700">
+                      Batas Atas (%)
+                    </label>
+                    <input
+                      type="number"
+                      min={5}
+                      max={90}
+                      value={beginner.maxScore}
+                      onChange={(e) =>
+                        handleBeginnerMaxChange(Number(e.target.value))
+                      }
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-white border border-emerald-300 focus:ring-2 focus:ring-emerald-200 outline-none text-xs font-bold text-slate-900 text-center"
+                    />
                   </div>
                 </div>
 
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  0% – {beginner.maxScore}%
-                </span>
-              </div>
-
-              {/* Input Batas */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-bold text-slate-500">
-                    Batas Bawah
+                {/* Batas Waktu */}
+                <div className="space-y-1 pt-1">
+                  <label className="text-[11px] font-bold text-slate-600">
+                    Batas Waktu Pengerjaan
                   </label>
                   <input
                     type="text"
                     disabled
-                    value="0%"
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
+                    value="Bebas Waktu (Tanpa Batasan)"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-500 cursor-not-allowed text-center"
                   />
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold text-slate-700">
-                    Batas Atas (%)
-                  </label>
-                  <input
-                    type="number"
-                    min={5}
-                    max={90}
-                    value={beginner.maxScore}
-                    onChange={(e) =>
-                      handleBeginnerMaxChange(Number(e.target.value))
-                    }
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-white border border-emerald-300 focus:ring-2 focus:ring-emerald-200 outline-none text-xs font-bold text-slate-900 text-center"
-                  />
+                  <p className="text-[10px] text-slate-400 text-center">
+                    Level dasar tidak mengalami penurunan level
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* KARTU 2: INTERMEDIATE */}
-            <div className="p-5 rounded-3xl border border-amber-200 bg-amber-50/20 space-y-4 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5" />
+            <div className="p-5 rounded-3xl border border-amber-200 bg-amber-50/20 space-y-4 shadow-2xs flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900">
+                        Level 2: Intermediate
+                      </h4>
+                      <span className="text-[11px] font-bold text-amber-700">
+                        Percakapan Menengah
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+                    {intermediate.minScore}% – {intermediate.maxScore}%
+                  </span>
+                </div>
+
+                {/* Input Batas Skor */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500">
+                      Batas Bawah
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value={`${intermediate.minScore}% (Auto)`}
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
+                    />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-sm text-slate-900">
-                      Level 2: Intermediate
-                    </h4>
-                    <span className="text-[11px] font-bold text-amber-700">
-                      Percakapan Menengah
-                    </span>
+                    <label className="text-[11px] font-bold text-slate-700">
+                      Batas Atas (%)
+                    </label>
+                    <input
+                      type="number"
+                      min={intermediate.minScore + 1}
+                      max={98}
+                      value={intermediate.maxScore}
+                      onChange={(e) =>
+                        handleIntermediateMaxChange(Number(e.target.value))
+                      }
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-white border border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none text-xs font-bold text-slate-900 text-center"
+                    />
                   </div>
                 </div>
 
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
-                  {intermediate.minScore}% – {intermediate.maxScore}%
-                </span>
-              </div>
-
-              {/* Input Batas */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-bold text-slate-500">
-                    Batas Bawah
+                {/* Batas Waktu */}
+                <div className="space-y-1 pt-1">
+                  <label className="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                    <span>Maksimal Waktu Riil (Menit)</span>
+                    <span className="text-amber-700 font-extrabold">≤ {intermediate.maxDurationMinutes ?? 20}m</span>
                   </label>
-                  <input
-                    type="text"
-                    disabled
-                    value={`${intermediate.minScore}% (Auto)`}
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold text-slate-700">
-                    Batas Atas (%)
-                  </label>
-                  <input
-                    type="number"
-                    min={intermediate.minScore + 1}
-                    max={98}
-                    value={intermediate.maxScore}
-                    onChange={(e) =>
-                      handleIntermediateMaxChange(Number(e.target.value))
-                    }
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-white border border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none text-xs font-bold text-slate-900 text-center"
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={1}
+                      max={durationMinutes}
+                      value={intermediate.maxDurationMinutes ?? ''}
+                      onChange={(e) =>
+                        handleLevelDurationChange(
+                          2,
+                          e.target.value ? Number(e.target.value) : null
+                        )
+                      }
+                      placeholder="Contoh: 20"
+                      className="w-full pl-3 pr-14 py-2 rounded-xl bg-white border border-amber-300 focus:ring-2 focus:ring-amber-200 outline-none text-xs font-bold text-slate-900 text-center font-mono"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
+                      Menit
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-amber-700 text-center">
+                    Jika &gt; {intermediate.maxDurationMinutes ?? 20}m, turun ke Beginner
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* KARTU 3: ADVANCED */}
-            <div className="p-5 rounded-3xl border border-indigo-200 bg-indigo-50/20 space-y-4 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
-                    <Award className="w-5 h-5" />
+            <div className="p-5 rounded-3xl border border-indigo-200 bg-indigo-50/20 space-y-4 shadow-2xs flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900">
+                        Level 3: Advanced
+                      </h4>
+                      <span className="text-[11px] font-bold text-indigo-700">
+                        Mahir & Profesional
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                    {advanced.minScore}% – 100%
+                  </span>
+                </div>
+
+                {/* Input Batas Skor */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500">
+                      Batas Bawah
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value={`${advanced.minScore}% (Auto)`}
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
+                    />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-sm text-slate-900">
-                      Level 3: Advanced
-                    </h4>
-                    <span className="text-[11px] font-bold text-indigo-700">
-                      Mahir & Profesional
-                    </span>
+                    <label className="text-[11px] font-bold text-slate-500">
+                      Batas Atas
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value="100% (Maksimal)"
+                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
+                    />
                   </div>
                 </div>
 
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                  {advanced.minScore}% – 100%
-                </span>
-              </div>
-
-              {/* Input Batas */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-bold text-slate-500">
-                    Batas Bawah
+                {/* Batas Waktu */}
+                <div className="space-y-1 pt-1">
+                  <label className="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                    <span>Maksimal Waktu Riil (Menit)</span>
+                    <span className="text-indigo-700 font-extrabold">≤ {advanced.maxDurationMinutes ?? 25}m</span>
                   </label>
-                  <input
-                    type="text"
-                    disabled
-                    value={`${advanced.minScore}% (Auto)`}
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold text-slate-500">
-                    Batas Atas
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    value="100% (Maksimal)"
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-500 cursor-not-allowed text-center"
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={1}
+                      max={durationMinutes}
+                      value={advanced.maxDurationMinutes ?? ''}
+                      onChange={(e) =>
+                        handleLevelDurationChange(
+                          3,
+                          e.target.value ? Number(e.target.value) : null
+                        )
+                      }
+                      placeholder="Contoh: 25"
+                      className="w-full pl-3 pr-14 py-2 rounded-xl bg-white border border-indigo-300 focus:ring-2 focus:ring-indigo-200 outline-none text-xs font-bold text-slate-900 text-center font-mono"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">
+                      Menit
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-indigo-700 text-center">
+                    Jika &gt; {advanced.maxDurationMinutes ?? 25}m, turun ke Intermediate
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tombol Simpan Sticky Bar */}
+        {/* ========================================================================= */}
+        {/* BAGIAN 3: KONTAK TUTOR PER JENJANG */}
+        {/* ========================================================================= */}
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shadow-2xs">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                3. Kontak WhatsApp Tutor Pembimbing Per Jenjang
+              </h3>
+              <p className="text-xs text-slate-500">
+                Data tutor ini akan tampil pada kartu instruktur di halaman hasil siswa (`/result`) dengan tautan langsung (*Direct WhatsApp*).
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* KARTU TUTOR ELEMENTARY */}
+            <div className="p-5 sm:p-6 rounded-3xl border border-sky-200 bg-sky-50/20 space-y-4 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-xs">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
+                    Tutor Jenjang Elementary (SD)
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Penanggung jawab peserta tingkat Sekolah Dasar
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3.5 pt-2">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Nama Tutor</span>
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tutorElementary.name}
+                    onChange={(e) =>
+                      setTutorElementary((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder="Contoh: Miss Sarah"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-sky-300 focus:ring-2 focus:ring-sky-200 outline-none text-xs sm:text-sm font-semibold text-slate-900"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Nomor WhatsApp</span>
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tutorElementary.whatsapp}
+                    onChange={(e) =>
+                      setTutorElementary((prev) => ({ ...prev, whatsapp: e.target.value }))
+                    }
+                    placeholder="Contoh: 081234567890 / 6281234567890"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-sky-300 focus:ring-2 focus:ring-sky-200 outline-none text-xs sm:text-sm font-semibold text-slate-900 font-mono"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Format: Otomatis distandarisasi ke format internasional (628xxx).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* KARTU TUTOR HIGH SCHOOL */}
+            <div className="p-5 sm:p-6 rounded-3xl border border-indigo-200 bg-indigo-50/20 space-y-4 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
+                    Tutor Jenjang High School
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Penanggung jawab peserta SMP, SMA & Umum
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3.5 pt-2">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Nama Tutor</span>
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tutorHighSchool.name}
+                    onChange={(e) =>
+                      setTutorHighSchool((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder="Contoh: Mr. David"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-indigo-300 focus:ring-2 focus:ring-indigo-200 outline-none text-xs sm:text-sm font-semibold text-slate-900"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Nomor WhatsApp</span>
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tutorHighSchool.whatsapp}
+                    onChange={(e) =>
+                      setTutorHighSchool((prev) => ({ ...prev, whatsapp: e.target.value }))
+                    }
+                    placeholder="Contoh: 089876543210 / 6289876543210"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-indigo-300 focus:ring-2 focus:ring-indigo-200 outline-none text-xs sm:text-sm font-semibold text-slate-900 font-mono"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Format: Otomatis distandarisasi ke format internasional (628xxx).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* TOMBOL SIMPAN STICKY BAR */}
+        {/* ========================================================================= */}
         <div className="bg-white rounded-3xl border border-slate-100 p-5 sm:p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-slate-500">
-            Pastikan seluruh konfigurasi sudah benar sebelum menekan tombol simpan.
+            Pastikan seluruh konfigurasi durasi, matrix evaluasi level, dan nomor WhatsApp tutor sudah benar sebelum menyimpan.
           </div>
 
           <button
@@ -581,7 +863,7 @@ export default function AdminSettingsPage() {
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Pengaturan...</span>
+                <span>Menyimpan Seluruh Pengaturan...</span>
               </>
             ) : (
               <>
