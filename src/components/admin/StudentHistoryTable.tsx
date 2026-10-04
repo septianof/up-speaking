@@ -17,9 +17,11 @@ import {
   ChevronRight,
   ArrowUpDown,
   XCircle,
+  Loader2,
 } from 'lucide-react';
 import { StudentHistoryRecord } from '@/app/actions/admin';
 import { RetestConfirmModal } from '@/components/admin/RetestConfirmModal';
+import { exportToExcel, exportToPDF } from '@/lib/export';
 
 interface StudentHistoryTableProps {
   data: StudentHistoryRecord[];
@@ -51,6 +53,8 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     useState<StudentHistoryRecord | null>(null);
   const [isRetestModalOpen, setIsRetestModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // Selaraskan localData jika data dari parent diperbarui
   useEffect(() => {
@@ -119,6 +123,54 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
       setToastMessage(null);
     }, 4500);
     onRefresh?.();
+  };
+
+  // Handler Ekspor Excel
+  const handleExportExcel = () => {
+    if (filteredAndSortedData.length === 0) {
+      alert('Tidak ada data siswa yang cocok dengan kriteria filter saat ini untuk diekspor.');
+      return;
+    }
+    setIsExportingExcel(true);
+    try {
+      exportToExcel(filteredAndSortedData, {
+        level: selectedLevel,
+        search: searchTerm,
+      });
+      setToastMessage(
+        `Berhasil mengekspor ${filteredAndSortedData.length} data riwayat siswa ke Excel (.xlsx)!`
+      );
+      setTimeout(() => setToastMessage(null), 4000);
+    } catch (err) {
+      console.error('Gagal mengekspor data ke Excel:', err);
+      alert('Terjadi kesalahan saat membuat file Excel. Silakan coba lagi.');
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
+  // Handler Ekspor PDF
+  const handleExportPDF = () => {
+    if (filteredAndSortedData.length === 0) {
+      alert('Tidak ada data siswa yang cocok dengan kriteria filter saat ini untuk dicetak ke PDF.');
+      return;
+    }
+    setIsExportingPDF(true);
+    try {
+      exportToPDF(filteredAndSortedData, {
+        level: selectedLevel,
+        search: searchTerm,
+      });
+      setToastMessage(
+        `Berhasil mengunduh dokumen cetak PDF untuk ${filteredAndSortedData.length} siswa!`
+      );
+      setTimeout(() => setToastMessage(null), 4000);
+    } catch (err) {
+      console.error('Gagal mengekspor data ke PDF:', err);
+      alert('Terjadi kesalahan saat memproses dokumen PDF. Silakan coba lagi.');
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   // Filter & Pengurutan Data
@@ -245,30 +297,36 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           </p>
         </div>
 
-        {/* Tombol Ekspor (Persiapan Task ADM-06) */}
+        {/* Tombol Ekspor (Task ADM-06) */}
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs"
-            title="Ekspor ke spreadsheet Excel (.xlsx)"
-            onClick={() => {
-              alert('Fitur Ekspor Excel (.xlsx) akan aktif pada Task ADM-06.');
-            }}
+            disabled={isExportingExcel || isExportingPDF || isLoading}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs disabled:opacity-50"
+            title="Unduh seluruh data terfilter ke spreadsheet Excel (.xlsx)"
+            onClick={handleExportExcel}
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            <span>Ekspor Excel</span>
+            {isExportingExcel ? (
+              <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            )}
+            <span>{isExportingExcel ? 'Mengunduh...' : 'Ekspor Excel'}</span>
           </button>
 
           <button
             type="button"
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs"
-            title="Cetak & Ekspor ke dokumen PDF (.pdf)"
-            onClick={() => {
-              alert('Fitur Ekspor PDF (.pdf) akan aktif pada Task ADM-06.');
-            }}
+            disabled={isExportingExcel || isExportingPDF || isLoading}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs disabled:opacity-50"
+            title="Cetak & unduh laporan resmi ke dokumen PDF (.pdf)"
+            onClick={handleExportPDF}
           >
-            <FileText className="w-4 h-4 text-rose-600" />
-            <span>Ekspor PDF</span>
+            {isExportingPDF ? (
+              <Loader2 className="w-4 h-4 text-rose-600 animate-spin" />
+            ) : (
+              <FileText className="w-4 h-4 text-rose-600" />
+            )}
+            <span>{isExportingPDF ? 'Membuat PDF...' : 'Ekspor PDF'}</span>
           </button>
         </div>
       </div>
