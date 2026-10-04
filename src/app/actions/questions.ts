@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { EducationLevel } from '@/types';
 
 export interface AdminQuestionOption {
   id: string;
@@ -13,6 +14,7 @@ export interface AdminQuestionOption {
 export interface AdminQuestion {
   id: string;
   questionText: string;
+  educationLevel: EducationLevel;
   isActive: boolean;
   createdAt: string;
   options: AdminQuestionOption[];
@@ -66,6 +68,7 @@ export async function getQuestionsForAdmin(): Promise<GetQuestionsResult> {
       .select(`
         id,
         question_text,
+        education_level,
         is_active,
         created_at,
         question_options (
@@ -111,6 +114,7 @@ export async function getQuestionsForAdmin(): Promise<GetQuestionsResult> {
       return {
         id: q.id,
         questionText: q.question_text,
+        educationLevel: (q.education_level as EducationLevel) || 'elementary',
         isActive: Boolean(q.is_active),
         createdAt: q.created_at,
         options: sortedOptions,
@@ -197,6 +201,7 @@ export interface SaveQuestionOptionInput {
 export interface SaveQuestionPayload {
   id?: string; // Jika ada = mode edit, jika null/undefined = mode tambah baru
   questionText: string;
+  educationLevel: EducationLevel;
   options: SaveQuestionOptionInput[];
 }
 
@@ -235,6 +240,16 @@ export async function saveQuestion(
     }
 
     // 2. Validasi input ketat
+    if (
+      !payload.educationLevel ||
+      !['elementary', 'high_school'].includes(payload.educationLevel)
+    ) {
+      return {
+        success: false,
+        error: 'Jenjang pendidikan wajib dipilih (Elementary atau High School).',
+      };
+    }
+
     const trimmedQuestion = payload.questionText?.trim() || '';
     if (trimmedQuestion.length < 5) {
       return {
@@ -272,11 +287,12 @@ export async function saveQuestion(
     // CASE A: MODE EDIT (Jika id terdefinisi)
     // --------------------------------------------------------------------------
     if (payload.id) {
-      // 1. Perbarui teks pertanyaan
+      // 1. Perbarui teks pertanyaan & jenjang pendidikan
       const { error: updateQErr } = await supabase
         .from('questions')
         .update({
           question_text: trimmedQuestion,
+          education_level: payload.educationLevel,
           updated_at: new Date().toISOString(),
         })
         .eq('id', payload.id);
@@ -355,6 +371,7 @@ export async function saveQuestion(
       .from('questions')
       .insert({
         question_text: trimmedQuestion,
+        education_level: payload.educationLevel,
         is_active: true,
       })
       .select('id')

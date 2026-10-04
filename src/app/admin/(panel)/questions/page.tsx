@@ -16,10 +16,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  GraduationCap,
 } from 'lucide-react';
 import { getQuestionsForAdmin, AdminQuestion } from '@/app/actions/questions';
 import { QuestionDeleteModal } from '@/components/admin/QuestionDeleteModal';
 import { QuestionFormModal } from '@/components/admin/QuestionFormModal';
+import { EducationLevel } from '@/types';
 
 const PAGE_SIZE = 10;
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -30,6 +32,7 @@ export default function AdminQuestionsPage() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [levelFilter, setLevelFilter] = useState<'all' | EducationLevel>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   // State Modal Soft Delete
@@ -96,18 +99,39 @@ export default function AdminQuestionsPage() {
     }, 4500);
   };
 
-  // Filter Search
+  // Hitung Statistik Soal Per Jenjang
+  const stats = useMemo(() => {
+    const total = questions.length;
+    const elementary = questions.filter(
+      (q) => q.educationLevel === 'elementary'
+    ).length;
+    const highSchool = questions.filter(
+      (q) => q.educationLevel === 'high_school'
+    ).length;
+    return { total, elementary, highSchool };
+  }, [questions]);
+
+  // Filter Search & Jenjang Pendidikan
   const filteredQuestions = useMemo(() => {
-    if (!searchTerm.trim()) return questions;
-    const q = searchTerm.toLowerCase().trim();
     return questions.filter((item) => {
-      const matchQuestion = item.questionText.toLowerCase().includes(q);
-      const matchOption = item.options.some((opt) =>
-        opt.optionText.toLowerCase().includes(q)
-      );
-      return matchQuestion || matchOption;
+      // 1. Filter Jenjang Pendidikan
+      if (levelFilter !== 'all' && item.educationLevel !== levelFilter) {
+        return false;
+      }
+
+      // 2. Filter Teks Pertanyaan & Pilihan Jawaban
+      if (searchTerm.trim()) {
+        const q = searchTerm.toLowerCase().trim();
+        const matchQuestion = item.questionText.toLowerCase().includes(q);
+        const matchOption = item.options.some((opt) =>
+          opt.optionText.toLowerCase().includes(q)
+        );
+        return matchQuestion || matchOption;
+      }
+
+      return true;
     });
-  }, [questions, searchTerm]);
+  }, [questions, levelFilter, searchTerm]);
 
   // Pagination
   const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE) || 1;
@@ -186,29 +210,43 @@ export default function AdminQuestionsPage() {
       </div>
 
       {/* Ringkasan Cepat */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Total Soal Aktif */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-2xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0">
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
             <p className="text-xs font-bold text-slate-400">Total Soal Aktif</p>
             <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">
-              {questions.length} Butir Soal
+              {stats.total} Butir
             </h3>
           </div>
         </div>
 
+        {/* Soal Elementary */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-2xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+            <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400">Sistem Pengacakan</p>
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight mt-0.5">
-              Acak Fisher-Yates Aktif
+            <p className="text-xs font-bold text-slate-400">Elementary (SD)</p>
+            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">
+              {stats.elementary} Butir
             </h3>
-            <p className="text-xs text-slate-400">Urutan soal & opsi diacak unik per siswa</p>
+          </div>
+        </div>
+
+        {/* Soal High School */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-2xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-400">High School (SMP/SMA/Umum)</p>
+            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">
+              {stats.highSchool} Butir
+            </h3>
           </div>
         </div>
       </div>
@@ -232,36 +270,101 @@ export default function AdminQuestionsPage() {
 
       {/* Kontainer Utama Tabel Bank Soal */}
       <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] space-y-6">
-        {/* Toolbar Pencarian */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
+        {/* Toolbar: Filter Jenjang Tabs & Pencarian */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Tabs Filter Jenjang */}
+          <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/80 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setLevelFilter('all');
                 setCurrentPage(1);
               }}
-              placeholder="Cari teks pertanyaan atau pilihan jawaban..."
-              className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none text-xs sm:text-sm text-slate-800 placeholder-slate-400 transition-all"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors"
+              className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                levelFilter === 'all'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Semua ({stats.total})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLevelFilter('elementary');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                levelFilter === 'elementary'
+                  ? 'bg-sky-500 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-sky-700'
+              }`}
+            >
+              <span>Elementary (SD)</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  levelFilter === 'elementary'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-slate-200 text-slate-700'
+                }`}
               >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+                {stats.elementary}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLevelFilter('high_school');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                levelFilter === 'high_school'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-indigo-700'
+              }`}
+            >
+              <span>High School</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  levelFilter === 'high_school'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-slate-200 text-slate-700'
+                }`}
+              >
+                {stats.highSchool}
+              </span>
+            </button>
           </div>
 
-          <div className="text-xs text-slate-500">
-            Menampilkan{' '}
-            <strong className="text-slate-800 font-bold">
-              {filteredQuestions.length}
-            </strong>{' '}
-            dari {questions.length} butir soal aktif
+          {/* Search Box & Info Count */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 lg:max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Cari teks pertanyaan atau pilihan jawaban..."
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none text-xs sm:text-sm text-slate-800 placeholder-slate-400 transition-all"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-md transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <div className="text-xs text-slate-500 whitespace-nowrap">
+              <strong className="text-slate-800 font-bold">
+                {filteredQuestions.length}
+              </strong>{' '}
+              dari {questions.length} butir
+            </div>
           </div>
         </div>
 
@@ -271,14 +374,15 @@ export default function AdminQuestionsPage() {
             <thead>
               <tr className="bg-slate-50/80 text-slate-600 text-xs font-bold border-b border-slate-100">
                 <th className="py-3.5 px-4 w-12 text-center">#</th>
-                <th className="py-3.5 px-4 min-w-[260px]">Teks Pertanyaan</th>
-                <th className="py-3.5 px-4 min-w-[320px]">
+                <th className="py-3.5 px-4 min-w-[240px]">Teks Pertanyaan</th>
+                <th className="py-3.5 px-4 min-w-[130px] text-center">Jenjang</th>
+                <th className="py-3.5 px-4 min-w-[300px]">
                   Pilihan Jawaban & Kunci
                 </th>
-                <th className="py-3.5 px-4 min-w-[110px] text-center">
+                <th className="py-3.5 px-4 min-w-[90px] text-center">
                   Jumlah Opsi
                 </th>
-                <th className="py-3.5 px-4 min-w-[130px] text-center">Aksi</th>
+                <th className="py-3.5 px-4 min-w-[110px] text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -292,6 +396,9 @@ export default function AdminQuestionsPage() {
                     <td className="py-5 px-4">
                       <div className="w-48 h-4 bg-slate-200 rounded mb-2" />
                       <div className="w-32 h-3 bg-slate-100 rounded" />
+                    </td>
+                    <td className="py-5 px-4 text-center">
+                      <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
                     </td>
                     <td className="py-5 px-4">
                       <div className="w-64 h-6 bg-slate-200 rounded-lg mb-1.5" />
@@ -308,7 +415,7 @@ export default function AdminQuestionsPage() {
               ) : paginatedQuestions.length === 0 ? (
                 // Empty State
                 <tr>
-                  <td colSpan={5} className="py-12 px-4 text-center">
+                  <td colSpan={6} className="py-12 px-4 text-center">
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                       <HelpCircle className="w-6 h-6" />
                     </div>
@@ -316,17 +423,21 @@ export default function AdminQuestionsPage() {
                       Tidak Ada Soal Ditemukan
                     </h4>
                     <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
-                      {searchTerm
-                        ? `Tidak ada butir soal yang cocok dengan pencarian "${searchTerm}".`
+                      {searchTerm || levelFilter !== 'all'
+                        ? 'Tidak ada butir soal yang cocok dengan filter atau pencarian saat ini.'
                         : 'Belum ada data butir soal aktif di bank soal.'}
                     </p>
-                    {searchTerm && (
+                    {(searchTerm || levelFilter !== 'all') && (
                       <button
-                        onClick={() => setSearchTerm('')}
+                        onClick={() => {
+                          setSearchTerm('');
+                          setLevelFilter('all');
+                          setCurrentPage(1);
+                        }}
                         className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0e263e] text-white font-bold text-xs hover:bg-[#1a385c] transition-colors"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
-                        <span>Reset Pencarian</span>
+                        <span>Reset Filter & Pencarian</span>
                       </button>
                     )}
                   </td>
@@ -357,6 +468,21 @@ export default function AdminQuestionsPage() {
                             ID: {q.id.slice(0, 8)}...
                           </span>
                         </div>
+                      </td>
+
+                      {/* Jenjang */}
+                      <td className="py-5 px-4 text-center">
+                        {q.educationLevel === 'high_school' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                            <span>High School</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                            <span>Elementary</span>
+                          </span>
+                        )}
                       </td>
 
                       {/* Pilihan Opsi & Kunci Jawaban */}
@@ -486,6 +612,9 @@ export default function AdminQuestionsPage() {
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         questionToEdit={selectedQuestionForEdit}
+        defaultEducationLevel={
+          levelFilter !== 'all' ? levelFilter : 'elementary'
+        }
         onSuccess={handleFormSuccess}
       />
     </div>

@@ -12,17 +12,20 @@ import {
   BookOpen,
   HelpCircle,
   Check,
+  GraduationCap,
 } from 'lucide-react';
 import {
   AdminQuestion,
   saveQuestion,
   SaveQuestionOptionInput,
 } from '@/app/actions/questions';
+import { EducationLevel } from '@/types';
 
 interface QuestionFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   questionToEdit: AdminQuestion | null;
+  defaultEducationLevel?: EducationLevel;
   onSuccess: (message: string) => void;
 }
 
@@ -32,10 +35,13 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
   isOpen,
   onClose,
   questionToEdit,
+  defaultEducationLevel = 'elementary',
   onSuccess,
 }) => {
   const [mounted, setMounted] = useState(false);
   const [questionText, setQuestionText] = useState('');
+  const [educationLevel, setEducationLevel] =
+    useState<EducationLevel>('elementary');
   const [options, setOptions] = useState<SaveQuestionOptionInput[]>([
     { optionText: '', isCorrect: true },
     { optionText: '', isCorrect: false },
@@ -55,6 +61,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
       setValidationError(null);
       if (questionToEdit) {
         setQuestionText(questionToEdit.questionText);
+        setEducationLevel(questionToEdit.educationLevel || 'elementary');
         setOptions(
           questionToEdit.options.map((opt) => ({
             id: opt.id,
@@ -64,6 +71,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
         );
       } else {
         setQuestionText('');
+        setEducationLevel(defaultEducationLevel || 'elementary');
         setOptions([
           { optionText: '', isCorrect: true },
           { optionText: '', isCorrect: false },
@@ -72,7 +80,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
         ]);
       }
     }
-  }, [isOpen, questionToEdit]);
+  }, [isOpen, questionToEdit, defaultEducationLevel]);
 
   // Handle ESC key press
   useEffect(() => {
@@ -185,6 +193,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
       const res = await saveQuestion({
         id: questionToEdit ? questionToEdit.id : undefined,
         questionText: questionText.trim(),
+        educationLevel,
         options: options.map((opt) => ({
           id: opt.id,
           optionText: opt.optionText.trim(),
@@ -238,8 +247,8 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               {isEditMode
-                ? 'Perbarui teks pertanyaan, opsi jawaban dinamis, atau kunci jawaban.'
-                : 'Isi butir pertanyaan placement test baru dan tentukan kunci jawaban benar.'}
+                ? 'Perbarui teks pertanyaan, jenjang pendidikan, opsi jawaban, atau kunci jawaban.'
+                : 'Isi butir pertanyaan placement test baru dan tentukan jenjang serta kunci jawaban benar.'}
             </p>
           </div>
         </div>
@@ -253,6 +262,69 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Pilihan Jenjang Pendidikan */}
+          <div className="space-y-2">
+            <label className="block text-xs sm:text-sm font-bold text-slate-800 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <GraduationCap className="w-4 h-4 text-sky-600" />
+                <span>Jenjang Pendidikan Soal</span>
+                <span className="text-rose-500">*</span>
+              </span>
+              <span className="text-[11px] font-normal text-slate-400">
+                Pilih target kelompok peserta
+              </span>
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setEducationLevel('elementary')}
+                className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-2xl border-2 text-left transition-all ${
+                  educationLevel === 'elementary'
+                    ? 'border-sky-500 bg-sky-50/70 text-sky-950 shadow-xs ring-1 ring-sky-500/20'
+                    : 'border-slate-200 hover:border-slate-300 bg-slate-50/50 text-slate-600'
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors ${
+                    educationLevel === 'elementary'
+                      ? 'bg-sky-500 text-white shadow-2xs'
+                      : 'bg-white text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  SD
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-bold">Elementary</p>
+                  <p className="text-[11px] text-slate-500">Sekolah Dasar</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEducationLevel('high_school')}
+                className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-2xl border-2 text-left transition-all ${
+                  educationLevel === 'high_school'
+                    ? 'border-indigo-500 bg-indigo-50/70 text-indigo-950 shadow-xs ring-1 ring-indigo-500/20'
+                    : 'border-slate-200 hover:border-slate-300 bg-slate-50/50 text-slate-600'
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors ${
+                    educationLevel === 'high_school'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'bg-white text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  HS
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-bold">High School</p>
+                  <p className="text-[11px] text-slate-500">SMP, SMA & Umum</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* Input Teks Pertanyaan */}
           <div className="space-y-2">
             <label className="block text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">

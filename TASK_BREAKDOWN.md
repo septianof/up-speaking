@@ -94,7 +94,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `UPD-03` | **Server Action `submitExam` & Matrix Evaluasi:** Hitung durasi pengerjaan riil, evaluasi matrix level (Skor % + Waktu pengerjaan menit), dan return kontak tutor jenjang | `UPD-01`, `DB-06` | 1 jam | 🔴 Wajib | Siswa skor >= 80% durasi > 25m turun ke Intermediate; skor 60-79% durasi > 20m turun ke Beginner |
 | `[x]` | `UPD-04` | **UI Registrasi Siswa (`/`):** Tambah input pilihan Jenjang Pendidikan (`Elementary` / `High School`) pada modal registrasi | `UPD-02`, `STU-02` | 45 menit | 🔴 Wajib | Siswa wajib memilih jenjang sebelum tes dimulai |
 | `[x]` | `UPD-05` | **UI Halaman Hasil (`/result`):** Tampilkan durasi pengerjaan riil, rekomendasi kelas jenjang+level, dan kartu kontak Tutor via WhatsApp | `UPD-03`, `STU-08` | 1 jam | 🔴 Wajib | Hasil menampilkan durasi pengerjaan dan tombol WA tutor jenjang terkait |
-| `[ ]` | `UPD-06` | **UI Admin Bank Soal (`/admin/questions`):** Tambah filter jenjang pada tabel soal dan pilihan jenjang pada modal form tambah/edit soal | `UPD-01`, `ADM-08` | 1 jam | 🔴 Wajib | Admin dapat memfilter dan menginput soal per jenjang |
+| `[x]` | `UPD-06` | **UI Admin Bank Soal (`/admin/questions`):** Tambah filter jenjang pada tabel soal dan pilihan jenjang pada modal form tambah/edit soal | `UPD-01`, `ADM-08` | 1 jam | 🔴 Wajib | Admin dapat memfilter dan menginput soal per jenjang |
 | `[ ]` | `UPD-07` | **UI Admin Pengaturan (`/admin/settings`):** Form matrix penilaian level (skor + batas waktu menit) dan form kontak tutor per jenjang (Elementary & High School) | `UPD-01`, `ADM-09` | 1 jam | 🔴 Wajib | Pengaturan matrix level dan kontak tutor tersimpan ke database |
 | `[ ]` | `UPD-08` | **UI Admin Dashboard (`/admin/dashboard`):** Tambah kolom Jenjang dan Durasi Pengerjaan pada tabel riwayat serta filter dropdown jenjang | `UPD-01`, `ADM-04` | 45 menit | 🔴 Wajib | Tabel riwayat menampilkan jenjang dan durasi serta dapat difilter per jenjang |
 
@@ -120,9 +120,9 @@ Setiap task menggunakan format checklist berikut:
 | Database & Server (`DB`) | 6 | 0 | **6** | 6 | 0 |
 | Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
 | Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
-| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 5 | 3 |
+| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 6 | 2 |
 | PWA & Deploy (`FIN`) | 4 | 0 | **4** | 1 | 3 |
-| **Total** | **38** | **1** | **39 Task** | **33** | **6** |
+| **Total** | **38** | **1** | **39 Task** | **34** | **5** |
 
 ---
 
