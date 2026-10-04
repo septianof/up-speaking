@@ -60,7 +60,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `STU-02` | Buat Modal / Bottom Sheet pendaftaran: input Nama Lengkap & Nomor WhatsApp, integrasi start session, dan deteksi pemulihan sesi aktif | `STU-01`, `DB-04` | 1.5 jam | 🔴 Wajib |
 | `[x]` | `STU-03` | Buat layout Ruang Ujian (`/exam`): Sticky Header (Nama, Countdown Timer tersinkronisasi server, badge auto-save hijau) | `STU-02` | 1 jam | 🔴 Wajib |
 | `[x]` | `STU-04` | Buat komponen Soal & Opsi Jawaban: Radio Card interaktif yang ramah sentuhan layar ponsel (mobile tap-friendly) | `STU-03` | 1 jam | 🔴 Wajib |
-| `[ ]` | `STU-05` | Implementasi Bottom Navigation Bar (`Sebelumnya`, `Selanjutnya`, dan `Kumpulkan Ujian` di nomor terakhir) serta Bottom Sheet Kisi/Palet Soal (indikator Hijau, Abu-abu, Biru) | `STU-04` | 1.5 jam | 🔴 Wajib |
+| `[x]` | `STU-05` | Implementasi Bottom Navigation Bar (`Sebelumnya`, `Selanjutnya`, dan `Kumpulkan Ujian` di nomor terakhir) serta Bottom Sheet Kisi/Palet Soal (indikator Hijau, Abu-abu, Biru) | `STU-04` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `STU-06` | Implementasi mekanisme Crash Recovery & Auto-Save di LocalStorage: restorasi jawaban dan sisa waktu jika halaman ter-refresh/tertutup | `STU-04`, `DB-05` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `STU-07` | Buat Modal Konfirmasi Pengumpulan (alert jika ada soal belum dijawab) dan aksi submit otomatis ketika waktu habis (00:00) | `STU-05`, `DB-06` | 1 jam | 🔴 Wajib |
 | `[ ]` | `STU-08` | Buat Halaman Hasil (`/result`): kartu pencapaian skor %, rincian benar/total, badge level, deskripsi rekomendasi kelas, tombol Selesai, dan tombol direct WA ke Admin | `STU-07` | 1.5 jam | 🔴 Wajib |

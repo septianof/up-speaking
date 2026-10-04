@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import ExamHeader from '@/components/exam/ExamHeader';
 import QuestionCard from '@/components/exam/QuestionCard';
+import QuestionPaletteModal from '@/components/exam/QuestionPaletteModal';
 import { saveAnswer } from '@/app/actions/session';
 import type { SessionInfo, SanitizedQuestion } from '@/types';
 
@@ -16,6 +17,7 @@ export default function ExamPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Inisialisasi data ujian dari LocalStorage saat halaman dimuat
@@ -96,6 +98,26 @@ export default function ExamPage() {
     }
   };
 
+  // Handler klik tombol Kumpulkan Ujian di soal terakhir
+  const handleSubmitClick = () => {
+    const unansweredCount = totalQuestions - answeredCount;
+    if (unansweredCount > 0) {
+      const confirmSubmit = window.confirm(
+        `Perhatian: Masih ada ${unansweredCount} butir pertanyaan yang belum Anda jawab!\n\nApakah Anda yakin ingin menyelesaikan dan mengumpulkan ujian sekarang?`
+      );
+      if (confirmSubmit) {
+        alert('Lembar jawaban berhasil dikirim! Menyiapkan hasil...');
+      }
+    } else {
+      const confirmSubmit = window.confirm(
+        'Seluruh pertanyaan telah Anda jawab dengan lengkap!\n\nApakah Anda yakin ingin mengakhiri dan mengumpulkan ujian sekarang?'
+      );
+      if (confirmSubmit) {
+        alert('Lembar jawaban berhasil dikirim! Menyiapkan hasil...');
+      }
+    }
+  };
+
   if (isLoading || !session) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
@@ -144,7 +166,7 @@ export default function ExamPage() {
       </main>
 
       {/* ======================================================================= */}
-      {/* 3. BOTTOM STICKY NAVIGATION BAR (Struktur Dasar STU-05)                 */}
+      {/* 3. BOTTOM STICKY NAVIGATION BAR (STU-05)                                */}
       {/* ======================================================================= */}
       <footer className="fixed inset-x-0 bottom-0 bg-white/95 backdrop-blur-sm border-t border-slate-200/80 py-3 sm:py-3.5 px-3 sm:px-8 z-30 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4">
@@ -162,7 +184,9 @@ export default function ExamPage() {
           {/* Tombol Palet / Daftar Soal */}
           <button
             type="button"
-            className="px-2.5 min-[380px]:px-3.5 sm:px-5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap transition-colors shrink-0"
+            onClick={() => setIsPaletteOpen(true)}
+            className="px-2.5 min-[380px]:px-3.5 sm:px-5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap transition-colors shrink-0 cursor-pointer active:scale-95"
+            aria-label="Buka daftar seluruh nomor soal"
           >
             <span className="text-sm shrink-0">📑</span>
             <span className="whitespace-nowrap shrink-0">Daftar Soal</span>
@@ -171,18 +195,40 @@ export default function ExamPage() {
             </span>
           </button>
 
-          {/* Tombol Selanjutnya */}
-          <button
-            type="button"
-            disabled={currentIndex >= totalQuestions - 1}
-            onClick={() => setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1))}
-            className="px-3 min-[380px]:px-4 sm:px-6 py-2.5 rounded-xl bg-[#0e2a47] hover:bg-[#1a385c] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs disabled:opacity-40 disabled:cursor-not-allowed shrink-0 whitespace-nowrap"
-          >
-            <span>Selanjutnya</span>
-            <span className="text-sm">→</span>
-          </button>
+          {/* Tombol Selanjutnya atau Kumpulkan Ujian di Nomor Terakhir */}
+          {currentIndex < totalQuestions - 1 ? (
+            <button
+              type="button"
+              onClick={() => setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1))}
+              className="px-3 min-[380px]:px-4 sm:px-6 py-2.5 rounded-xl bg-[#0e2a47] hover:bg-[#1a385c] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs shrink-0 whitespace-nowrap cursor-pointer active:scale-95"
+            >
+              <span>Selanjutnya</span>
+              <span className="text-sm">→</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmitClick}
+              className="px-3.5 min-[380px]:px-5 sm:px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-sm shrink-0 whitespace-nowrap cursor-pointer active:scale-95 animate-pulse"
+            >
+              <span>Kumpulkan Ujian</span>
+              <span className="text-sm">✓</span>
+            </button>
+          )}
         </div>
       </footer>
+
+      {/* ======================================================================= */}
+      {/* 4. MODAL / BOTTOM SHEET KISI PALET SOAL (STU-05)                        */}
+      {/* ======================================================================= */}
+      <QuestionPaletteModal
+        isOpen={isPaletteOpen}
+        onClose={() => setIsPaletteOpen(false)}
+        questions={questions}
+        currentIndex={currentIndex}
+        answers={answers}
+        onSelectQuestion={(idx) => setCurrentIndex(idx)}
+      />
     </div>
   );
 }
