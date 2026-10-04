@@ -12,6 +12,8 @@ import {
   BookOpen,
   Home,
   MessageCircle,
+  GraduationCap,
+  UserCheck,
 } from 'lucide-react';
 import type { ExamResultData } from '@/types';
 
@@ -86,13 +88,16 @@ export default function ResultPage() {
   const isIntermediate = levelName.toLowerCase() === 'intermediate';
   const isAdvanced = levelName.toLowerCase() === 'advanced';
 
+  // Data Jenjang Pendidikan
+  const isHighSchool = result.educationLevel === 'high_school';
+  const educationLabel = isHighSchool ? 'High School (SMP, SMA, Umum)' : 'Elementary (SD)';
+
   const levelColorConfig = isAdvanced
     ? {
         badgeBg: 'bg-indigo-50 border-indigo-200/80 text-indigo-700',
         cardBorder: 'border-indigo-200',
         ringColor: 'ring-indigo-400',
         tag: 'Level Mahir (Advanced)',
-        recommendationTitle: 'Program Rekomendasi: Professional & Executive Speaking',
       }
     : isIntermediate
     ? {
@@ -100,19 +105,23 @@ export default function ResultPage() {
         cardBorder: 'border-sky-200',
         ringColor: 'ring-sky-400',
         tag: 'Level Menengah (Intermediate)',
-        recommendationTitle: 'Program Rekomendasi: Conversational Fluency & Discussion',
       }
     : {
         badgeBg: 'bg-emerald-50 border-emerald-200/80 text-emerald-700',
         cardBorder: 'border-emerald-200',
         ringColor: 'ring-emerald-400',
         tag: 'Level Pemula (Beginner)',
-        recommendationTitle: 'Program Rekomendasi: Foundation & Essential Speaking',
       };
+
+  // Data Tutor Penanggung Jawab Jenjang
+  const tutorName = result.tutor?.name || (isHighSchool ? 'Mr. David' : 'Miss Sarah');
+  const tutorWhatsApp = result.tutor?.whatsapp || (isHighSchool ? '6281234567891' : '6281234567890');
+  const tutorMessage = `Halo ${tutorName}, saya *${result.studentName}* telah menyelesaikan Placement Test jenjang *${educationLabel}* dengan skor *${result.finalScorePercent}%* (${result.durationMinutes ?? 0} menit, Level: *${levelName}*). Saya ingin konsultasi materi belajar dan persiapan les di Up Speaking. Terima kasih!`;
+  const tutorWhatsAppUrl = `https://wa.me/${tutorWhatsApp}?text=${encodeURIComponent(tutorMessage)}`;
 
   // Pre-filled URL WhatsApp ke Admin
   const adminWhatsApp = process.env.NEXT_PUBLIC_ADMIN_WHATSAPP || '6281234567890';
-  const waMessage = `Halo Admin Up Speaking, saya *${result.studentName}* baru saja menyelesaikan English Placement Test dengan skor *${result.finalScorePercent}%* (Level: *${levelName}*). Saya ingin konsultasi jadwal belajar dan pendaftaran kelas yang cocok. Terima kasih!`;
+  const waMessage = `Halo Admin Up Speaking, saya *${result.studentName}* baru saja menyelesaikan English Placement Test jenjang *${educationLabel}* dengan skor *${result.finalScorePercent}%* (Level: *${levelName}*). Saya ingin konsultasi jadwal belajar dan pendaftaran kelas yang cocok. Terima kasih!`;
   const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waMessage)}`;
 
   return (
@@ -157,9 +166,15 @@ export default function ResultPage() {
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Banner Ucapan Selamat */}
         <div className="text-center mb-6 sm:mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 mb-3 shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Placement Test Selesai</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs">
+              {isHighSchool ? <GraduationCap className="w-3.5 h-3.5" /> : <BookOpen className="w-3.5 h-3.5" />}
+              <span>Jenjang {educationLabel}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Placement Test Selesai</span>
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Selamat, {result.studentName}!
@@ -172,7 +187,7 @@ export default function ResultPage() {
 
         <div className="space-y-6 animate-scale-in">
           {/* ===================================================================== */}
-          {/* KARTU 1: PENCAPAIAN SKOR UTAMA                                       */}
+          {/* KARTU 1: PENCAPAIAN SKOR UTAMA & METRIK (Termasuk Durasi Riil)        */}
           {/* ===================================================================== */}
           <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] text-center relative overflow-hidden">
             {/* Background Accent Glow */}
@@ -202,8 +217,8 @@ export default function ResultPage() {
               dengan tepat.
             </p>
 
-            {/* Grid Kartu Rincian 3 Metrik */}
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-lg mx-auto pt-6 border-t border-slate-100">
+            {/* Grid Kartu Rincian 4 Metrik */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 max-w-2xl mx-auto pt-6 border-t border-slate-100">
               <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <span className="text-[11px] sm:text-xs text-slate-500 font-medium block">Akurasi</span>
                 <span className="text-base sm:text-lg font-bold text-slate-900 mt-0.5 block">
@@ -217,6 +232,12 @@ export default function ResultPage() {
                 </span>
               </div>
               <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <span className="text-[11px] sm:text-xs text-slate-500 font-medium block">Durasi Pengerjaan</span>
+                <span className="text-base sm:text-lg font-bold text-sky-600 mt-0.5 block">
+                  {result.durationMinutes ?? 0} Menit
+                </span>
+              </div>
+              <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <span className="text-[11px] sm:text-xs text-slate-500 font-medium block">Level Hasil</span>
                 <span className="text-base sm:text-lg font-bold text-[#0e263e] mt-0.5 block">
                   {levelName}
@@ -226,10 +247,10 @@ export default function ResultPage() {
           </div>
 
           {/* ===================================================================== */}
-          {/* KARTU 2: REKOMENDASI LEVEL & KURIKULUM BELAJAR                       */}
+          {/* KARTU 2: HASIL LEVEL PENEMPATAN                                       */}
           {/* ===================================================================== */}
           <div className={`bg-white rounded-3xl border-2 ${levelColorConfig.cardBorder} p-6 sm:p-8 shadow-xs relative`}>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#0e263e] text-white flex items-center justify-center flex-shrink-0 shadow-xs">
                   <Award className="w-6 h-6 text-amber-400" />
@@ -250,22 +271,46 @@ export default function ResultPage() {
                 <span>Terverifikasi Kurikulum Up Speaking</span>
               </div>
             </div>
-
-            {/* Deskripsi Rekomendasi */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-[#00a6f4]" />
-                <span>{levelColorConfig.recommendationTitle}</span>
-              </h4>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {result.level?.description ||
-                  'Fokus melatih kelancaran berkomunikasi dalam bahasa Inggris secara aktif dan percaya diri melalui kurikulum terstruktur Up Speaking Learning Centre.'}
-              </p>
-            </div>
           </div>
 
           {/* ===================================================================== */}
-          {/* KARTU 3: TOMBOL AKSI & DIRECT WHATSAPP KE ADMIN                       */}
+          {/* KARTU 3: TUTOR PENANGGUNG JAWAB JENJANG & TOMBOL WHATSAPP TUTOR       */}
+          {/* ===================================================================== */}
+          <div className="bg-gradient-to-br from-emerald-50/80 via-white to-sky-50/50 rounded-3xl border border-emerald-200/80 p-6 sm:p-8 shadow-xs relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-600/20">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="inline-block text-[11px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md mb-1">
+                    Instruktur Pembimbing {isHighSchool ? 'High School' : 'Elementary'}
+                  </span>
+                  <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 leading-tight">
+                    {tutorName}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-5">
+              Konsultasikan perkembangan hasil tes, persiapan silabus, dan jadwal belajar bersama tutor penanggung jawab jenjang Anda secara langsung.
+            </p>
+
+            <a
+              href={tutorWhatsAppUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-md shadow-emerald-500/20 active:scale-[0.99] text-center"
+            >
+              <MessageCircle className="w-5 h-5 fill-current" />
+              <span>Hubungi {tutorName} via WhatsApp</span>
+              <ArrowRight className="w-4 h-4 hidden sm:inline" />
+            </a>
+          </div>
+
+          {/* ===================================================================== */}
+          {/* KARTU 4: KONSULTASI ADMINISTRASI ADMIN & KEMBALI KE BERANDA           */}
           {/* ===================================================================== */}
           <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] flex flex-col gap-3">
             {/* Tombol Direct WhatsApp ke Admin */}
@@ -273,11 +318,10 @@ export default function ResultPage() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-md shadow-emerald-500/20 active:scale-[0.99] text-center"
+              className="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-sm active:scale-[0.99] text-center"
             >
-              <MessageCircle className="w-5 h-5 fill-current" />
-              <span>Konsultasi Hasil & Jadwal ke Admin WhatsApp</span>
-              <ArrowRight className="w-4 h-4 hidden sm:inline" />
+              <MessageCircle className="w-4 h-4 fill-current text-emerald-400" />
+              <span>Konsultasi Administrasi &amp; Pendaftaran Kelas (Admin)</span>
             </a>
 
             {/* Tombol Selesai & Kembali ke Beranda */}
@@ -286,7 +330,7 @@ export default function ResultPage() {
               className="w-full py-3 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors text-center"
             >
               <Home className="w-4 h-4" />
-              <span>Selesai & Kembali ke Beranda</span>
+              <span>Selesai &amp; Kembali ke Beranda</span>
             </Link>
           </div>
         </div>
