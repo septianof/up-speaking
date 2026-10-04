@@ -1,0 +1,194 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import ExamHeader from '@/components/exam/ExamHeader';
+import type { SessionInfo, SanitizedQuestion } from '@/types';
+
+export default function ExamPage() {
+  const router = useRouter();
+
+  const [session, setSession] = useState<SessionInfo | null>(null);
+  const [questions, setQuestions] = useState<SanitizedQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Inisialisasi data ujian dari LocalStorage saat halaman dimuat
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+
+      const storedSession = localStorage.getItem('upspeaking_session');
+      const storedQuestions = localStorage.getItem('upspeaking_questions');
+      const storedAnswers = localStorage.getItem('upspeaking_answers');
+
+      // Jika tidak ada data sesi aktif, arahkan siswa kembali ke Landing Page
+      if (!storedSession) {
+        router.replace('/');
+        return;
+      }
+
+      const parsedSession: SessionInfo = JSON.parse(storedSession);
+
+      // Cek apakah waktu sesi sudah kadaluarsa
+      if (new Date(parsedSession.end_time).getTime() <= Date.now()) {
+        router.replace('/');
+        return;
+      }
+
+      setSession(parsedSession);
+
+      if (storedQuestions) {
+        setQuestions(JSON.parse(storedQuestions));
+      }
+
+      if (storedAnswers) {
+        setAnswers(JSON.parse(storedAnswers));
+      }
+
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error saat inisialisasi sesi ujian:', err);
+      router.replace('/');
+    }
+  }, [router]);
+
+  // Handler saat waktu ujian habis
+  const handleTimeUp = () => {
+    alert('Waktu ujian telah berakhir! Lembar jawaban akan otomatis dikumpulkan.');
+    // Pada STU-07 aksi submit otomatis akan dipanggil di sini
+  };
+
+  if (isLoading || !session) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
+        <Loader2 className="w-10 h-10 text-sky-600 animate-spin mb-4" />
+        <h2 className="text-base sm:text-lg font-bold text-slate-800">Menyiapkan Ruang Ujian...</h2>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">Memuat lembar soal dan waktu pengerjaan</p>
+      </div>
+    );
+  }
+
+  const totalQuestions = questions.length > 0 ? questions.length : session.total_questions || 10;
+  const answeredCount = Object.keys(answers).length;
+  const currentQuestion = questions[currentIndex];
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col selection:bg-rose-100 selection:text-rose-900">
+      {/* ======================================================================= */}
+      {/* 1. STICKY EXAM HEADER & PROGRESS TRACKER (STU-03)                       */}
+      {/* ======================================================================= */}
+      <ExamHeader
+        studentName={session.student_name}
+        endTime={session.end_time}
+        autoSaveStatus={autoSaveStatus}
+        currentQuestionIndex={currentIndex}
+        totalQuestions={totalQuestions}
+        answeredCount={answeredCount}
+        onTimeUp={handleTimeUp}
+      />
+
+      {/* ======================================================================= */}
+      {/* 2. MAIN EXAM CONTENT AREA (Tempat Soal STU-04 & Navigasi STU-05)        */}
+      {/* ======================================================================= */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28">
+        {currentQuestion ? (
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] animate-fade-in">
+            {/* Teks Butir Pertanyaan */}
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 leading-relaxed sm:leading-snug mb-6 sm:mb-8">
+              {currentQuestion.question_text}
+            </h2>
+
+            {/* Daftar Pilihan Opsi Jawaban (Struktur Dasar STU-04) */}
+            <div className="space-y-3 sm:space-y-3.5">
+              {currentQuestion.options.map((option, idx) => {
+                const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
+                const isSelected = answers[currentQuestion.id] === option.id;
+
+                return (
+                  <div
+                    key={option.id}
+                    className={`w-full p-4 sm:p-4.5 rounded-2xl flex items-center justify-between transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'border-2 border-[#0e2a47] bg-white text-slate-900 shadow-sm'
+                        : 'border border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/60 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5 sm:gap-4">
+                      <span
+                        className={`w-8 h-8 rounded-xl font-bold text-sm flex items-center justify-center transition-colors flex-shrink-0 ${
+                          isSelected
+                            ? 'bg-[#0e2a47] text-white'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {optionLabel}
+                      </span>
+                      <span className="text-sm sm:text-base font-medium">
+                        {option.option_text}
+                      </span>
+                    </div>
+
+                    {isSelected && (
+                      <span className="text-[#0e2a47] font-bold text-lg pr-1">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl border border-slate-100 p-8 text-center text-slate-500">
+            Memuat soal ujian...
+          </div>
+        )}
+      </main>
+
+      {/* ======================================================================= */}
+      {/* 3. BOTTOM STICKY NAVIGATION BAR (Struktur Dasar STU-05)                 */}
+      {/* ======================================================================= */}
+      <footer className="fixed inset-x-0 bottom-0 bg-white/95 backdrop-blur-sm border-t border-slate-200/80 py-3 sm:py-3.5 px-3 sm:px-8 z-30 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4">
+          {/* Tombol Sebelumnya */}
+          <button
+            type="button"
+            disabled={currentIndex === 0}
+            onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+            className="px-3 sm:px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <span className="text-sm">←</span>
+            <span className="hidden sm:inline">Sebelumnya</span>
+          </button>
+
+          {/* Tombol Palet / Daftar Soal */}
+          <button
+            type="button"
+            className="px-2.5 min-[380px]:px-3.5 sm:px-5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap transition-colors shrink-0"
+          >
+            <span className="text-sm shrink-0">📑</span>
+            <span className="whitespace-nowrap shrink-0">Daftar Soal</span>
+            <span className="bg-[#0e2a47] text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-md font-bold shrink-0">
+              {currentIndex + 1}/{totalQuestions}
+            </span>
+          </button>
+
+          {/* Tombol Selanjutnya */}
+          <button
+            type="button"
+            disabled={currentIndex >= totalQuestions - 1}
+            onClick={() => setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1))}
+            className="px-3 min-[380px]:px-4 sm:px-6 py-2.5 rounded-xl bg-[#0e2a47] hover:bg-[#1a385c] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs disabled:opacity-40 disabled:cursor-not-allowed shrink-0 whitespace-nowrap"
+          >
+            <span>Selanjutnya</span>
+            <span className="text-sm">→</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  );
+}
