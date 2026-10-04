@@ -18,6 +18,7 @@ import {
   ArrowUpDown,
   XCircle,
   Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import { StudentHistoryRecord } from '@/app/actions/admin';
 import { RetestConfirmModal } from '@/components/admin/RetestConfirmModal';
@@ -328,6 +329,19 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
             )}
             <span>{isExportingPDF ? 'Membuat PDF...' : 'Ekspor PDF'}</span>
           </button>
+
+          {onRefresh && (
+            <button
+              type="button"
+              disabled={isRefreshing || isLoading}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors border border-slate-200/80 shadow-2xs disabled:opacity-50"
+              title="Perbarui data"
+              onClick={onRefresh}
+            >
+              <RefreshCw className={`w-4 h-4 text-slate-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          )}
         </div>
       </div>
 

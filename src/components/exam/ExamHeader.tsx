@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 
 interface ExamHeaderProps {
@@ -23,12 +23,12 @@ export default function ExamHeader({
   onTimeUp,
 }: ExamHeaderProps) {
   // Hitung sisa waktu awal dari jam server (end_time - current_time)
-  const calculateRemainingSeconds = () => {
+  const calculateRemainingSeconds = useCallback(() => {
     if (!endTime) return 0;
     const endMs = new Date(endTime).getTime();
     const nowMs = Date.now();
     return Math.max(0, Math.floor((endMs - nowMs) / 1000));
-  };
+  }, [endTime]);
 
   const [remainingSeconds, setRemainingSeconds] = useState<number>(calculateRemainingSeconds);
 
@@ -50,7 +50,7 @@ export default function ExamHeader({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [endTime, onTimeUp]);
+  }, [onTimeUp, calculateRemainingSeconds]);
 
   // Format MM:SS
   const minutes = Math.floor(remainingSeconds / 60);

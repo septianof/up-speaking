@@ -9,6 +9,7 @@ import type {
   SaveAnswerResult,
   SubmitExamResult,
   GetSessionResultResponse,
+  EducationLevel,
 } from '@/types';
 
 /**
@@ -27,19 +28,22 @@ function shuffle<T>(array: T[]): T[] {
  * Server Action: startSession
  * 
  * Tanggung Jawab:
- * 1. Validasi nama siswa & normalisasi nomor WhatsApp ke format internasional 628xxx.
- * 2. Cek apakah ada sesi berjalan (in_progress & end_time > now) untuk Crash Recovery.
- * 3. Cek pencegahan fraud 24 jam (siswa tidak boleh tes ulang dalam 24 jam kecuali can_retest = true).
- * 4. Buat sesi ujian baru di test_sessions dengan batas waktu server-side.
- * 5. Kembalikan daftar soal aktif & opsi jawaban teracak TANPA kolom is_correct.
+ * 1. Validasi nama siswa, normalisasi nomor WhatsApp ke format 628xxx, dan validasi jenjang pendidikan.
+ * 2. Cek apakah ada sesi berjalan (in_progress & end_time > now) untuk pasangan (WA + Nama) -> Crash Recovery.
+ * 3. Cek pencegahan fraud permanen: blokir jika pasangan (WA + Nama) sudah pernah tes kecuali can_retest = true.
+ *    (Orang tua tetap dapat menggunakan 1 nomor WA untuk anak yang berbeda).
+ * 4. Ambil butir soal aktif sesuai jenjang pendidikan yang dipilih (Elementary / High School).
+ * 5. Buat sesi ujian baru di test_sessions dengan batas waktu server-side dan jenjang pendidikan.
+ * 6. Kembalikan daftar soal aktif & opsi jawaban teracak TANPA kolom is_correct.
  */
 export async function startSession(
   rawName: string,
-  rawWhatsApp: string
+  rawWhatsApp: string,
+  rawEducationLevel: EducationLevel = 'elementary'
 ): Promise<StartSessionResult> {
   try {
     // --------------------------------------------------------------------------
-    // 1. VALIDASI NAMA & NORMALISASI WHATSAPP
+    // 1. VALIDASI NAMA, NORMALISASI WHATSAPP, & VALIDASI JENJANG
     // --------------------------------------------------------------------------
     const studentName = rawName?.trim();
     if (!studentName || studentName.length < 2) {
@@ -68,16 +72,21 @@ export async function startSession(
       };
     }
 
+    const educationLevel: EducationLevel =
+      rawEducationLevel === 'high_school' ? 'high_school' : 'elementary';
+
     const supabase = createClient();
     const nowIso = new Date().toISOString();
 
     // --------------------------------------------------------------------------
     // 2. CEK SESI BERJALAN (CRASH RECOVERY)
+    // Sesi aktif dicocokkan berdasarkan kombinasi No WA + Nama Siswa (ilike)
     // --------------------------------------------------------------------------
     const { data: activeSessions, error: activeErr } = await supabase
       .from('test_sessions')
       .select('*')
       .eq('whatsapp_number', normalizedWA)
+      .ilike('student_name', studentName)
       .eq('status', 'in_progress')
       .gt('end_time', nowIso)
       .order('created_at', { ascending: false })
@@ -95,6 +104,8 @@ export async function startSession(
     // Jika siswa masih memiliki sesi yang sedang berjalan dan belum habis waktu
     if (activeSessions && activeSessions.length > 0) {
       const activeSession = activeSessions[0];
+      const sessionEduLevel: EducationLevel =
+        (activeSession.education_level as EducationLevel) || educationLevel;
 
       // Ambil jawaban yang sebelumnya sudah disimpan (auto-saved)
       const { data: answersData } = await supabase
@@ -109,12 +120,13 @@ export async function startSession(
         }
       });
 
-      // Ambil seluruh butir pertanyaan aktif tanpa menyertakan kolom is_correct
+      // Ambil seluruh butir pertanyaan aktif sesuai jenjang sesi tanpa kolom is_correct
       const { data: questionsData, error: qErr } = await supabase
         .from('questions')
         .select(`
           id,
           question_text,
+          education_level,
           question_options (
             id,
             question_id,
@@ -122,7 +134,8 @@ export async function startSession(
             order_index
           )
         `)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('education_level', sessionEduLevel);
 
       if (qErr || !questionsData) {
         console.error('Error saat mengambil soal untuk sesi recovery:', qErr);
@@ -153,6 +166,7 @@ export async function startSession(
         return {
           id: q.id,
           question_text: q.question_text,
+          education_level: q.education_level as EducationLevel,
           options: sortedOptions,
         };
       });
@@ -164,6 +178,7 @@ export async function startSession(
           id: activeSession.id,
           student_name: activeSession.student_name,
           whatsapp_number: activeSession.whatsapp_number,
+          education_level: sessionEduLevel,
           start_time: activeSession.start_time,
           end_time: activeSession.end_time,
           total_questions: activeSession.total_questions,
@@ -174,21 +189,22 @@ export async function startSession(
     }
 
     // --------------------------------------------------------------------------
-    // 3. CEK FRAUD 24 JAM
+    // 3. CEK FRAUD PERMANEN BERBASIS PASANGAN (NO WA + NAMA SISWA)
+    // Pemblokiran berlaku permanen bagi siswa yang sudah pernah tes,
+    // kecuali admin memberikan izin tes ulang (can_retest = true).
+    // Orang tua tetap bisa menggunakan 1 nomor WA untuk anak yang berbeda.
     // --------------------------------------------------------------------------
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-    const { data: recentSessions, error: recentErr } = await supabase
+    const { data: pastSessions, error: pastErr } = await supabase
       .from('test_sessions')
-      .select('id, status, can_retest, created_at, completed_at')
+      .select('id, student_name, status, can_retest, created_at, completed_at')
       .eq('whatsapp_number', normalizedWA)
+      .ilike('student_name', studentName)
       .in('status', ['completed', 'expired'])
-      .gte('created_at', twentyFourHoursAgo)
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (recentErr) {
-      console.error('Error saat memeriksa riwayat sesi 24 jam:', recentErr);
+    if (pastErr) {
+      console.error('Error saat memeriksa riwayat sesi peserta:', pastErr);
       return {
         success: false,
         error: 'Terjadi gangguan saat memverifikasi data peserta.',
@@ -196,21 +212,20 @@ export async function startSession(
       };
     }
 
-    // Jika sudah pernah tes dalam 24 jam terakhir dan belum mendapat izin tes ulang
-    if (recentSessions && recentSessions.length > 0) {
-      const latestSession = recentSessions[0];
+    // Jika siswa dengan kombinasi WA dan nama ini sudah pernah menyelesaikan tes
+    if (pastSessions && pastSessions.length > 0) {
+      const latestSession = pastSessions[0];
       if (!latestSession.can_retest) {
         return {
           success: false,
-          error:
-            'Nomor WhatsApp ini telah menyelesaikan tes penempatan dalam kurun 24 jam terakhir. Anda hanya dapat mengikuti tes 1 kali per hari. Silakan hubungi admin Up Speaking jika Anda membutuhkan izin tes ulang.',
+          error: `Peserta atas nama "${studentName}" dengan nomor WhatsApp ini telah menyelesaikan tes penempatan sebelumnya. Akses tes penempatan berikutnya memerlukan izin dari Admin Up Speaking. Silakan hubungi admin untuk mendapatkan izin tes ulang.`,
           code: 'SESSION_BLOCKED',
         };
       }
     }
 
     // --------------------------------------------------------------------------
-    // 4. AMBIL PENGATURAN DURASI & BANK SOAL
+    // 4. AMBIL PENGATURAN DURASI & BANK SOAL SESUAI JENJANG
     // --------------------------------------------------------------------------
     const { data: settingData } = await supabase
       .from('settings')
@@ -220,12 +235,13 @@ export async function startSession(
 
     const durationMinutes = settingData?.test_duration_minutes ?? 45;
 
-    // Ambil butir soal aktif dan pilihan opsi (TIDAK menyertakan is_correct)
+    // Ambil butir soal aktif sesuai jenjang pendidikan yang dipilih (TIDAK menyertakan is_correct)
     const { data: questionsData, error: qErr } = await supabase
       .from('questions')
       .select(`
         id,
         question_text,
+        education_level,
         question_options (
           id,
           question_id,
@@ -233,13 +249,16 @@ export async function startSession(
           order_index
         )
       `)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('education_level', educationLevel);
 
     if (qErr || !questionsData || questionsData.length === 0) {
-      console.error('Error atau soal kosong:', qErr);
+      const levelLabel =
+        educationLevel === 'elementary' ? 'Elementary (SD)' : 'High School (SMP/SMA/Umum)';
+      console.error(`Error atau butir soal kosong untuk jenjang ${levelLabel}:`, qErr);
       return {
         success: false,
-        error: 'Belum ada butir soal ujian yang aktif di sistem. Silakan hubungi admin.',
+        error: `Belum ada butir soal ujian aktif untuk jenjang ${levelLabel}. Silakan hubungi admin Up Speaking.`,
         code: 'SERVER_ERROR',
       };
     }
@@ -255,6 +274,7 @@ export async function startSession(
       .insert({
         student_name: studentName,
         whatsapp_number: normalizedWA,
+        education_level: educationLevel,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         status: 'in_progress',
@@ -274,12 +294,12 @@ export async function startSession(
       };
     }
 
-    // Konsumsi izin tes ulang jika sebelumnya siswa diberikan akses retest
-    if (recentSessions && recentSessions.length > 0 && recentSessions[0].can_retest) {
+    // Konsumsi izin tes ulang jika sebelumnya siswa diberikan akses retest oleh admin
+    if (pastSessions && pastSessions.length > 0 && pastSessions[0].can_retest) {
       await supabase
         .from('test_sessions')
         .update({ can_retest: false })
-        .eq('id', recentSessions[0].id);
+        .eq('id', pastSessions[0].id);
     }
 
     // --------------------------------------------------------------------------
@@ -303,6 +323,7 @@ export async function startSession(
       return {
         id: q.id,
         question_text: q.question_text,
+        education_level: q.education_level as EducationLevel,
         options: shuffledOptions,
       };
     });
@@ -314,6 +335,7 @@ export async function startSession(
         id: createdSession.id,
         student_name: createdSession.student_name,
         whatsapp_number: createdSession.whatsapp_number,
+        education_level: createdSession.education_level as EducationLevel,
         start_time: createdSession.start_time,
         end_time: createdSession.end_time,
         total_questions: createdSession.total_questions,

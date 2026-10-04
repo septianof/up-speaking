@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, ExternalLink, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Menu, ExternalLink } from 'lucide-react';
 
 interface AdminHeaderProps {
   onOpenSidebar: () => void;
@@ -63,6 +63,12 @@ export default function AdminHeader({
 
       {/* Sisi Kanan: Status & Akses Cepat */}
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        {adminEmail && (
+          <span className="hidden md:inline-block text-xs text-slate-500 font-medium px-2.5 py-1 rounded-lg bg-slate-100/80 border border-slate-200/60 max-w-[200px] truncate">
+            {adminEmail}
+          </span>
+        )}
+
         <Link
           href="/"
           target="_blank"

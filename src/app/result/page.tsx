@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import {
   Award,
   CheckCircle2,
@@ -17,7 +16,6 @@ import {
 import type { ExamResultData } from '@/types';
 
 export default function ResultPage() {
-  const router = useRouter();
   const [result, setResult] = useState<ExamResultData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -85,7 +83,6 @@ export default function ResultPage() {
 
   // Konfigurasi visual tema berdasarkan level penempatan
   const levelName = result.level?.name || 'Beginner';
-  const isBeginner = levelName.toLowerCase() === 'beginner';
   const isIntermediate = levelName.toLowerCase() === 'intermediate';
   const isAdvanced = levelName.toLowerCase() === 'advanced';
 

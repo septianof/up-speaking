@@ -11,7 +11,6 @@ import {
   LogOut,
   X,
   ExternalLink,
-  Shield,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
