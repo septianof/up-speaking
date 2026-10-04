@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import ExamHeader from '@/components/exam/ExamHeader';
+import QuestionCard from '@/components/exam/QuestionCard';
+import { saveAnswer } from '@/app/actions/session';
 import type { SessionInfo, SanitizedQuestion } from '@/types';
 
 export default function ExamPage() {
@@ -62,6 +64,38 @@ export default function ExamPage() {
     // Pada STU-07 aksi submit otomatis akan dipanggil di sini
   };
 
+  // Handler pemilihan opsi jawaban (STU-04 & DB-05 Auto-save)
+  const handleSelectOption = (questionId: string, optionId: string) => {
+    // 1. Simpan jawaban di state lokal (optimistic update)
+    const nextAnswers = { ...answers, [questionId]: optionId };
+    setAnswers(nextAnswers);
+
+    // 2. Simpan ke LocalStorage untuk crash recovery instan
+    try {
+      localStorage.setItem('upspeaking_answers', JSON.stringify(nextAnswers));
+    } catch (err) {
+      console.error('Gagal menyimpan jawaban ke localStorage:', err);
+    }
+
+    // 3. Auto-save ke database di background
+    if (session?.id) {
+      setAutoSaveStatus('saving');
+      saveAnswer(session.id, questionId, optionId)
+        .then((res) => {
+          if (res.success) {
+            setAutoSaveStatus('saved');
+          } else {
+            console.error('Gagal auto-save ke server:', res.error);
+            setAutoSaveStatus('error');
+          }
+        })
+        .catch((err) => {
+          console.error('Error saat auto-save ke server:', err);
+          setAutoSaveStatus('error');
+        });
+    }
+  };
+
   if (isLoading || !session) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
@@ -96,52 +130,12 @@ export default function ExamPage() {
       {/* ======================================================================= */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28">
         {currentQuestion ? (
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] animate-fade-in">
-            {/* Teks Butir Pertanyaan */}
-            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 leading-relaxed sm:leading-snug mb-6 sm:mb-8">
-              {currentQuestion.question_text}
-            </h2>
-
-            {/* Daftar Pilihan Opsi Jawaban (Struktur Dasar STU-04) */}
-            <div className="space-y-3 sm:space-y-3.5">
-              {currentQuestion.options.map((option, idx) => {
-                const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
-                const isSelected = answers[currentQuestion.id] === option.id;
-
-                return (
-                  <div
-                    key={option.id}
-                    className={`w-full p-4 sm:p-4.5 rounded-2xl flex items-center justify-between transition-all duration-200 cursor-pointer ${
-                      isSelected
-                        ? 'border-2 border-[#0e2a47] bg-white text-slate-900 shadow-sm'
-                        : 'border border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/60 text-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5 sm:gap-4">
-                      <span
-                        className={`w-8 h-8 rounded-xl font-bold text-sm flex items-center justify-center transition-colors flex-shrink-0 ${
-                          isSelected
-                            ? 'bg-[#0e2a47] text-white'
-                            : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {optionLabel}
-                      </span>
-                      <span className="text-sm sm:text-base font-medium">
-                        {option.option_text}
-                      </span>
-                    </div>
-
-                    {isSelected && (
-                      <span className="text-[#0e2a47] font-bold text-lg pr-1">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <QuestionCard
+            key={currentQuestion.id}
+            question={currentQuestion}
+            selectedOptionId={answers[currentQuestion.id]}
+            onSelectOption={handleSelectOption}
+          />
         ) : (
           <div className="bg-white rounded-3xl border border-slate-100 p-8 text-center text-slate-500">
             Memuat soal ujian...
