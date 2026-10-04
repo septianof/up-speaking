@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { getQuestionsForAdmin, AdminQuestion } from '@/app/actions/questions';
 import { QuestionDeleteModal } from '@/components/admin/QuestionDeleteModal';
+import { QuestionFormModal } from '@/components/admin/QuestionFormModal';
 
 const PAGE_SIZE = 10;
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -35,6 +36,12 @@ export default function AdminQuestionsPage() {
   const [selectedQuestionForDelete, setSelectedQuestionForDelete] =
     useState<AdminQuestion | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+
+  // State Modal Form Tambah / Edit Soal
+  const [selectedQuestionForEdit, setSelectedQuestionForEdit] =
+    useState<AdminQuestion | null>(null);
+  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Ambil daftar soal dari server
@@ -74,6 +81,15 @@ export default function AdminQuestionsPage() {
 
   const handleDeleteSuccess = (deletedQuestionId: string, message: string) => {
     setQuestions((prev) => prev.filter((item) => item.id !== deletedQuestionId));
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+  };
+
+  // Handler Sukses Tambah / Edit Soal
+  const handleFormSuccess = (message: string) => {
+    loadQuestions(true);
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage(null);
@@ -153,13 +169,12 @@ export default function AdminQuestionsPage() {
               <span>{isRefreshing ? 'Memperbarui...' : 'Segarkan'}</span>
             </button>
 
-            {/* Tombol Tambah Soal Baru (Persiapan Task ADM-08) */}
+            {/* Tombol Tambah Soal Baru (ADM-08) */}
             <button
               type="button"
               onClick={() => {
-                alert(
-                  'Form modal Tambah Soal Baru dengan deret opsi dinamis akan diimplementasikan pada task ADM-08.'
-                );
+                setSelectedQuestionForEdit(null);
+                setIsFormModalOpen(true);
               }}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0e263e] hover:bg-[#1a385c] text-white font-bold text-xs sm:text-sm transition-colors shadow-xs"
             >
@@ -397,9 +412,8 @@ export default function AdminQuestionsPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              alert(
-                                `Modal Form Edit untuk soal "${q.questionText.slice(0, 30)}..." akan aktif pada Task ADM-08.`
-                              );
+                              setSelectedQuestionForEdit(q);
+                              setIsFormModalOpen(true);
                             }}
                             className="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-700 border border-slate-200/80 hover:border-sky-200 transition-colors shadow-2xs"
                             title="Edit butir soal & opsi"
@@ -466,6 +480,15 @@ export default function AdminQuestionsPage() {
         question={selectedQuestionForDelete}
         onSuccess={handleDeleteSuccess}
       />
+
+      {/* Modal Form Tambah / Edit Soal (ADM-08) */}
+      <QuestionFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        questionToEdit={selectedQuestionForEdit}
+        onSuccess={handleFormSuccess}
+      />
     </div>
   );
 }
+

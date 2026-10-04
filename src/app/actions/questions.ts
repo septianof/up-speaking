@@ -187,3 +187,218 @@ export async function softDeleteQuestion(
     };
   }
 }
+
+export interface SaveQuestionOptionInput {
+  id?: string;
+  optionText: string;
+  isCorrect: boolean;
+}
+
+export interface SaveQuestionPayload {
+  id?: string; // Jika ada = mode edit, jika null/undefined = mode tambah baru
+  questionText: string;
+  options: SaveQuestionOptionInput[];
+}
+
+export type SaveQuestionResult =
+  | {
+      success: true;
+      message: string;
+      questionId: string;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+/**
+ * Server Action: saveQuestion
+ * Menyimpan butir soal baru atau memperbarui butir soal yang sudah ada beserta deret opsi dinamisnya.
+ */
+export async function saveQuestion(
+  payload: SaveQuestionPayload
+): Promise<SaveQuestionResult> {
+  try {
+    const supabase = createClient();
+
+    // 1. Verifikasi autentikasi admin
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return {
+        success: false,
+        error: 'Akses ditolak. Anda harus login sebagai admin.',
+      };
+    }
+
+    // 2. Validasi input ketat
+    const trimmedQuestion = payload.questionText?.trim() || '';
+    if (trimmedQuestion.length < 5) {
+      return {
+        success: false,
+        error: 'Teks pertanyaan harus diisi (minimal 5 karakter).',
+      };
+    }
+
+    if (!payload.options || payload.options.length < 2) {
+      return {
+        success: false,
+        error: 'Soal harus memiliki minimal 2 pilihan jawaban.',
+      };
+    }
+
+    const hasEmptyOption = payload.options.some(
+      (opt) => !opt.optionText || opt.optionText.trim().length === 0
+    );
+    if (hasEmptyOption) {
+      return {
+        success: false,
+        error: 'Semua pilihan opsi jawaban harus diisi teksnya.',
+      };
+    }
+
+    const correctCount = payload.options.filter((opt) => opt.isCorrect).length;
+    if (correctCount !== 1) {
+      return {
+        success: false,
+        error: 'Wajib memilih tepat 1 opsi jawaban sebagai kunci jawaban yang benar.',
+      };
+    }
+
+    // --------------------------------------------------------------------------
+    // CASE A: MODE EDIT (Jika id terdefinisi)
+    // --------------------------------------------------------------------------
+    if (payload.id) {
+      // 1. Perbarui teks pertanyaan
+      const { error: updateQErr } = await supabase
+        .from('questions')
+        .update({
+          question_text: trimmedQuestion,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', payload.id);
+
+      if (updateQErr) {
+        console.error('Error saat update soal:', updateQErr);
+        return {
+          success: false,
+          error: 'Gagal memperbarui teks pertanyaan.',
+        };
+      }
+
+      // 2. Ambil opsi yang saat ini ada di DB
+      const { data: existingOpts, error: fetchOptErr } = await supabase
+        .from('question_options')
+        .select('id')
+        .eq('question_id', payload.id);
+
+      if (fetchOptErr) {
+        console.error('Error fetch opsi eksisting:', fetchOptErr);
+        return {
+          success: false,
+          error: 'Gagal memeriksa opsi jawaban di database.',
+        };
+      }
+
+      const existingIds = (existingOpts || []).map((o) => o.id);
+      const submittedIds = payload.options
+        .filter((o) => o.id)
+        .map((o) => o.id as string);
+
+      // Hapus opsi yang dibuang oleh admin
+      const idsToDelete = existingIds.filter((id) => !submittedIds.includes(id));
+      if (idsToDelete.length > 0) {
+        await supabase
+          .from('question_options')
+          .delete()
+          .in('id', idsToDelete);
+      }
+
+      // Update opsi lama atau Insert opsi baru
+      for (let idx = 0; idx < payload.options.length; idx++) {
+        const opt = payload.options[idx];
+        if (opt.id && existingIds.includes(opt.id)) {
+          // Update opsi lama
+          await supabase
+            .from('question_options')
+            .update({
+              option_text: opt.optionText.trim(),
+              is_correct: opt.isCorrect,
+              order_index: idx,
+            })
+            .eq('id', opt.id);
+        } else {
+          // Tambah opsi baru
+          await supabase.from('question_options').insert({
+            question_id: payload.id,
+            option_text: opt.optionText.trim(),
+            is_correct: opt.isCorrect,
+            order_index: idx,
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: 'Perubahan butir soal berhasil disimpan!',
+        questionId: payload.id,
+      };
+    }
+
+    // --------------------------------------------------------------------------
+    // CASE B: MODE TAMBAH BARU (Jika id kosong)
+    // --------------------------------------------------------------------------
+    const { data: newQuestion, error: insertQErr } = await supabase
+      .from('questions')
+      .insert({
+        question_text: trimmedQuestion,
+        is_active: true,
+      })
+      .select('id')
+      .single();
+
+    if (insertQErr || !newQuestion) {
+      console.error('Error saat membuat soal baru:', insertQErr);
+      return {
+        success: false,
+        error: 'Gagal menambahkan butir soal baru.',
+      };
+    }
+
+    // Masukkan seluruh opsi jawaban
+    const optionsToInsert = payload.options.map((opt, idx) => ({
+      question_id: newQuestion.id,
+      option_text: opt.optionText.trim(),
+      is_correct: opt.isCorrect,
+      order_index: idx,
+    }));
+
+    const { error: insertOptErr } = await supabase
+      .from('question_options')
+      .insert(optionsToInsert);
+
+    if (insertOptErr) {
+      console.error('Error saat insert opsi baru:', insertOptErr);
+      return {
+        success: false,
+        error: 'Soal dibuat, tetapi gagal menyimpan daftar opsi jawaban.',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Butir soal baru berhasil ditambahkan ke bank soal!',
+      questionId: newQuestion.id,
+    };
+  } catch (err) {
+    console.error('Unexpected error di saveQuestion:', err);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat menyimpan butir soal.',
+    };
+  }
+}
+
