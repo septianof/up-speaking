@@ -100,13 +100,26 @@ Setiap task menggunakan format checklist berikut:
 
 ---
 
-## Fase 5 — PWA, Testing & Deployment (`FIN`)
+---
+
+## Fase 5 — Redesain Modern & UI/UX Polish (`RED`)
+
+| Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
+|---|---|---|---|---|---|---|
+| `[ ]` | `RED-01` | **Redesain Modern Landing Page & Modal Registrasi (`/`):** Hero section bergengsi, tipografi tajam, kartu panduan bertekstur, dan modal ramah mobile | `FIN-02` | 1.5 jam | 🔴 Wajib | Tampilan landing page dan form registrasi modern, responsif, dan elegan |
+| `[ ]` | `RED-02` | **Redesain Ruang Ujian Interaktif (`/exam`):** Sleek header countdown timer, kartu pertanyaan fokus, radio cards taktil, dan palet soal modern | `RED-01` | 1.5 jam | 🔴 Wajib | Pengalaman ujian fokus (*hyper-focused exam UI*) dan interaktif |
+| `[ ]` | `RED-03` | **Redesain Halaman Hasil Placement Test (`/result`):** Showcase skor megah, lencana level prestisius, rincian akurasi/durasi, dan CTA tutor WA | `RED-02` | 1.5 jam | 🔴 Wajib | Tampilan hasil memukau dan tombol kontak tutor mengundang aksi |
+| `[ ]` | `RED-04` | **Redesain Admin Panel (`/admin/*`):** Sidebar sleek, metric cards mewah, tabel riwayat tajam, modal CRUD soal, dan pengaturan bersih | `RED-03` | 2 jam | 🔴 Wajib | Seluruh antarmuka admin panel berstandar *enterprise dashboard* |
+
+---
+
+## Fase 6 — PWA, Testing & Deployment (`FIN`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
 | `[x]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA agar dapat diinstal di homescreen | `STU-08` | 45 menit | 🔴 Wajib | Web App Manifest aktif dan lolos audit PWA |
 | `[x]` | `FIN-02` | Pengujian simulasi kendala jaringan & Crash Recovery: tes tutup tab browser HP di tengah ujian dan pastikan sesi kembali utuh | `STU-06`, `UPD-02` | 1 jam | 🔴 Wajib | Sesi dan jawaban pulih setelah browser dibuka kembali |
-| `[ ]` | `FIN-03` | Pengujian end-to-end lengkap: alur pengerjaan Elementary & High School, evaluasi matrix skor+waktu, hingga rekap dashboard admin | Semua `UPD-*` | 1.5 jam | 🔴 Wajib | Pengujian alur siswa per jenjang dan admin berjalan tanpa bug |
+| `[ ]` | `FIN-03` | Pengujian end-to-end lengkap: alur pengerjaan Elementary & High School, evaluasi matrix skor+waktu, hingga rekap dashboard admin | `RED-04` | 1.5 jam | 🔴 Wajib | Pengujian alur siswa per jenjang dan admin berjalan tanpa bug |
 | `[ ]` | `FIN-04` | Deployment aplikasi ke platform hosting (Vercel / Netlify) dan koneksi database Supabase production | `FIN-01` s/d `FIN-03` | 1 jam | 🔴 Wajib | Aplikasi live di URL produksi dan siap digunakan |
 
 ---
@@ -121,8 +134,9 @@ Setiap task menggunakan format checklist berikut:
 | Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
 | Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
 | Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 8 | 0 |
+| Redesain UI/UX (`RED`) | 4 | 0 | **4** | 0 | 4 |
 | PWA & Deploy (`FIN`) | 4 | 0 | **4** | 2 | 2 |
-| **Total** | **38** | **1** | **39 Task** | **37** | **2** |
+| **Total** | **42** | **1** | **43 Task** | **37** | **6** |
 
 ---
 
@@ -137,5 +151,8 @@ flowchart TD
     
     STU & ADM --> UPD["✨ FASE 4: Kebutuhan Baru (UPD)\n(Jenjang, Matrix Waktu, Tutor, Fraud)"]
     
-    UPD --> FIN["🚀 FASE 5: Testing & Deploy\n(FIN-01 s/d FIN-04)"]
+    UPD --> RED["🎨 FASE 5: Redesain UI/UX (RED)\n(Landing, Exam, Result, Admin)"]
+    
+    RED --> FIN["🚀 FASE 6: Testing & Deploy (FIN)\n(PWA, E2E Test, Production Deploy)"]
 ```
+
