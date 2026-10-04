@@ -89,7 +89,7 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[ ]` | `UPD-01` | **Skema DB Kebutuhan Baru:** Migration SQL tambah kolom `education_level` di `questions` & `test_sessions`, kolom `duration_minutes` di `test_sessions`, serta kolom tutor di `settings` | `DB-01` | 45 menit | 🔴 Wajib | Kolom baru terdaftar di database Supabase |
+| `[x]` | `UPD-01` | **Skema DB Kebutuhan Baru:** Migration SQL tambah kolom `education_level` di `questions` & `test_sessions`, kolom `duration_minutes` di `test_sessions`, serta kolom tutor di `settings` | `DB-01` | 45 menit | 🔴 Wajib | Kolom baru terdaftar di database Supabase |
 | `[ ]` | `UPD-02` | **Server Action `startSession` Update:** Tambah parameter `education_level`, filter soal sesuai jenjang, dan fraud check permanen berbasis pasangan `(No WA + Nama)` | `UPD-01`, `DB-04` | 1 jam | 🔴 Wajib | Siswa hanya dapat soal sesuai jenjangnya; pasangan WA+Nama yang sudah tes diblokir permanen |
 | `[ ]` | `UPD-03` | **Server Action `submitExam` & Matrix Evaluasi:** Hitung durasi pengerjaan riil, evaluasi matrix level (Skor % + Waktu pengerjaan menit), dan return kontak tutor jenjang | `UPD-01`, `DB-06` | 1 jam | 🔴 Wajib | Siswa skor >= 80% durasi > 25m turun ke Intermediate; skor 60-79% durasi > 20m turun ke Beginner |
 | `[ ]` | `UPD-04` | **UI Registrasi Siswa (`/`):** Tambah input pilihan Jenjang Pendidikan (`Elementary` / `High School`) pada modal registrasi | `UPD-02`, `STU-02` | 45 menit | 🔴 Wajib | Siswa wajib memilih jenjang sebelum tes dimulai |
@@ -120,9 +120,9 @@ Setiap task menggunakan format checklist berikut:
 | Database & Server (`DB`) | 6 | 0 | **6** | 6 | 0 |
 | Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
 | Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
-| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 0 | 8 |
+| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 1 | 7 |
 | PWA & Deploy (`FIN`) | 4 | 0 | **4** | 1 | 3 |
-| **Total** | **38** | **1** | **39 Task** | **28** | **11** |
+| **Total** | **38** | **1** | **39 Task** | **29** | **10** |
 
 ---
 
