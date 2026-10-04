@@ -77,7 +77,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `ADM-04` | Buat Tabel Riwayat Hasil Siswa: kolom info sesi, nilai %, badge level, fitur search pencarian instan (Nama/WA), dan filter dropdown per level | `ADM-03` | 1.5 jam | 🔴 Wajib |
 | `[x]` | `ADM-05` | Implementasikan fitur Aksi "Izinkan Tes Ulang" (*Retest Permission*): tombol buka kunci tes untuk no. WA tertentu tanpa menghapus riwayat lama | `ADM-04` | 1 jam | 🔴 Wajib |
 | `[x]` | `ADM-06` | Implementasikan fitur Ekspor Data: tombol unduh file Excel (`.xlsx`) dan PDF cetak rapi yang otomatis mengikuti filter aktif di layar | `ADM-04` | 2 jam | 🟡 Penting |
-| `[ ]` | `ADM-07` | Buat Halaman Manajemen Bank Soal (`/admin/questions`): tabel daftar soal aktif dengan tombol aksi Edit & Soft Delete | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib |
+| `[x]` | `ADM-07` | Buat Halaman Manajemen Bank Soal (`/admin/questions`): tabel daftar soal aktif dengan tombol aksi Edit & Soft Delete | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib |
 | `[ ]` | `ADM-08` | Buat Modal Form Tambah/Edit Soal: input teks soal, deret pilihan jawaban dinamis (+ Tambah Pilihan / 🗑️ Hapus min. 2), dan radio button kunci jawaban benar | `ADM-07` | 2 jam | 🔴 Wajib |
 | `[ ]` | `ADM-09` | Buat Halaman Pengaturan (`/admin/settings`): form ubah durasi tes (menit) & konfigurasi rentang persentase 3 level (validasi bersambung 0-100%) | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib |
 
