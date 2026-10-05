@@ -3,9 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { X, Loader2, AlertCircle, BookOpen, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, AlertCircle, CheckCircle, ArrowRight, UserX } from 'lucide-react';
 import { startSession } from '@/app/actions/session';
-import type { EducationLevel } from '@/types';
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -16,15 +15,22 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [educationLevel, setEducationLevel] = useState<EducationLevel>('elementary');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Status Dialog Modal Khusus (Belum Terdaftar / Sudah Selesai)
+  const [statusDialog, setStatusDialog] = useState<{
+    type: 'not_registered' | 'session_blocked';
+    title: string;
+    message: string;
+  } | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setStatusDialog(null);
 
     const trimmedName = name.trim();
     const trimmedWA = whatsapp.trim();
@@ -42,11 +48,35 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     try {
       setIsLoading(true);
 
-      const result = await startSession(trimmedName, trimmedWA, educationLevel);
+      // Panggil Server Action startSession (jenjang otomatis dicocokkan dari database)
+      const result = await startSession(trimmedName, trimmedWA);
 
       if (!result.success) {
-        setErrorMessage(result.error);
         setIsLoading(false);
+
+        if (result.code === 'NOT_REGISTERED') {
+          setStatusDialog({
+            type: 'not_registered',
+            title: 'Data Belum Terdaftar di Meja Registrasi',
+            message:
+              result.error ||
+              `Data atas nama "${trimmedName}" dengan nomor WhatsApp ini belum terdaftar di sistem. Silakan temui staf Up Speaking di meja pendaftaran untuk registrasi terlebih dahulu.`,
+          });
+          return;
+        }
+
+        if (result.code === 'SESSION_BLOCKED') {
+          setStatusDialog({
+            type: 'session_blocked',
+            title: 'Tes Penempatan Telah Selesai',
+            message:
+              result.error ||
+              `Anda telah menyelesaikan tes penempatan sebelumnya. Hasil pengerjaan Anda sedang atau telah dievaluasi oleh Tutor kami. Hubungi staf/tutor jika Anda memerlukan izin tes ulang.`,
+          });
+          return;
+        }
+
+        setErrorMessage(result.error);
         return;
       }
 
@@ -72,7 +102,6 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Hanya izinkan huruf, spasi, petik tunggal ('), titik (.), dan strip (-)
-    // Menolak angka dan simbol aneh tanpa menghambat nama sah (misal: Syafi'i, M. Rizky)
     const filtered = e.target.value.replace(/[^a-zA-Z\s'.\-]/g, '');
     setName(filtered);
   };
@@ -91,7 +120,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-[480px] bg-white rounded-t-[32px] sm:rounded-3xl p-5 sm:p-8 shadow-2xl border border-slate-100 transition-all duration-300 transform sm:scale-100"
+        className="w-full sm:max-w-[460px] bg-white rounded-t-[32px] sm:rounded-3xl p-5 sm:p-8 shadow-2xl border border-slate-100 transition-all duration-300 transform sm:scale-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile Pull Handle Bar */}
@@ -112,10 +141,10 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
             </div>
             <div className="min-w-0">
               <h2 className="font-bold text-slate-900 text-sm min-[375px]:text-[15px] sm:text-lg leading-tight whitespace-nowrap">
-                Data Peserta Placement Test
+                Verifikasi Peserta Ujian
               </h2>
               <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
-                Isi nama dan nomor WhatsApp untuk memuat lembar soal
+                Masukkan nama &amp; nomor WA yang telah didaftarkan Admin
               </p>
             </div>
           </div>
@@ -131,16 +160,83 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
           </button>
         </div>
 
-        {/* Error Alert */}
+        {/* Status Dialog: Belum Terdaftar di Meja Registrasi */}
+        {statusDialog && statusDialog.type === 'not_registered' && (
+          <div className="mb-5 p-4 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                <UserX className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-sm text-amber-900 leading-tight">
+                  {statusDialog.title}
+                </h3>
+                <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                  {statusDialog.message}
+                </p>
+                <div className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-medium text-amber-800">
+                    💡 Meja Registrasi Up Speaking
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStatusDialog(null)}
+                    className="text-xs font-bold text-amber-900 underline hover:text-amber-700"
+                  >
+                    Periksa Kembali
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Status Dialog: Sesi Sudah Pernah Diselesaikan */}
+        {statusDialog && statusDialog.type === 'session_blocked' && (
+          <div className="mb-5 p-4 rounded-2xl bg-sky-50 border border-sky-200/80 text-sky-900 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-sm text-sky-900 leading-tight">
+                  {statusDialog.title}
+                </h3>
+                <p className="text-xs text-sky-700 mt-1 leading-relaxed">
+                  {statusDialog.message}
+                </p>
+                <div className="mt-3 pt-2.5 border-t border-sky-200/60 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/result')}
+                    className="text-xs font-bold text-sky-800 hover:text-sky-950 inline-flex items-center gap-1"
+                  >
+                    <span>Buka Halaman Hasil</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusDialog(null)}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* General Error Alert */}
         {errorMessage && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2.5 animate-shake">
+          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2.5 animate-fade-in">
             <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
             <span className="leading-relaxed">{errorMessage}</span>
           </div>
         )}
 
-        {/* Form Registration */}
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        {/* Form Verifikasi Masuk */}
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4.5">
           {/* Field: Nama Lengkap Siswa */}
           <div>
             <label
@@ -158,9 +254,12 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               disabled={isLoading}
               value={name}
               onChange={handleNameChange}
-              placeholder="Contoh: Budi Pratama"
+              placeholder="Contoh: Budi Santoso"
               className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:border-[#0284c7] focus:ring-4 focus:ring-sky-100 text-slate-800 placeholder:text-slate-400 text-sm transition-all"
             />
+            <p className="text-[11px] text-slate-400 mt-1">
+              Gunakan nama yang didaftarkan staf di meja pendaftaran.
+            </p>
           </div>
 
           {/* Field: Nomor WhatsApp Aktif */}
@@ -181,92 +280,11 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               disabled={isLoading}
               value={whatsapp}
               onChange={handleWhatsAppChange}
-              placeholder="Contoh: 08123456789"
+              placeholder="Contoh: 081234567890"
               className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:border-[#0284c7] focus:ring-4 focus:ring-sky-100 text-slate-800 placeholder:text-slate-400 text-sm transition-all"
             />
-            <p className="text-xs text-slate-400 mt-1.5 leading-normal">
-              Hasil skor &amp; rekomendasi level akan disesuaikan dengan nomor ini.
-            </p>
-          </div>
-
-          {/* Field: Pilihan Jenjang Pendidikan */}
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-2">
-              Jenjang Pendidikan <span className="text-rose-500 font-bold">*</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {/* Card Elementary */}
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => setEducationLevel('elementary')}
-                className={`relative flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
-                  educationLevel === 'elementary'
-                    ? 'border-sky-500 bg-sky-50/70 ring-2 ring-sky-200 shadow-xs'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'
-                }`}
-              >
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    educationLevel === 'elementary'
-                      ? 'bg-sky-500 text-white'
-                      : 'bg-slate-100 text-slate-500'
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <p className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
-                      Elementary
-                    </p>
-                    {educationLevel === 'elementary' && (
-                      <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
-                    Tingkat Sekolah Dasar (SD)
-                  </p>
-                </div>
-              </button>
-
-              {/* Card High School */}
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => setEducationLevel('high_school')}
-                className={`relative flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
-                  educationLevel === 'high_school'
-                    ? 'border-sky-500 bg-sky-50/70 ring-2 ring-sky-200 shadow-xs'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70'
-                }`}
-              >
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    educationLevel === 'high_school'
-                      ? 'bg-sky-500 text-white'
-                      : 'bg-slate-100 text-slate-500'
-                  }`}
-                >
-                  <GraduationCap className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <p className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
-                      High School
-                    </p>
-                    {educationLevel === 'high_school' && (
-                      <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
-                    SMP, SMA, &amp; Umum
-                  </p>
-                </div>
-              </button>
-            </div>
-            <p className="text-xs text-slate-400 mt-1.5 leading-normal">
-              Butir soal tes penempatan dan tutor akan disesuaikan dengan jenjang ini.
+            <p className="text-[11px] text-slate-400 mt-1 leading-normal">
+              Jenjang soal &amp; kontak tutor akan otomatis disesuaikan dari data registrasi Anda.
             </p>
           </div>
 
@@ -280,7 +298,7 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Menyiapkan Lembar Ujian...</span>
+                  <span>Memeriksa Pendaftaran...</span>
                 </>
               ) : (
                 <>
@@ -291,6 +309,11 @@ export default function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
             </button>
           </div>
         </form>
+
+        {/* Micro Footer Notice */}
+        <p className="text-center text-[11px] text-slate-400 mt-4">
+          Belum terdaftar? Temui staf kami di meja registrasi lembaga.
+        </p>
       </div>
     </div>
   );

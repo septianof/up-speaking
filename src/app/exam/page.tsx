@@ -109,13 +109,6 @@ export default function ExamPage() {
     };
   }, [session]);
 
-  // Handler saat waktu ujian habis (00:00 - STU-07)
-  const handleTimeUp = () => {
-    setIsTimeUp(true);
-    setIsSubmitModalOpen(true);
-    executeExamSubmission();
-  };
-
   // Handler pemilihan opsi jawaban (STU-04 & DB-05 Auto-save)
   const handleSelectOption = (questionId: string, optionId: string) => {
     // 1. Simpan jawaban di state lokal (optimistic update)

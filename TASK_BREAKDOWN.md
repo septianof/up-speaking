@@ -60,7 +60,7 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[ ]` | `STU-01` | **Halaman Masuk Siswa (`/`):** Tampilan panduan ringkas, form input Nama Lengkap & Nomor WhatsApp, verifikasi pendaftaran admin, penanganan status belum terdaftar / sudah selesai | `DB-05` | 1.5 jam | 🔴 Wajib | Siswa terdaftar langsung masuk ke `/exam`; siswa tidak terdaftar mendapat modal peringatan |
+| `[x]` | `STU-01` | **Halaman Masuk Siswa (`/`):** Tampilan panduan ringkas, form input Nama Lengkap & Nomor WhatsApp, verifikasi pendaftaran admin, penanganan status belum terdaftar / sudah selesai | `DB-05` | 1.5 jam | 🔴 Wajib | Siswa terdaftar langsung masuk ke `/exam`; siswa tidak terdaftar mendapat modal peringatan |
 | `[ ]` | `STU-02` | **Ruang Ujian Untimed (`/exam`):** Header informasi siswa & jenjang, indikator durasi pengerjaan berjalan di latar belakang (tanpa countdown timer paksa), kartu pertanyaan & radio cards interaktif, auto-save, dan drawer palet nomor soal | `STU-01` | 1.5 jam | 🔴 Wajib | Ujian berjalan lancar tanpa batas waktu mendesak dan jawaban tersimpan otomatis |
 | `[ ]` | `STU-03` | **Dialog Konfirmasi Pengumpulan:** Modal peringatan jika terdapat soal yang belum terjawab dan konfirmasi kumpulkan ujian | `STU-02` | 45 menit | 🔴 Wajib | Dialog konfirmasi memvalidasi kelengkapan soal dan memproses submit |
 | `[ ]` | `STU-04` | **Halaman Hasil & Apresiasi (`/result`):** Pesan apresiasi ramah, kartu ringkasan objektif (total soal, jumlah benar, skor %, durasi riil), badge status *"Menunggu Konfirmasi Level oleh Tutor"*, tombol direct WA ke Tutor jenjang, dan tombol keluar | `STU-03`, `DB-06` | 1.5 jam | 🔴 Wajib | Halaman menampilkan ringkasan skor & durasi, status menunggu tutor, dan kontak WA tutor |
@@ -108,11 +108,11 @@ Setiap task menggunakan format checklist berikut:
 |---|---|---|---|---|---|---|---|
 | Setup & Konfigurasi | `ENV` | 4 | 0 | 0 | **4** | 4 | 0 |
 | Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 7 | 0 |
-| Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 0 | 4 |
+| Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 1 | 3 |
 | Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 3 | 2 |
 | Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 0 | 3 |
 | Testing & Deployment | `FIN` | 4 | 0 | 0 | **4** | 2 | 2 |
-| **Total** | | **27** | **0** | **0** | **27 Task** | **16** | **11** |
+| **Total** | | **27** | **0** | **0** | **27 Task** | **17** | **10** |
 
 ---
 

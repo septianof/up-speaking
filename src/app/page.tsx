@@ -128,42 +128,42 @@ export default function LandingPage() {
         {/* ======================================================================= */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-8 md:my-14">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1: Durasi */}
+            {/* Card 1: Durasi Santai (Untimed) */}
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-7 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-indigo-50/80 flex items-center justify-center text-xl mb-4">
                 ⏱️
               </div>
               <h2 className="font-bold text-slate-900 text-lg mb-2">
-                Durasi ~45 Menit
+                Ujian Santai &amp; Alami
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Dilengkapi penghitung waktu mundur otomatis dan penyimpanan jawaban berkala (<em>*auto-save*</em>).
+                Pengerjaan bersifat <em>untimed</em> tanpa hitung mundur mendesak. Sistem mencatat durasi riil di latar belakang untuk menilai kelancaran berpikir.
               </p>
             </div>
 
-            {/* Card 2: Format Soal */}
+            {/* Card 2: Format Soal Teracak */}
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-7 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-rose-50/80 flex items-center justify-center text-xl mb-4">
                 📝
               </div>
               <h2 className="font-bold text-slate-900 text-lg mb-2">
-                Format Pilihan Ganda
+                Materi Adaptif Jenjang
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Soal dirancang khusus dengan pengacakan butir untuk mengukur kesiapan berbicara secara objektif.
+                Butir soal disesuaikan otomatis untuk jenjang Elementary (SD) dan High School (SMP/SMA/Umum) dengan pengacakan acak aman di server.
               </p>
             </div>
 
-            {/* Card 3: Hasil & Level */}
+            {/* Card 3: Evaluasi Profesional Tutor */}
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-7 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
               <div className="w-12 h-12 rounded-2xl bg-teal-50/80 flex items-center justify-center text-xl mb-4">
-                🎯
+                🎓
               </div>
               <h2 className="font-bold text-slate-900 text-lg mb-2">
-                Hasil &amp; Level Instan
+                Evaluasi Mandiri Tutor
               </h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Skor langsung keluar lengkap dengan lencana (Beginner, Intermediate, atau Advanced) &amp; saran kelas.
+                Penetapan level resmi (Beginner, Intermediate, Advanced) diputuskan profesional oleh Tutor penanggung jawab didukung akurasi skor &amp; durasi pengerjaan.
               </p>
             </div>
           </div>
@@ -177,26 +177,26 @@ export default function LandingPage() {
             <div className="flex items-center gap-2.5 mb-6">
               <span className="w-2 h-2 rounded-full bg-[#0284c7]"></span>
               <h2 className="text-xs sm:text-sm font-bold tracking-wider text-slate-500 uppercase">
-                Petunjuk &amp; Integritas Ujian
+                Petunjuk &amp; Alur Pelaksanaan Tes
               </h2>
             </div>
             <ol className="space-y-4 text-sm sm:text-base text-slate-700">
               <li className="flex items-start gap-3 leading-relaxed">
                 <span className="font-bold text-emerald-600 shrink-0">1.</span>
                 <span>
-                  Kerjakan secara mandiri tanpa kamus atau bantuan pihak lain agar penempatan kelas belajar Anda akurat.
+                  Pastikan Anda telah mendaftarkan Nama &amp; Nomor WhatsApp di meja registrasi staf Up Speaking.
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-relaxed">
                 <span className="font-bold text-emerald-600 shrink-0">2.</span>
                 <span>
-                  Jika browser tidak sengaja tertutup, Anda dapat kembali ke halaman ini dan melanjutkan ujian tanpa kehilangan progres.
+                  Kerjakan secara mandiri dan santai tanpa bantuan kamus agar rekomendasi kelas belajar Anda akurat.
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-relaxed">
                 <span className="font-bold text-emerald-600 shrink-0">3.</span>
                 <span>
-                  Satu nomor WhatsApp hanya berlaku untuk 1× kesempatan tes resmi (sistem anti-duplikasi).
+                  Jika browser tertutup tidak sengaja, Anda dapat membuka web kembali dan lembar soal serta jawaban Anda akan dipulihkan utuh (<em>Crash Recovery</em>).
                 </span>
               </li>
             </ol>
