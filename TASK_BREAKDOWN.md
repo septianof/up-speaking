@@ -1,9 +1,10 @@
 # Task Breakdown — Up Speaking Placement Test System
 **Dokumen:** Task Breakdown & Development Checklist  
-**Versi:** 1.3.0  
-**Tanggal:** 4 Oktober 2026  
+**Versi:** 2.0.0  
+**Tanggal:** 5 Oktober 2026  
 **Referensi Utama:** [PRD.md](PRD.md) · [UI_FLOW.md](UI_FLOW.md)  
-**Tech Stack:** Next.js (App Router, TypeScript) · Tailwind CSS · Supabase (PostgreSQL & Auth) · PWA  
+**Tech Stack:** Next.js (App Router, TypeScript) · Tailwind CSS · Framer Motion · Supabase (PostgreSQL & Auth) · PWA  
+**Asumsi Pengerjaan:** 1 developer, fokus pada implementasi fitur inti terintegrasi.  
 
 ---
 
@@ -22,11 +23,11 @@ Setiap task menggunakan format checklist berikut:
 | Prefix | Area Pengerjaan | Platform / Scope |
 |---|---|---|
 | `ENV` | Setup & Konfigurasi Proyek | Next.js, Tailwind, Supabase Config |
-| `DB` | Database & Server Actions | Supabase PostgreSQL, DDL, Seed, API |
-| `STU` | Alur Siswa (Peserta Tes) | Landing Page, Exam Room, Auto-Save, Hasil |
-| `ADM` | Alur Admin Panel (Staf) | Auth, Dashboard, CRUD Soal, Settings, Ekspor |
-| `UPD` | Penyesuaian Kebutuhan Baru | Jenjang Pendidikan, Matrix Skor+Waktu, Tutor, Fraud Permanen |
-| `FIN` | PWA, Testing & Deployment | PWA Manifest, Crash Recovery Test, Deploy |
+| `DB` | Skema Database & Server Actions | Supabase PostgreSQL, DDL, Seeder, API Logic |
+| `STU` | Alur Siswa (Peserta Tes) | Halaman Masuk, Ruang Ujian Untimed, Hasil Apresiasi |
+| `ADM` | Alur Admin (Meja Pendaftaran & Rekap) | Login, Registrasi Siswa, Dashboard, Bank Soal, Settings |
+| `TUT` | Alur Tutor (Evaluator Akademik) | Login Tutor, Antrean Evaluasi per Jenjang, Penetapan Level |
+| `FIN` | Testing & Deployment | Crash Recovery Test, E2E 3 Aktor, Deployment Live |
 
 ---
 
@@ -35,108 +36,83 @@ Setiap task menggunakan format checklist berikut:
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
 | `[x]` | `ENV-01` | Inisialisasi project Next.js dengan App Router, TypeScript, dan Tailwind CSS di workspace root | — | 30 menit | 🔴 Wajib | Project terinisialisasi dan `npm run dev` dapat berjalan |
-| `[x]` | `ENV-02` | Install dependensi pendukung: `@supabase/supabase-js`, `lucide-react`, `canvas-confetti`, dan utilitas styling (`clsx`, `tailwind-merge`) | `ENV-01` | 15 menit | 🔴 Wajib | Seluruh pustaka terpasang di `package.json` |
+| `[x]` | `ENV-02` | Install dependensi pendukung: `@supabase/supabase-js`, `lucide-react`, `canvas-confetti`, utilitas styling (`clsx`, `tailwind-merge`), dan `framer-motion` | `ENV-01` | 15 menit | 🔴 Wajib | Seluruh pustaka terpasang di `package.json` |
 | `[x]` | `ENV-03` | Pindahkan aset logo dari folder `assets/logo/` ke `public/` untuk favicon dan komponen branding visual | `ENV-01` | 15 menit | 🔴 Wajib | Aset logo tersedia di folder `public/` dan favicon aktif |
 | `[x]` | `ENV-04` | Setup koneksi Supabase: buat file `.env.local` (URL & Anon Key) serta helper client/server Supabase (`lib/supabase.ts`) | `ENV-02` | 30 menit | 🔴 Wajib | Koneksi Supabase client dan server helper berhasil dibuat |
 
 ---
 
-## Fase 1 — Database & Logika Server Awal (`DB`)
+## Fase 1 — Skema Database & Logika Server Terpadu (`DB`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[x]` | `DB-01` | Buat skrip DDL SQL migration Supabase untuk 6 tabel: `settings`, `levels`, `questions`, `question_options`, `test_sessions`, dan `student_answers` | `ENV-04` | 1 jam | 🔴 Wajib | Tabel terbuat di Supabase dengan skema relasional |
-| `[x]` | `DB-02` | Terapkan proteksi Row Level Security (RLS) & indeks performa pada tabel `test_sessions` dan `question_options` | `DB-01` | 30 menit | 🔴 Wajib | Kebijakan RLS aktif dan query terproteksi |
-| `[x]` | `DB-03` | Buat seeder SQL data awal: durasi tes (45 menit), 3 konfigurasi level default, dan butir soal uji coba dummy | `DB-01` | 45 menit | 🔴 Wajib | Data seeder awal masuk ke database |
-| `[x]` | `DB-04` | Buat Server Action `startSession`: validasi format WA, cek sesi aktif, dan return soal teracak Fisher-Yates tanpa `is_correct` | `DB-02`, `DB-03` | 1.5 jam | 🔴 Wajib | Sesi terbentuk dan soal diacak tanpa bocoran kunci |
-| `[x]` | `DB-05` | Buat Server Action `saveAnswer`: upsert pilihan jawaban siswa ke tabel `student_answers` di background | `DB-04` | 45 menit | 🔴 Wajib | Jawaban tersimpan otomatis secara realtime |
-| `[x]` | `DB-06` | Buat Server Action `submitExam`: validasi jawaban, hitung persentase skor, tentukan level, dan tandai sesi `completed` | `DB-04`, `DB-05` | 1.5 jam | 🔴 Wajib | Sesi terkunci `completed` dan nilai terhitung |
+| `[x]` | `DB-01` | Buat skrip DDL SQL migration awal Supabase untuk tabel: `settings`, `levels`, `questions`, `question_options`, `test_sessions`, dan `student_answers` | `ENV-04` | 1 jam | 🔴 Wajib | Tabel terbuat di Supabase dengan skema relasional |
+| `[ ]` | `DB-02` | **Migration SQL Skema Baru:** Tambah tabel `profiles` (id, email, full_name, role: `admin`/`tutor`, education_level), perbarui kolom status `test_sessions` (`registered`, `in_progress`, `submitted`, `graded`), kolom `reviewed_by` (FK profiles), `tutor_notes`, dan kebijakan RLS | `DB-01` | 45 menit | 🔴 Wajib | Tabel `profiles` aktif dan kolom baru `test_sessions` terdaftar di Supabase |
+| `[ ]` | `DB-03` | **Seeder Akun & Data Awal:** Buat seeder akun default Admin, Tutor Elementary, Tutor High School di Supabase Auth + profiles, serta data master level dan bank soal terverifikasi | `DB-02` | 45 menit | 🔴 Wajib | Akun Admin dan 2 Tutor dapat digunakan login dengan role yang sesuai |
+| `[ ]` | `DB-04` | **Server Action `registerStudent`:** Logika registrasi siswa oleh admin di meja pendaftaran, memvalidasi format WA, dan membuat record `test_sessions` berstatus `registered` | `DB-02` | 45 menit | 🔴 Wajib | Admin berhasil membuat sesi `registered` baru tanpa bisa duplikasi sesi aktif |
+| `[ ]` | `DB-05` | **Server Action `verifyStudentAccess` & `startSession`:** Memvalidasi kombinasi Nama & WA siswa yang telah didaftarkan admin, mengambil soal acak Fisher-Yates sesuai jenjang tanpa `is_correct`, mencatat `started_at`, dan ubah status ke `in_progress` | `DB-02`, `DB-03` | 1 jam | 🔴 Wajib | Siswa terdaftar berhasil memulai ujian; siswa belum terdaftar ditolak |
+| `[ ]` | `DB-06` | **Server Action `submitExam`:** Menghitung total jawaban benar, persentase skor, durasi pengerjaan aktual (`submitted_at - started_at` menit), dan ubah status sesi ke `submitted` | `DB-05` | 1 jam | 🔴 Wajib | Sesi terkunci `submitted`, nilai dan durasi riil tersimpan di database |
+| `[ ]` | `DB-07` | **Server Action `gradeSession`:** Logika khusus tutor untuk menetapkan level resmi siswa (`level_id`), menyimpan catatan evaluasi (`tutor_notes`), mencatat `reviewed_by`, dan ubah status ke `graded` | `DB-02` | 45 menit | 🔴 Wajib | Status sesi berubah menjadi `graded` dan level resmi tersimpan permanen |
 
 ---
 
-## Fase 2 — Alur Siswa Awal (`STU`)
+## Fase 2 — Alur Siswa: Masuk Cepat, Ujian Untimed & Hasil Apresiasi (`STU`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[x]` | `STU-01` | Buat halaman Landing Page (`/`): Navbar logo, Hero section, info fitur tes, panduan, dan tombol CTA | `ENV-03` | 1.5 jam | 🔴 Wajib | Landing page tampil rapi dan responsif |
-| `[x]` | `STU-02` | Buat Modal / Bottom Sheet pendaftaran: input Nama Lengkap & Nomor WhatsApp, integrasi start session | `STU-01`, `DB-04` | 1.5 jam | 🔴 Wajib | Form pendaftaran berfungsi membuka sesi ujian |
-| `[x]` | `STU-03` | Buat layout Ruang Ujian (`/exam`): Sticky Header (Nama, Countdown Timer tersinkronisasi server, badge auto-save) | `STU-02` | 1 jam | 🔴 Wajib | Header ujian menampilkan timer dan auto-save |
-| `[x]` | `STU-04` | Buat komponen Soal & Opsi Jawaban: Radio Card interaktif yang ramah sentuhan layar ponsel | `STU-03` | 1 jam | 🔴 Wajib | Opsi jawaban mudah dipilih pada ponsel |
-| `[x]` | `STU-05` | Implementasi Bottom Navigation Bar (`Sebelumnya`, `Selanjutnya`, `Kumpulkan Ujian`) serta Drawer Kisi Soal | `STU-04` | 1.5 jam | 🔴 Wajib | Navigasi soal dan drawer kisi soal berfungsi |
-| `[x]` | `STU-06` | Implementasi mekanisme Crash Recovery & Auto-Save di LocalStorage: restorasi jawaban dan sisa waktu | `STU-04`, `DB-05` | 1.5 jam | 🔴 Wajib | Browser tertutup dapat merestorasi status pengerjaan |
-| `[x]` | `STU-07` | Buat Modal Konfirmasi Pengumpulan dan aksi submit otomatis ketika waktu habis | `STU-05`, `DB-06` | 1 jam | 🔴 Wajib | Dialog konfirmasi submit dan auto-submit 00:00 aktif |
-| `[x]` | `STU-08` | Buat Halaman Hasil (`/result`): kartu pencapaian skor %, rincian benar/total, badge level, tombol Selesai | `STU-07` | 1.5 jam | 🔴 Wajib | Halaman hasil menampilkan nilai dan lencana level |
+| `[ ]` | `STU-01` | **Halaman Masuk Siswa (`/`):** Tampilan panduan ringkas, form input Nama Lengkap & Nomor WhatsApp, verifikasi pendaftaran admin, penanganan status belum terdaftar / sudah selesai | `DB-05` | 1.5 jam | 🔴 Wajib | Siswa terdaftar langsung masuk ke `/exam`; siswa tidak terdaftar mendapat modal peringatan |
+| `[ ]` | `STU-02` | **Ruang Ujian Untimed (`/exam`):** Header informasi siswa & jenjang, indikator durasi pengerjaan berjalan di latar belakang (tanpa countdown timer paksa), kartu pertanyaan & radio cards interaktif, auto-save, dan drawer palet nomor soal | `STU-01` | 1.5 jam | 🔴 Wajib | Ujian berjalan lancar tanpa batas waktu mendesak dan jawaban tersimpan otomatis |
+| `[ ]` | `STU-03` | **Dialog Konfirmasi Pengumpulan:** Modal peringatan jika terdapat soal yang belum terjawab dan konfirmasi kumpulkan ujian | `STU-02` | 45 menit | 🔴 Wajib | Dialog konfirmasi memvalidasi kelengkapan soal dan memproses submit |
+| `[ ]` | `STU-04` | **Halaman Hasil & Apresiasi (`/result`):** Pesan apresiasi ramah, kartu ringkasan objektif (total soal, jumlah benar, skor %, durasi riil), badge status *"Menunggu Konfirmasi Level oleh Tutor"*, tombol direct WA ke Tutor jenjang, dan tombol keluar | `STU-03`, `DB-06` | 1.5 jam | 🔴 Wajib | Halaman menampilkan ringkasan skor & durasi, status menunggu tutor, dan kontak WA tutor |
 
 ---
 
-## Fase 3 — Alur Admin Panel Awal (`ADM`)
+## Fase 3 — Alur Admin: Meja Registrasi, Rekapitulasi & Bank Soal (`ADM`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[x]` | `ADM-01` | Buat Halaman Login Admin (`/admin`): autentikasi email & password via Supabase Auth + middleware proteksi | `ENV-04` | 1.5 jam | 🔴 Wajib | Login admin berhasil dan rute admin terproteksi |
-| `[x]` | `ADM-02` | Buat Layout Admin Panel: Sidebar navigasi responsif, Header topbar, profil admin, dan tombol Logout | `ADM-01` | 1.5 jam | 🔴 Wajib | Layout admin sidebar & header berjalan |
-| `[x]` | `ADM-03` | Buat Halaman Dashboard (`/admin/dashboard`): 4 kartu ringkasan metrik | `ADM-02`, `DB-01` | 1 jam | 🔴 Wajib | Kartu metrik menampilkan statistik riil |
-| `[x]` | `ADM-04` | Buat Tabel Riwayat Hasil Siswa: pencarian instan (Nama/WA) dan filter dropdown level | `ADM-03` | 1.5 jam | 🔴 Wajib | Tabel riwayat dapat dicari dan difilter |
-| `[x]` | `ADM-05` | Implementasikan fitur Aksi "Izinkan Tes Ulang": tombol buka kunci tes nomor WA tertentu | `ADM-04` | 1 jam | 🔴 Wajib | Tombol izin tes ulang berhasil membuka akses |
-| `[x]` | `ADM-06` | Implementasikan fitur Ekspor Data: tombol unduh file Excel (`.xlsx`) dan PDF terfilter | `ADM-04` | 2 jam | 🟡 Penting | File Excel dan PDF berhasil diunduh sesuai filter |
-| `[x]` | `ADM-07` | Buat Halaman Manajemen Bank Soal (`/admin/questions`): tabel daftar soal aktif dengan Edit & Soft Delete | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib | Tabel soal aktif dan aksi soft delete berfungsi |
-| `[x]` | `ADM-08` | Buat Modal Form Tambah/Edit Soal: opsi jawaban dinamis (+ Tambah / Hapus) dan radio kunci | `ADM-07` | 2 jam | 🔴 Wajib | Form tambah dan edit soal dengan opsi dinamis aktif |
-| `[x]` | `ADM-09` | Buat Halaman Pengaturan (`/admin/settings`): form ubah durasi tes & rentang persentase 3 level | `ADM-02`, `DB-01` | 1.5 jam | 🔴 Wajib | Pengaturan durasi dan rentang level tersimpan |
+| `[x]` | `ADM-01` | Halaman Login Admin (`/admin`): Form login email & password via Supabase Auth + middleware proteksi rute | `ENV-04` | 1.5 jam | 🔴 Wajib | Staf berhasil login dan rute terproteksi |
+| `[ ]` | `ADM-02` | **Modal Form Registrasi Siswa Baru:** Tombol dan modal di dashboard admin untuk menginput Nama Siswa, No WA, dan Pilihan Jenjang (`Elementary` / `High School`) yang memicu Server Action `registerStudent` | `ADM-01`, `DB-04` | 1 jam | 🔴 Wajib | Admin berhasil mendaftarkan calon siswa baru langsung dari dashboard |
+| `[ ]` | `ADM-03` | **Dashboard Rekapitulasi Global & Retest:** 4 kartu metrik, tabel riwayat lengkap (Status: `Menunggu Review` / `Graded`, Jenjang, Durasi Riil, Skor, Tutor Penilai), pencarian Nama/WA, filter status/jenjang, tombol izin tes ulang, dan ekspor Excel/PDF | `ADM-02`, `DB-07` | 1.5 jam | 🔴 Wajib | Seluruh rekap riwayat tampil akurat, dapat difilter, diizinkan tes ulang, dan diekspor |
+| `[x]` | `ADM-04` | Halaman Manajemen Bank Soal (`/admin/questions`): Tabel soal per jenjang, filter jenjang, modal CRUD soal dengan opsi dinamis A–D/E, penentuan kunci, dan soft delete | `ADM-01`, `DB-01` | 2 jam | 🔴 Wajib | CRUD bank soal dengan opsi dinamis dan soft delete berfungsi lancar |
+| `[x]` | `ADM-05` | Halaman Pengaturan Kontak Tutor (`/admin/settings`): Form konfigurasi nama dan nomor WhatsApp resmi Tutor Elementary dan High School | `ADM-01`, `DB-01` | 1 jam | 🔴 Wajib | Kontak tutor tersimpan ke database dan terhubung ke halaman hasil |
 
 ---
 
-## Fase 4 — Implementasi Kebutuhan Tambahan (`UPD`)
+## Fase 4 — Alur Tutor: Portal Evaluator & Penetapan Level (`TUT`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[x]` | `UPD-01` | **Skema DB Kebutuhan Baru:** Migration SQL tambah kolom `education_level` di `questions` & `test_sessions`, kolom `duration_minutes` di `test_sessions`, serta kolom tutor di `settings` | `DB-01` | 45 menit | 🔴 Wajib | Kolom baru terdaftar di database Supabase |
-| `[x]` | `UPD-02` | **Server Action `startSession` Update:** Tambah parameter `education_level`, filter soal sesuai jenjang, dan fraud check permanen berbasis pasangan `(No WA + Nama)` | `UPD-01`, `DB-04` | 1 jam | 🔴 Wajib | Siswa hanya dapat soal sesuai jenjangnya; pasangan WA+Nama yang sudah tes diblokir permanen |
-| `[x]` | `UPD-03` | **Server Action `submitExam` & Matrix Evaluasi:** Hitung durasi pengerjaan riil, evaluasi matrix level (Skor % + Waktu pengerjaan menit), dan return kontak tutor jenjang | `UPD-01`, `DB-06` | 1 jam | 🔴 Wajib | Siswa skor >= 80% durasi > 25m turun ke Intermediate; skor 60-79% durasi > 20m turun ke Beginner |
-| `[x]` | `UPD-04` | **UI Registrasi Siswa (`/`):** Tambah input pilihan Jenjang Pendidikan (`Elementary` / `High School`) pada modal registrasi | `UPD-02`, `STU-02` | 45 menit | 🔴 Wajib | Siswa wajib memilih jenjang sebelum tes dimulai |
-| `[x]` | `UPD-05` | **UI Halaman Hasil (`/result`):** Tampilkan durasi pengerjaan riil, rekomendasi kelas jenjang+level, dan kartu kontak Tutor via WhatsApp | `UPD-03`, `STU-08` | 1 jam | 🔴 Wajib | Hasil menampilkan durasi pengerjaan dan tombol WA tutor jenjang terkait |
-| `[x]` | `UPD-06` | **UI Admin Bank Soal (`/admin/questions`):** Tambah filter jenjang pada tabel soal dan pilihan jenjang pada modal form tambah/edit soal | `UPD-01`, `ADM-08` | 1 jam | 🔴 Wajib | Admin dapat memfilter dan menginput soal per jenjang |
-| `[x]` | `UPD-07` | **UI Admin Pengaturan (`/admin/settings`):** Form matrix penilaian level (skor + batas waktu menit) dan form kontak tutor per jenjang (Elementary & High School) | `UPD-01`, `ADM-09` | 1 jam | 🔴 Wajib | Pengaturan matrix level dan kontak tutor tersimpan ke database |
-| `[x]` | `UPD-08` | **UI Admin Dashboard (`/admin/dashboard`):** Tambah kolom Jenjang dan Durasi Pengerjaan pada tabel riwayat serta filter dropdown jenjang | `UPD-01`, `ADM-04` | 45 menit | 🔴 Wajib | Tabel riwayat menampilkan jenjang dan durasi serta dapat difilter per jenjang |
+| `[ ]` | `TUT-01` | **Autentikasi & Portal Login Tutor:** Halaman login dengan validasi role Tutor di Supabase Auth dan pengalihan ke antrean evaluasi | `DB-02`, `DB-03` | 1 jam | 🔴 Wajib | Akun Tutor berhasil login dan diarahkan ke dashboard evaluasi |
+| `[ ]` | `TUT-02` | **Antrean Evaluasi Siswa per Jenjang:** Dashboard khusus evaluator dengan filter otomatis sesuai jenjang tutor (Tutor Elementary hanya melihat antrean Elementary; Tutor High School melihat High School), tab filter status (`Menunggu Review` vs `Sudah Dinilai`) | `TUT-01` | 1.5 jam | 🔴 Wajib | Antrean siswa terfilter tepat per jenjang dan menampilkan skor % serta durasi riil |
+| `[ ]` | `TUT-03` | **Modal Evaluasi & Penetapan Level:** Tampilan rincian performa pengerjaan siswa, dropdown pilihan level resmi (`Beginner`, `Intermediate`, `Advanced`), input catatan evaluasi, dan aksi simpan penetapan level | `TUT-02`, `DB-07` | 1 jam | 🔴 Wajib | Tutor berhasil menetapkan level resmi dan status siswa otomatis menjadi `graded` |
 
 ---
 
----
-
-## Fase 5 — Redesain Modern & UI/UX Polish (`RED`)
+## Fase 5 — Pengujian Sistem Terpadu & Deployment (`FIN`)
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[ ]` | `RED-01` | **Redesain Modern Landing Page & Modal Registrasi (`/`):** Hero section bergengsi, tipografi tajam, kartu panduan bertekstur, dan modal ramah mobile | `FIN-02` | 1.5 jam | 🔴 Wajib | Tampilan landing page dan form registrasi modern, responsif, dan elegan |
-| `[ ]` | `RED-02` | **Redesain Ruang Ujian Interaktif (`/exam`):** Sleek header countdown timer, kartu pertanyaan fokus, radio cards taktil, dan palet soal modern | `RED-01` | 1.5 jam | 🔴 Wajib | Pengalaman ujian fokus (*hyper-focused exam UI*) dan interaktif |
-| `[ ]` | `RED-03` | **Redesain Halaman Hasil Placement Test (`/result`):** Showcase skor megah, lencana level prestisius, rincian akurasi/durasi, dan CTA tutor WA | `RED-02` | 1.5 jam | 🔴 Wajib | Tampilan hasil memukau dan tombol kontak tutor mengundang aksi |
-| `[ ]` | `RED-04` | **Redesain Admin Panel (`/admin/*`):** Sidebar sleek, metric cards mewah, tabel riwayat tajam, modal CRUD soal, dan pengaturan bersih | `RED-03` | 2 jam | 🔴 Wajib | Seluruh antarmuka admin panel berstandar *enterprise dashboard* |
-
----
-
-## Fase 6 — PWA, Testing & Deployment (`FIN`)
-
-| Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
-|---|---|---|---|---|---|---|
-| `[x]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA agar dapat diinstal di homescreen | `STU-08` | 45 menit | 🔴 Wajib | Web App Manifest aktif dan lolos audit PWA |
-| `[x]` | `FIN-02` | Pengujian simulasi kendala jaringan & Crash Recovery: tes tutup tab browser HP di tengah ujian dan pastikan sesi kembali utuh | `STU-06`, `UPD-02` | 1 jam | 🔴 Wajib | Sesi dan jawaban pulih setelah browser dibuka kembali |
-| `[ ]` | `FIN-03` | Pengujian end-to-end lengkap: alur pengerjaan Elementary & High School, evaluasi matrix skor+waktu, hingga rekap dashboard admin | `RED-04` | 1.5 jam | 🔴 Wajib | Pengujian alur siswa per jenjang dan admin berjalan tanpa bug |
-| `[ ]` | `FIN-04` | Deployment aplikasi ke platform hosting (Vercel / Netlify) dan koneksi database Supabase production | `FIN-01` s/d `FIN-03` | 1 jam | 🔴 Wajib | Aplikasi live di URL produksi dan siap digunakan |
+| `[x]` | `FIN-01` | Konfigurasi Web App Manifest (`manifest.json`) dan icon PWA agar dapat diinstal di homescreen | `ENV-01` | 45 menit | 🔴 Wajib | Web App Manifest aktif dan lolos audit PWA |
+| `[x]` | `FIN-02` | Pengujian simulasi ketahanan sesi (*Crash Recovery*): Verifikasi pemulihan jawaban dan waktu saat tab browser ditutup di tengah pengerjaan | `STU-02` | 1 jam | 🔴 Wajib | Sesi dan jawaban pulih setelah browser dibuka kembali |
+| `[ ]` | `FIN-03` | **Pengujian End-to-End Alur Terpadu 3 Aktor:** Uji coba lengkap pendaftaran di meja admin $\rightarrow$ siswa login & ujian $\rightarrow$ evaluasi & penetapan level oleh tutor $\rightarrow$ sinkronisasi rekap dashboard admin | `STU-04`, `ADM-03`, `TUT-03` | 1.5 jam | 🔴 Wajib | Siklus lengkap 3 aktor berjalan mulus tanpa kendala atau bug |
+| `[ ]` | `FIN-04` | **Deployment Produksi:** Setup environment Supabase produksi dan deployment aplikasi web ke platform hosting (Vercel / Netlify) | `FIN-03` | 1 jam | 🔴 Wajib | Aplikasi live di URL produksi dan siap digunakan oleh lembaga Up Speaking |
 
 ---
 
 ## Ringkasan & Peta Dependensi
 
 ### Jumlah Task per Area:
-| Area | Wajib 🔴 | Penting 🟡 | Total Task | Selesai | Sisa |
-|---|---|---|---|---|---|
-| Setup Proyek (`ENV`) | 4 | 0 | **4** | 4 | 0 |
-| Database & Server (`DB`) | 6 | 0 | **6** | 6 | 0 |
-| Alur Siswa Awal (`STU`) | 8 | 0 | **8** | 8 | 0 |
-| Admin Panel Awal (`ADM`) | 8 | 1 | **9** | 9 | 0 |
-| Kebutuhan Baru (`UPD`) | 8 | 0 | **8** | 8 | 0 |
-| Redesain UI/UX (`RED`) | 4 | 0 | **4** | 0 | 4 |
-| PWA & Deploy (`FIN`) | 4 | 0 | **4** | 2 | 2 |
-| **Total** | **42** | **1** | **43 Task** | **37** | **6** |
+
+| Area | Prefix | Wajib 🔴 | Penting 🟡 | Opsional 🟢 | Total Task | Selesai | Sisa |
+|---|---|---|---|---|---|---|---|
+| Setup & Konfigurasi | `ENV` | 4 | 0 | 0 | **4** | 4 | 0 |
+| Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 1 | 6 |
+| Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 0 | 4 |
+| Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 3 | 2 |
+| Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 0 | 3 |
+| Testing & Deployment | `FIN` | 4 | 0 | 0 | **4** | 2 | 2 |
+| **Total** | | **27** | **0** | **0** | **27 Task** | **10** | **17** |
 
 ---
 
@@ -144,15 +120,17 @@ Setiap task menggunakan format checklist berikut:
 
 ```mermaid
 flowchart TD
-    ENV["⚙️ FASE 0: Setup & Config\n(ENV-01 s/d ENV-04)"] --> DB["🗄️ FASE 1: Database & Server Logic\n(DB-01 s/d DB-06)"]
+    ENV["⚙️ FASE 0: Setup & Konfigurasi<br/>(ENV-01 s/d ENV-04)"] --> DB["🗄️ FASE 1: Database & Server Logic<br/>(DB-01 s/d DB-07)"]
     
-    DB --> STU["📱 FASE 2: Alur Siswa & PWA\n(STU-01 s/d STU-08)"]
-    DB --> ADM["🖥️ FASE 3: Alur Admin Panel\n(ADM-01 s/d ADM-09)"]
-    
-    STU & ADM --> UPD["✨ FASE 4: Kebutuhan Baru (UPD)\n(Jenjang, Matrix Waktu, Tutor, Fraud)"]
-    
-    UPD --> RED["🎨 FASE 5: Redesain UI/UX (RED)\n(Landing, Exam, Result, Admin)"]
-    
-    RED --> FIN["🚀 FASE 6: Testing & Deploy (FIN)\n(PWA, E2E Test, Production Deploy)"]
-```
+    DB --> ADM["🖥️ FASE 3: Alur Admin & Registrasi Siswa<br/>(ADM-01 s/d ADM-05)"]
+    DB --> STU["📱 FASE 2: Alur Siswa Masuk & Ujian<br/>(STU-01 s/d STU-04)"]
+    DB --> TUT["📋 FASE 4: Alur Evaluasi Tutor<br/>(TUT-01 s/d TUT-03)"]
 
+    ADM -. "Admin daftarkan siswa" .-> STU
+    STU -. "Siswa submit ujian" .-> TUT
+    TUT -. "Tutor tetapkan level" .-> ADM
+
+    STU --> FIN["🚀 FASE 5: Testing E2E & Deployment<br/>(FIN-01 s/d FIN-04)"]
+    ADM --> FIN
+    TUT --> FIN
+```
