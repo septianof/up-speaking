@@ -41,14 +41,6 @@ export default function ExamPage() {
       }
 
       const parsedSession: SessionInfo = JSON.parse(storedSession);
-
-      // Cek apakah waktu sesi sudah kadaluarsa
-      if (new Date(parsedSession.end_time).getTime() <= Date.now()) {
-        localStorage.removeItem('upspeaking_session');
-        router.replace('/');
-        return;
-      }
-
       setSession(parsedSession);
 
       if (storedQuestions) {
@@ -224,12 +216,12 @@ export default function ExamPage() {
       {/* ======================================================================= */}
       <ExamHeader
         studentName={session.student_name}
-        endTime={session.end_time}
+        startTime={session.start_time}
+        educationLevel={session.education_level}
         autoSaveStatus={autoSaveStatus}
         currentQuestionIndex={currentIndex}
         totalQuestions={totalQuestions}
         answeredCount={answeredCount}
-        onTimeUp={handleTimeUp}
       />
 
       {/* ======================================================================= */}

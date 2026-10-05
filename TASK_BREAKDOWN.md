@@ -51,7 +51,7 @@ Setiap task menggunakan format checklist berikut:
 | `[x]` | `DB-03` | **Seeder Akun & Data Awal:** Buat seeder akun default Admin, Tutor Elementary, Tutor High School di Supabase Auth + profiles, serta data master level dan bank soal terverifikasi | `DB-02` | 45 menit | 🔴 Wajib | Akun Admin dan 2 Tutor dapat digunakan login dengan role yang sesuai |
 | `[x]` | `DB-04` | **Server Action `registerStudent`:** Logika registrasi siswa oleh admin di meja pendaftaran, memvalidasi format WA, dan membuat record `test_sessions` berstatus `registered` | `DB-02` | 45 menit | 🔴 Wajib | Admin berhasil membuat sesi `registered` baru tanpa bisa duplikasi sesi aktif |
 | `[x]` | `DB-05` | **Server Action `verifyStudentAccess` & `startSession`:** Memvalidasi kombinasi Nama & WA siswa yang telah didaftarkan admin, mengambil soal acak Fisher-Yates sesuai jenjang tanpa `is_correct`, mencatat `started_at`, dan ubah status ke `in_progress` | `DB-02`, `DB-03` | 1 jam | 🔴 Wajib | Siswa terdaftar berhasil memulai ujian; siswa belum terdaftar ditolak |
-| `[ ]` | `DB-06` | **Server Action `submitExam`:** Menghitung total jawaban benar, persentase skor, durasi pengerjaan aktual (`submitted_at - started_at` menit), dan ubah status sesi ke `submitted` | `DB-05` | 1 jam | 🔴 Wajib | Sesi terkunci `submitted`, nilai dan durasi riil tersimpan di database |
+| `[x]` | `DB-06` | **Server Action `submitExam`:** Menghitung total jawaban benar, persentase skor, durasi pengerjaan aktual (`submitted_at - started_at` menit), dan ubah status sesi ke `submitted` | `DB-05` | 1 jam | 🔴 Wajib | Sesi terkunci `submitted`, nilai dan durasi riil tersimpan di database |
 | `[ ]` | `DB-07` | **Server Action `gradeSession`:** Logika khusus tutor untuk menetapkan level resmi siswa (`level_id`), mencatat `reviewed_by`, dan ubah status ke `graded` | `DB-02` | 45 menit | 🔴 Wajib | Status sesi berubah menjadi `graded` dan level resmi tersimpan permanen |
 
 ---
@@ -107,12 +107,12 @@ Setiap task menggunakan format checklist berikut:
 | Area | Prefix | Wajib 🔴 | Penting 🟡 | Opsional 🟢 | Total Task | Selesai | Sisa |
 |---|---|---|---|---|---|---|---|
 | Setup & Konfigurasi | `ENV` | 4 | 0 | 0 | **4** | 4 | 0 |
-| Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 5 | 2 |
+| Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 6 | 1 |
 | Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 0 | 4 |
 | Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 3 | 2 |
 | Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 0 | 3 |
 | Testing & Deployment | `FIN` | 4 | 0 | 0 | **4** | 2 | 2 |
-| **Total** | | **27** | **0** | **0** | **27 Task** | **14** | **13** |
+| **Total** | | **27** | **0** | **0** | **27 Task** | **15** | **12** |
 
 ---
 

@@ -2,62 +2,55 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
+import { Clock } from 'lucide-react';
+import type { EducationLevel } from '@/types';
 
 interface ExamHeaderProps {
   studentName: string;
-  endTime: string;
+  startTime: string;
+  educationLevel?: EducationLevel;
   autoSaveStatus?: 'saved' | 'saving' | 'error' | 'offline';
   currentQuestionIndex: number;
   totalQuestions: number;
   answeredCount: number;
-  onTimeUp?: () => void;
 }
 
 export default function ExamHeader({
   studentName,
-  endTime,
+  startTime,
+  educationLevel = 'elementary',
   autoSaveStatus = 'saved',
   currentQuestionIndex,
   totalQuestions,
   answeredCount,
-  onTimeUp,
 }: ExamHeaderProps) {
-  // Hitung sisa waktu awal dari jam server (end_time - current_time)
-  const calculateRemainingSeconds = useCallback(() => {
-    if (!endTime) return 0;
-    const endMs = new Date(endTime).getTime();
+  // Hitung durasi waktu yang sudah berjalan dari start_time server (Stopwatch Riil)
+  const calculateElapsedSeconds = useCallback(() => {
+    if (!startTime) return 0;
+    const startMs = new Date(startTime).getTime();
     const nowMs = Date.now();
-    return Math.max(0, Math.floor((endMs - nowMs) / 1000));
-  }, [endTime]);
+    return Math.max(0, Math.floor((nowMs - startMs) / 1000));
+  }, [startTime]);
 
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(calculateRemainingSeconds);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(calculateElapsedSeconds);
 
-  // Countdown timer effect
+  // Stopwatch effect: bertambah setiap 1 detik secara santai (untimed duration)
   useEffect(() => {
-    // Sinkronisasi ulang saat props endTime berubah
-    setRemainingSeconds(calculateRemainingSeconds());
+    setElapsedSeconds(calculateElapsedSeconds());
 
     const interval = setInterval(() => {
-      const remaining = calculateRemainingSeconds();
-      setRemainingSeconds(remaining);
-
-      if (remaining <= 0) {
-        clearInterval(interval);
-        if (onTimeUp) {
-          onTimeUp();
-        }
-      }
+      setElapsedSeconds(calculateElapsedSeconds());
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [onTimeUp, calculateRemainingSeconds]);
+  }, [calculateElapsedSeconds]);
 
   // Format MM:SS
-  const minutes = Math.floor(remainingSeconds / 60);
-  const seconds = remainingSeconds % 60;
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const seconds = elapsedSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-  // Persentase progres pengerjaan soal (berdasarkan nomor soal aktif atau jumlah soal terjawab)
+  // Persentase progres pengerjaan soal
   const currentStep = Math.max(answeredCount, currentQuestionIndex + 1);
   const progressPercent =
     totalQuestions > 0
@@ -120,17 +113,19 @@ export default function ExamHeader({
             </div>
           </div>
 
-          {/* Sisi Kanan: Countdown Timer Badge (Gold Text) */}
-          <div className="flex items-center flex-shrink-0">
+          {/* Sisi Kanan: Jenjang + Stopwatch Durasi Pengerjaan (Untimed) */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {educationLevel && (
+              <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-950/80 border border-sky-400/30 text-sky-200">
+                {educationLevel === 'high_school' ? 'High School' : 'Elementary'}
+              </span>
+            )}
             <div
-              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border transition-colors ${
-                remainingSeconds <= 300
-                  ? 'bg-rose-950/80 border-rose-500/50 text-rose-300 animate-pulse'
-                  : 'bg-[#163354]/90 border-sky-400/20 text-amber-400'
-              }`}
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border bg-[#163354]/90 border-sky-400/20 text-sky-200"
+              title="Durasi pengerjaan Anda (Ujian santai tanpa batas waktu mendesak)"
             >
-              <span className="text-sm sm:text-base">⏰</span>
-              <span className="font-mono font-bold text-xs sm:text-sm md:text-base tracking-wider">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400" />
+              <span className="font-mono font-bold text-xs sm:text-sm md:text-base tracking-wider text-white">
                 {formattedTime}
               </span>
             </div>
@@ -155,7 +150,7 @@ export default function ExamHeader({
             </div>
           </div>
 
-          {/* Dynamic Progress Bar dengan warna Cyan/Biru Up Speaking (#00a6f4) */}
+          {/* Dynamic Progress Bar */}
           <div className="w-full h-1.5 sm:h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-[#00a6f4] rounded-full transition-all duration-300 ease-out"

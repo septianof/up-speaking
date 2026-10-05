@@ -121,7 +121,7 @@ export interface SessionInfo {
   whatsapp_number: string;
   education_level?: EducationLevel;
   start_time: string;
-  end_time: string;
+  end_time?: string | null;
   total_questions: number;
 }
 
@@ -164,7 +164,8 @@ export interface ExamResultData {
   studentName: string;
   whatsappNumber: string;
   educationLevel?: EducationLevel;
-  durationMinutes?: number;
+  status: TestSessionStatus;
+  durationMinutes: number;
   totalQuestions: number;
   correctAnswers: number;
   finalScorePercent: number;
@@ -172,7 +173,7 @@ export interface ExamResultData {
     id: number;
     name: string;
     description: string | null;
-  };
+  } | null;
   tutor?: TutorContact;
   completedAt: string;
 }

@@ -288,7 +288,7 @@ export async function startSession(
           whatsapp_number: inProgressSession.whatsapp_number,
           education_level: sessionEduLevel,
           start_time: inProgressSession.start_time,
-          end_time: inProgressSession.end_time,
+          end_time: null,
           total_questions: inProgressSession.total_questions || resumedQuestions.length,
         },
         questions: resumedQuestions,
@@ -381,7 +381,7 @@ export async function startSession(
           whatsapp_number: registeredSession.whatsapp_number,
           education_level: sessionEduLevel,
           start_time: nowIso,
-          end_time: nowIso,
+          end_time: null,
           total_questions: questionsData.length,
         },
         questions: sanitizedQuestions,
@@ -444,7 +444,7 @@ export async function saveAnswer(
     // 1. Verifikasi status sesi ujian
     const { data: session, error: sessionErr } = await supabase
       .from('test_sessions')
-      .select('id, status, end_time')
+      .select('id, status')
       .eq('id', sessionId)
       .maybeSingle();
 
@@ -458,14 +458,7 @@ export async function saveAnswer(
     if (session.status !== 'in_progress') {
       return {
         success: false,
-        error: 'Sesi ujian sudah diselesaikan atau ditutup.',
-      };
-    }
-
-    if (new Date(session.end_time) <= new Date(nowIso)) {
-      return {
-        success: false,
-        error: 'Waktu ujian telah berakhir.',
+        error: 'Sesi ujian sudah diselesaikan atau belum dimulai.',
       };
     }
 
@@ -526,14 +519,16 @@ export async function saveAnswer(
  * 
  * Tanggung Jawab:
  * 1. Validasi sesi pengerjaan siswa.
- * 2. Penanganan idempotensi: jika sesi sudah 'completed', kembalikan hasil sebelumnya beserta durasi dan tutor.
- * 3. Ambil seluruh jawaban siswa pada sesi dan cocokkan dengan kunci jawaban di question_options.
- * 4. Hitung jumlah benar, persentase skor akhir (0.00% - 100.00%), dan durasi pengerjaan riil (menit).
- * 5. Evaluasi Matrix Penentuan Level (Skor % + Waktu Pengerjaan):
- *    - Siswa dengan skor >= 80% (Advanced), jika waktu > 25 menit -> degradasi ke Intermediate.
- *    - Siswa dengan skor 60-79% (Intermediate), jika waktu > 20 menit -> degradasi ke Beginner.
- * 6. Update status sesi menjadi 'completed', catat correct_answers, final_score_percent, assigned_level_id, duration_minutes, dan completed_at.
- * 7. Kembalikan detail pencapaian, durasi pengerjaan, dan kontak WhatsApp tutor jenjang terkait.
+ * 2. Penanganan idempotensi: jika sesi sudah berstatus 'submitted', 'graded', atau 'completed',
+ *    kembalikan data hasil yang sudah tersimpan dengan aman tanpa error.
+ * 3. Ambil seluruh jawaban siswa pada sesi dan cocokkan dengan kunci jawaban di question_options (is_correct).
+ * 4. Hitung jumlah jawaban benar dan persentase skor akhir (0.00% - 100.00%).
+ * 5. Hitung durasi pengerjaan aktual siswa:
+ *    durationMinutes = Math.max(1, Math.round((submittedAt - startedAt) / 60000)).
+ * 6. Update status sesi menjadi 'submitted' (BUKAN menetapkan level otomatis!),
+ *    simpan correct_answers, final_score_percent, duration_minutes, dan completed_at.
+ * 7. Ambil kontak WhatsApp resmi Tutor jenjang terkait (Elementary vs High School) dari tabel settings.
+ * 8. Kembalikan detail performa pengerjaan, status 'submitted', dan kontak tutor penanggung jawab jenjang.
  */
 export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
   try {
@@ -600,8 +595,8 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
             whatsapp: settingData?.tutor_elementary_whatsapp || '6281234567890',
           };
 
-    // Penanganan Idempotensi: Jika sesi sudah berstatus completed sebelumnya
-    if (session.status === 'completed') {
+    // Penanganan Idempotensi: Jika sesi sudah berstatus submitted, graded, atau completed
+    if (session.status === 'submitted' || session.status === 'graded' || session.status === 'completed') {
       const assignedLevel = Array.isArray(session.levels) ? session.levels[0] : session.levels;
       const completedTime = session.completed_at || new Date().toISOString();
       const elapsedMinutes =
@@ -615,18 +610,26 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
           studentName: session.student_name,
           whatsappNumber: session.whatsapp_number,
           educationLevel: sessionEduLevel,
+          status: session.status,
           durationMinutes: elapsedMinutes,
           totalQuestions: session.total_questions,
-          correctAnswers: session.correct_answers,
+          correctAnswers: session.correct_answers ?? 0,
           finalScorePercent: Number(session.final_score_percent ?? 0),
-          level: {
-            id: assignedLevel?.id ?? 0,
-            name: assignedLevel?.name ?? 'Level Selesai',
-            description: assignedLevel?.description ?? null,
-          },
+          level: assignedLevel ? {
+            id: assignedLevel.id,
+            name: assignedLevel.name,
+            description: assignedLevel.description,
+          } : null,
           tutor: tutorContact,
           completedAt: completedTime,
         },
+      };
+    }
+
+    if (session.status !== 'in_progress') {
+      return {
+        success: false,
+        error: 'Sesi ujian belum dimulai atau tidak valid untuk dikumpulkan.',
       };
     }
 
@@ -668,70 +671,26 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
     const totalQuestions = session.total_questions > 0 ? session.total_questions : 10;
     const finalScorePercent = Number(((correctCount / totalQuestions) * 100).toFixed(2));
 
-    // 4. Hitung durasi pengerjaan riil siswa (dalam satuan menit)
-    const completedAt = new Date().toISOString();
+    // 4. Hitung durasi pengerjaan aktual siswa (dalam menit)
+    const submittedAt = new Date().toISOString();
     const startMs = new Date(session.start_time).getTime();
-    const completedMs = new Date(completedAt).getTime();
-    const durationMinutes = Math.max(1, Math.round((completedMs - startMs) / 60000));
+    const submittedMs = new Date(submittedAt).getTime();
+    const durationMinutes = Math.max(1, Math.round((submittedMs - startMs) / 60000));
 
-    // 5. Ambil daftar konfigurasi level dan tentukan level penempatan (Matrix Evaluasi Skor + Waktu)
-    const { data: levelsData, error: levelsErr } = await supabase
-      .from('levels')
-      .select('id, name, min_score_percent, max_score_percent, max_duration_minutes, description')
-      .order('min_score_percent', { ascending: true });
-
-    if (levelsErr || !levelsData || levelsData.length === 0) {
-      console.error('Error saat mengambil data level:', levelsErr);
-      return {
-        success: false,
-        error: 'Konfigurasi level belum diatur dalam sistem.',
-      };
-    }
-
-    // Cari index level awal berdasarkan persentase skor
-    let matchedIndex = levelsData.findIndex(
-      (lvl) =>
-        finalScorePercent >= lvl.min_score_percent &&
-        finalScorePercent <= lvl.max_score_percent
-    );
-
-    if (matchedIndex === -1) {
-      if (finalScorePercent >= 100) {
-        matchedIndex = levelsData.length - 1;
-      } else {
-        matchedIndex = 0;
-      }
-    }
-
-    // Terapkan evaluasi waktu: jika durasi melebihi batas waktu level, turunkan 1 level
-    const initialLevel = levelsData[matchedIndex];
-    let finalLevel = initialLevel;
-
-    if (
-      initialLevel.max_duration_minutes !== null &&
-      initialLevel.max_duration_minutes !== undefined &&
-      durationMinutes > initialLevel.max_duration_minutes
-    ) {
-      // Degradasi 1 level ke bawah (misal Advanced -> Intermediate, Intermediate -> Beginner)
-      const demotedIndex = Math.max(0, matchedIndex - 1);
-      finalLevel = levelsData[demotedIndex];
-    }
-
-    // 6. Update data sesi menjadi 'completed' dan simpan durasi riil
+    // 5. Update data sesi menjadi 'submitted' (level resmi diserahkan kepada evaluasi Tutor)
     const { error: updateErr } = await supabase
       .from('test_sessions')
       .update({
-        status: 'completed',
+        status: 'submitted',
         correct_answers: correctCount,
         final_score_percent: finalScorePercent,
-        assigned_level_id: finalLevel.id,
         duration_minutes: durationMinutes,
-        completed_at: completedAt,
+        completed_at: submittedAt,
       })
       .eq('id', sessionId);
 
     if (updateErr) {
-      console.error('Error saat memperbarui status sesi completed:', updateErr);
+      console.error('Error saat memperbarui status sesi submitted:', updateErr);
       return {
         success: false,
         error: 'Gagal menyimpan hasil penilaian ujian.',
@@ -745,17 +704,14 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
         studentName: session.student_name,
         whatsappNumber: session.whatsapp_number,
         educationLevel: sessionEduLevel,
+        status: 'submitted',
         durationMinutes,
         totalQuestions,
         correctAnswers: correctCount,
         finalScorePercent,
-        level: {
-          id: finalLevel.id,
-          name: finalLevel.name,
-          description: finalLevel.description,
-        },
+        level: null, // Menunggu konfirmasi level resmi oleh Tutor
         tutor: tutorContact,
-        completedAt,
+        completedAt: submittedAt,
       },
     };
   } catch (error) {
@@ -770,7 +726,8 @@ export async function submitExam(sessionId: string): Promise<SubmitExamResult> {
 /**
  * Server Action: getSessionResult
  * 
- * Digunakan oleh Halaman Hasil (/result) untuk memuat data penilaian sesi yang telah berstatus completed.
+ * Digunakan oleh Halaman Hasil (/result) untuk memuat data performa sesi yang telah
+ * dikumpulkan ('submitted', 'graded', atau 'completed').
  */
 export async function getSessionResult(sessionId: string): Promise<GetSessionResultResponse> {
   try {
@@ -813,10 +770,11 @@ export async function getSessionResult(sessionId: string): Promise<GetSessionRes
       };
     }
 
-    if (session.status !== 'completed') {
+    const allowedStatuses = ['submitted', 'graded', 'completed'];
+    if (!allowedStatuses.includes(session.status)) {
       return {
         success: false,
-        error: 'Sesi ujian ini belum diselesaikan.',
+        error: 'Sesi ujian ini belum diselesaikan atau dikumpulkan.',
       };
     }
 
@@ -855,15 +813,16 @@ export async function getSessionResult(sessionId: string): Promise<GetSessionRes
         studentName: session.student_name,
         whatsappNumber: session.whatsapp_number,
         educationLevel: sessionEduLevel,
+        status: session.status,
         durationMinutes: elapsedMinutes,
         totalQuestions: session.total_questions,
-        correctAnswers: session.correct_answers,
+        correctAnswers: session.correct_answers ?? 0,
         finalScorePercent: Number(session.final_score_percent ?? 0),
-        level: {
-          id: assignedLevel?.id ?? 0,
-          name: assignedLevel?.name ?? 'Level Selesai',
-          description: assignedLevel?.description ?? null,
-        },
+        level: assignedLevel ? {
+          id: assignedLevel.id,
+          name: assignedLevel.name,
+          description: assignedLevel.description,
+        } : null,
         tutor: tutorContact,
         completedAt: completedTime,
       },

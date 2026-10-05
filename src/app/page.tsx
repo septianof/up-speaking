@@ -19,16 +19,10 @@ export default function LandingPage() {
       const stored = localStorage.getItem('upspeaking_session');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed?.end_time && new Date(parsed.end_time).getTime() > Date.now()) {
+        if (parsed?.id) {
           setIsRedirecting(true);
           router.replace('/exam');
           return;
-        } else {
-          // Sesi sudah kadaluarsa, bersihkan storage
-          localStorage.removeItem('upspeaking_session');
-          localStorage.removeItem('upspeaking_answers');
-          localStorage.removeItem('upspeaking_questions');
-          localStorage.removeItem('upspeaking_current_index');
         }
       }
     } catch (err) {
