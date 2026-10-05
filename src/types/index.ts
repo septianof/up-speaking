@@ -196,3 +196,23 @@ export type GetSessionResultResponse =
       success: false;
       error: string;
     };
+
+export interface RegisteredStudentSession {
+  id: string;
+  studentName: string;
+  whatsappNumber: string;
+  educationLevel: EducationLevel;
+  status: TestSessionStatus;
+  createdAt: string;
+}
+
+export type RegisterStudentResult =
+  | {
+      success: true;
+      session: RegisteredStudentSession;
+    }
+  | {
+      success: false;
+      error: string;
+      code?: 'INVALID_INPUT' | 'SESSION_EXISTS' | 'PREVIOUSLY_COMPLETED' | 'SERVER_ERROR';
+    };

@@ -1,7 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { EducationLevel } from '@/types';
+import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
+import type { EducationLevel, RegisterStudentResult } from '@/types';
 
 export interface DashboardMetrics {
   totalParticipants: number;
@@ -277,6 +278,173 @@ export async function toggleRetestPermission(
     return {
       success: false,
       error: 'Terjadi kesalahan sistem saat memperbarui izin tes ulang.',
+    };
+  }
+}
+
+/**
+ * Server Action: registerStudent
+ * Digunakan oleh staf Admin di meja pendaftaran untuk mendaftarkan calon siswa baru.
+ * 
+ * Tanggung Jawab:
+ * 1. Verifikasi autentikasi staf pemanggil (admin).
+ * 2. Validasi input nama siswa (2-150 karakter), nomor WhatsApp (normalisasi format 628xxx), dan jenjang pendidikan.
+ * 3. Cek apakah ada sesi berstatus 'registered' atau 'in_progress' untuk pasangan (WA + Nama).
+ * 4. Cek apakah siswa sudah pernah menyelesaikan tes tanpa izin tes ulang.
+ * 5. Buat record baru di tabel test_sessions dengan status 'registered'.
+ * 6. Kembalikan data sesi terdaftar.
+ */
+export async function registerStudent(
+  rawName: string,
+  rawWhatsApp: string,
+  rawEducationLevel: EducationLevel
+): Promise<RegisterStudentResult> {
+  try {
+    const supabase = createClient();
+
+    // 1. Verifikasi autentikasi admin
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return {
+        success: false,
+        error: 'Akses ditolak. Anda harus login sebagai admin terlebih dahulu.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    // 2. Validasi input nama
+    const studentName = rawName?.trim();
+    if (!studentName || studentName.length < 2) {
+      return {
+        success: false,
+        error: 'Nama lengkap calon siswa wajib diisi minimal 2 karakter.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    if (studentName.length > 150) {
+      return {
+        success: false,
+        error: 'Nama lengkap maksimal 150 karakter.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    // 3. Normalisasi & validasi nomor WhatsApp
+    const normalizedWhatsApp = normalizeWhatsAppNumber(rawWhatsApp);
+    if (!normalizedWhatsApp) {
+      return {
+        success: false,
+        error: 'Nomor WhatsApp tidak valid. Masukkan nomor HP/WA yang aktif (contoh: 08123456789).',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    // 4. Validasi jenjang pendidikan
+    const educationLevel = rawEducationLevel;
+    if (educationLevel !== 'elementary' && educationLevel !== 'high_school') {
+      return {
+        success: false,
+        error: 'Jenjang pendidikan wajib dipilih (Elementary atau High School).',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    // 5. Cek apakah ada sesi aktif atau riwayat pengerjaan untuk pasangan (WA + Nama)
+    const { data: existingSessions, error: checkErr } = await supabase
+      .from('test_sessions')
+      .select('id, status, can_retest, created_at')
+      .eq('whatsapp_number', normalizedWhatsApp)
+      .ilike('student_name', studentName)
+      .order('created_at', { ascending: false });
+
+    if (checkErr) {
+      console.error('Error saat cek sesi pendaftaran siswa:', checkErr);
+      return {
+        success: false,
+        error: 'Gagal memverifikasi data siswa ke database.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    if (existingSessions && existingSessions.length > 0) {
+      // a. Cek sesi yang masih aktif (registered atau in_progress)
+      const activeSession = existingSessions.find(
+        (s) => s.status === 'registered' || s.status === 'in_progress'
+      );
+      if (activeSession) {
+        return {
+          success: false,
+          error: `Siswa "${studentName}" dengan nomor WhatsApp ini sudah terdaftar (${
+            activeSession.status === 'in_progress' ? 'sedang ujian' : 'siap mengerjakan'
+          }). Siswa dapat langsung menuju halaman ujian.`,
+          code: 'SESSION_EXISTS',
+        };
+      }
+
+      // b. Cek sesi selesai yang belum diizinkan tes ulang
+      const completedWithoutRetest = existingSessions.find(
+        (s) =>
+          (s.status === 'submitted' || s.status === 'graded' || s.status === 'completed') &&
+          !s.can_retest
+      );
+      if (completedWithoutRetest) {
+        return {
+          success: false,
+          error: `Siswa "${studentName}" sudah pernah menyelesaikan placement test sebelumnya. Silakan berikan "Izin Tes Ulang" di tabel riwayat dashboard jika ingin mendaftarkan kembali.`,
+          code: 'PREVIOUSLY_COMPLETED',
+        };
+      }
+    }
+
+    // 6. Buat sesi baru berstatus 'registered'
+    const nowIso = new Date().toISOString();
+    const { data: newSession, error: insertErr } = await supabase
+      .from('test_sessions')
+      .insert({
+        student_name: studentName,
+        whatsapp_number: normalizedWhatsApp,
+        education_level: educationLevel,
+        status: 'registered',
+        start_time: nowIso,
+        end_time: nowIso,
+        can_retest: false,
+        total_questions: 0,
+        correct_answers: 0,
+      })
+      .select('id, student_name, whatsapp_number, education_level, status, created_at')
+      .single();
+
+    if (insertErr || !newSession) {
+      console.error('Error saat insert sesi pendaftaran:', insertErr);
+      return {
+        success: false,
+        error: 'Gagal menyimpan pendaftaran siswa baru ke database.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    return {
+      success: true,
+      session: {
+        id: newSession.id,
+        studentName: newSession.student_name,
+        whatsappNumber: newSession.whatsapp_number,
+        educationLevel: newSession.education_level as EducationLevel,
+        status: newSession.status,
+        createdAt: newSession.created_at,
+      },
+    };
+  } catch (err) {
+    console.error('Unexpected error di registerStudent:', err);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat mendaftarkan siswa baru.',
+      code: 'SERVER_ERROR',
     };
   }
 }
