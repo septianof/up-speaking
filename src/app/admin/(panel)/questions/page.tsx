@@ -15,7 +15,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   GraduationCap,
 } from 'lucide-react';
 import { getQuestionsForAdmin, AdminQuestion } from '@/app/actions/questions';

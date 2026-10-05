@@ -34,7 +34,7 @@ Tujuan utama sistem ini adalah menghadirkan instrumen tes penempatan yang kredib
      * Hak akses: Mendaftarkan calon siswa baru (Nama, No WA, Jenjang Pendidikan), mengelola Bank Soal (CRUD), memantau rekap riwayat global, mengelola pengaturan sistem, dan memberikan izin tes ulang (*retest permission*).
   3. **Tutor (Evaluator Akademik — Tutor Elementary & Tutor High School):**
      * Memerlukan autentikasi (*Email & Password*) via Supabase Auth dengan hak akses role Tutor.
-     * Hak akses: Mengakses daftar antrean hasil tes siswa sesuai jenjangnya (Tutor Elementary menangani siswa Elementary; Tutor High School menangani siswa High School), menganalisis akurasi jawaban dan durasi pengerjaan, serta menetapkan level penempatan resmi beserta catatan evaluasi.
+     * Hak akses: Mengakses daftar antrean hasil tes siswa sesuai jenjangnya (Tutor Elementary menangani siswa Elementary; Tutor High School menangani siswa High School), menganalisis akurasi jawaban dan durasi pengerjaan, serta menetapkan level penempatan resmi.
 * **Mekanisme Pengerjaan & Integritas Data:**
   * **Pengacakan Dinamis Anti-Hafalan:** Soal dan pilihan jawaban diacak secara dinamis di tingkat server menggunakan algoritma **Fisher-Yates Shuffle** per sesi pengerjaan siswa.
   * **Penyajian Soal Sesuai Jenjang:** Siswa hanya menerima bank soal yang relevan dengan jenjang pendidikannya (`Elementary` atau `High School`).
@@ -90,7 +90,6 @@ Tujuan utama sistem ini adalah menghadirkan instrumen tes penempatan yang kredib
     * `Beginner`
     * `Intermediate`
     * `Advanced`
-  * Input catatan/feedback evaluasi tutor (opsional).
   * Tombol aksi **"Simpan & Tetapkan Level"**.
 * Perubahan status sesi menjadi `graded` dan level resmi tersimpan permanen di database.
 
@@ -139,7 +138,7 @@ Tujuan utama sistem ini adalah menghadirkan instrumen tes penempatan yang kredib
 2. Tutor membuka antrean evaluasi jenjangnya (misal: Tutor High School membuka tab antrean High School).
 3. Tutor melihat daftar siswa dengan status `submitted` (Menunggu Review).
 4. Tutor mengklik baris siswa untuk melihat rincian performa (Akurasi % dan Durasi Pengerjaan Riil).
-5. Berdasarkan keahlian profesional dan data performa tersebut, Tutor memilih level penempatan (`Beginner`, `Intermediate`, atau `Advanced`), menambahkan catatan evaluasi jika diperlukan, lalu menekan **"Tetapkan Level"**.
+5. Berdasarkan keahlian profesional dan data performa tersebut, Tutor memilih level penempatan (`Beginner`, `Intermediate`, atau `Advanced`), lalu menekan **"Tetapkan Level"**.
 6. Sistem memperbarui status sesi menjadi `graded`, mencatat ID tutor penilai, dan menyimpan level resmi.
 7. Data hasil otomatis terbarui di rekapitulasi riwayat dan dapat diakses untuk koordinasi kelas belajar.
 
@@ -197,7 +196,7 @@ sequenceDiagram
     DB-->>Server: Return Data Antrean Siswa
     Server-->>Web: Tampilkan Tabel Antrean
     Tutor->>Web: Pilih Level (e.g. Intermediate) & Submit
-    Web->>Server: gradeSession(sessionId, levelId, tutorNotes)
+    Web->>Server: gradeSession(sessionId, levelId)
     Server->>DB: UPDATE test_sessions (status: 'graded', level_id, tutor_id)
     DB-->>Server: Updated
     Server-->>Web: Konfirmasi Berhasil Dinilai
@@ -278,7 +277,6 @@ erDiagram
         numeric score_percentage
         uuid level_id FK "assigned by tutor"
         uuid reviewed_by FK "tutor user id"
-        text tutor_notes
         boolean is_retest_allowed
         timestamp created_at
     }

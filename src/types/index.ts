@@ -7,6 +7,17 @@
 // ==============================================================================
 
 export type EducationLevel = 'elementary' | 'high_school';
+export type UserRole = 'admin' | 'tutor';
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  education_level: EducationLevel | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Setting {
   id: number;
@@ -47,7 +58,13 @@ export interface QuestionOption {
   created_at: string;
 }
 
-export type TestSessionStatus = 'in_progress' | 'completed' | 'expired';
+export type TestSessionStatus = 
+  | 'registered' 
+  | 'in_progress' 
+  | 'submitted' 
+  | 'graded' 
+  | 'completed' 
+  | 'expired';
 
 export interface TestSession {
   id: string;
@@ -63,8 +80,12 @@ export interface TestSession {
   final_score_percent: number | null;
   assigned_level_id: number | null;
   can_retest: boolean;
+  reviewed_by?: string | null;
   created_at: string;
   completed_at: string | null;
+  // Field join relasi opsional
+  level?: Level | null;
+  reviewer?: Profile | null;
 }
 
 export interface StudentAnswer {

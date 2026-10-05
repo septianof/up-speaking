@@ -461,14 +461,13 @@ flowchart TD
     B --> C["Tutor menganalisis kesesuaian akurasi dan durasi pengerjaan"]
 
     C --> D["Pilih Dropdown Level Resmi: Beginner / Intermediate / Advanced"]
-    D --> E["Input Catatan Evaluasi Tutor (Opsional)"]
-    E --> F["Klik Tombol 'Konfirmasi & Tetapkan Level'"]
+    D --> F["Klik Tombol 'Konfirmasi & Tetapkan Level'"]
 
     F --> G{"Validasi Pemilihan Level"}
     G -->|❌ Level Belum Dipilih| H["🔔 Pesan Error: Harap pilih salah satu level penempatan!"]
     H --> D
 
-    G -->|✅ Level Terpilih| I["Server perbarui sesi: status = 'graded', level_id, tutor_id, tutor_notes"]
+    G -->|✅ Level Terpilih| I["Server perbarui sesi: status = 'graded', level_id, tutor_id"]
     I --> J["🔔 Toast: Level siswa berhasil ditetapkan!"]
     J --> K["Tutup Modal & Perbarui Antrean Evaluasi (T2)"]
 ```
@@ -481,7 +480,6 @@ flowchart TD
   - Durasi Pengerjaan Aktual (dalam menit).
 - **Form Input Penetapan:**
   - Dropdown Pilihan Level: `Beginner`, `Intermediate`, `Advanced`.
-  - Textarea: Catatan / Rekomendasi Tutor (opsional).
 - **Tombol Aksi:**
   - Tombol Batal: *"Tutup"*.
   - Tombol Simpan: *"Konfirmasi & Tetapkan Level"*.
@@ -554,4 +552,4 @@ flowchart LR
 | **Admin** | A5 | Pengaturan Kontak Tutor | Halaman Penuh (Sidebar + Form) | Konfigurasi kontak WhatsApp resmi tutor penanggung jawab jenjang |
 | **Tutor** | T1 | Autentikasi Tutor | Halaman Penuh | Form login khusus evaluator akademik tutor |
 | **Tutor** | T2 | Antrean Evaluasi per Jenjang | Halaman Penuh (Sidebar + Table) | Antrean khusus jenjang tutor bersangkutan (Elementary / High School) |
-| **Tutor** | T3 | Penetapan Level Resmi | Modal Form | Analisis skor % & durasi riil, dropdown level resmi, dan catatan evaluasi |
+| **Tutor** | T3 | Penetapan Level Resmi | Modal Form | Analisis skor % & durasi riil dan dropdown level resmi |
