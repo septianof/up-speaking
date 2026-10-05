@@ -140,7 +140,7 @@ export type StartSessionResult =
   | {
       success: false;
       error: string;
-      code: 'INVALID_INPUT' | 'SESSION_BLOCKED' | 'SERVER_ERROR';
+      code: 'INVALID_INPUT' | 'SESSION_BLOCKED' | 'SERVER_ERROR' | 'NOT_REGISTERED';
     };
 
 export type SaveAnswerResult =
@@ -216,3 +216,16 @@ export type RegisterStudentResult =
       error: string;
       code?: 'INVALID_INPUT' | 'SESSION_EXISTS' | 'PREVIOUSLY_COMPLETED' | 'SERVER_ERROR';
     };
+
+export interface VerifyStudentAccessResult {
+  success: boolean;
+  error?: string;
+  code?: 'NOT_REGISTERED' | 'SESSION_BLOCKED' | 'READY_TO_START' | 'IN_PROGRESS' | 'SERVER_ERROR' | 'INVALID_INPUT';
+  session?: {
+    id: string;
+    studentName: string;
+    whatsappNumber: string;
+    educationLevel: EducationLevel;
+    status: TestSessionStatus;
+  };
+}

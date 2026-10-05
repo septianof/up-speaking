@@ -10,6 +10,8 @@ import type {
   SubmitExamResult,
   GetSessionResultResponse,
   EducationLevel,
+  VerifyStudentAccessResult,
+  TestSessionStatus,
 } from '@/types';
 
 /**
@@ -25,26 +27,135 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 /**
+ * Server Action: verifyStudentAccess
+ * Memeriksa status pendaftaran siswa tanpa memicu perubahan status ujian.
+ * Digunakan untuk validasi gerbang masuk awal di halaman landing page.
+ */
+export async function verifyStudentAccess(
+  rawName: string,
+  rawWhatsApp: string
+): Promise<VerifyStudentAccessResult> {
+  try {
+    const studentName = rawName?.trim();
+    if (!studentName || studentName.length < 2) {
+      return {
+        success: false,
+        error: 'Nama lengkap wajib diisi minimal 2 karakter.',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    const normalizedWA = normalizeWhatsAppNumber(rawWhatsApp);
+    if (!normalizedWA) {
+      return {
+        success: false,
+        error: 'Nomor WhatsApp tidak valid. Masukkan nomor HP/WA yang aktif (contoh: 08123456789).',
+        code: 'INVALID_INPUT',
+      };
+    }
+
+    const supabase = createClient();
+    const { data: sessions, error } = await supabase
+      .from('test_sessions')
+      .select('id, student_name, whatsapp_number, education_level, status, can_retest, created_at')
+      .eq('whatsapp_number', normalizedWA)
+      .ilike('student_name', studentName)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error saat verifikasi akses siswa:', error);
+      return {
+        success: false,
+        error: 'Terjadi gangguan saat memverifikasi data peserta.',
+        code: 'SERVER_ERROR',
+      };
+    }
+
+    if (!sessions || sessions.length === 0) {
+      return {
+        success: false,
+        error: `Data atas nama "${studentName}" dengan nomor ini belum terdaftar di sistem. Silakan temui staf kami di meja pendaftaran untuk registrasi terlebih dahulu.`,
+        code: 'NOT_REGISTERED',
+      };
+    }
+
+    // 1. Cek sesi in_progress
+    const inProgress = sessions.find((s) => s.status === 'in_progress');
+    if (inProgress) {
+      return {
+        success: true,
+        code: 'IN_PROGRESS',
+        session: {
+          id: inProgress.id,
+          studentName: inProgress.student_name,
+          whatsappNumber: inProgress.whatsapp_number,
+          educationLevel: inProgress.education_level as EducationLevel,
+          status: inProgress.status as TestSessionStatus,
+        },
+      };
+    }
+
+    // 2. Cek sesi registered (siap ujian)
+    const registered = sessions.find((s) => s.status === 'registered');
+    if (registered) {
+      return {
+        success: true,
+        code: 'READY_TO_START',
+        session: {
+          id: registered.id,
+          studentName: registered.student_name,
+          whatsappNumber: registered.whatsapp_number,
+          educationLevel: registered.education_level as EducationLevel,
+          status: registered.status as TestSessionStatus,
+        },
+      };
+    }
+
+    // 3. Jika hanya ada sesi yang sudah selesai (submitted, graded, completed)
+    const completedSession = sessions.find(
+      (s) => (s.status === 'submitted' || s.status === 'graded' || s.status === 'completed') && !s.can_retest
+    );
+    if (completedSession) {
+      return {
+        success: false,
+        error: `Peserta atas nama "${studentName}" telah menyelesaikan tes penempatan. Hasil tes Anda sedang atau telah dievaluasi oleh Tutor kami. Silakan hubungi staf/tutor jika Anda memerlukan bantuan.`,
+        code: 'SESSION_BLOCKED',
+      };
+    }
+
+    return {
+      success: false,
+      error: `Data peserta ditemukan, namun tidak memiliki sesi tes yang dapat dikerjakan. Silakan hubungi admin di meja pendaftaran.`,
+      code: 'NOT_REGISTERED',
+    };
+  } catch (err) {
+    console.error('Unexpected error di verifyStudentAccess:', err);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat memverifikasi akses pendaftaran.',
+      code: 'SERVER_ERROR',
+    };
+  }
+}
+
+/**
  * Server Action: startSession
  * 
  * Tanggung Jawab:
- * 1. Validasi nama siswa, normalisasi nomor WhatsApp ke format 628xxx, dan validasi jenjang pendidikan.
- * 2. Cek apakah ada sesi berjalan (in_progress & end_time > now) untuk pasangan (WA + Nama) -> Crash Recovery.
- * 3. Cek pencegahan fraud permanen: blokir jika pasangan (WA + Nama) sudah pernah tes kecuali can_retest = true.
- *    (Orang tua tetap dapat menggunakan 1 nomor WA untuk anak yang berbeda).
- * 4. Ambil butir soal aktif sesuai jenjang pendidikan yang dipilih (Elementary / High School).
- * 5. Buat sesi ujian baru di test_sessions dengan batas waktu server-side dan jenjang pendidikan.
- * 6. Kembalikan daftar soal aktif & opsi jawaban teracak TANPA kolom is_correct.
+ * 1. Validasi nama siswa & nomor WhatsApp (format 628xxx).
+ * 2. Cek sesi di database yang didaftarkan oleh admin (status: 'registered' atau 'in_progress').
+ *    - Jika belum terdaftar -> tolak dengan code: 'NOT_REGISTERED'.
+ *    - Jika sudah selesai -> tolak dengan code: 'SESSION_BLOCKED'.
+ * 3. Crash Recovery: Jika status 'in_progress', pulihkan jawaban yang sudah disimpan (auto-saved) dan muat soal sesuai jenjang.
+ * 4. Sesi Baru: Jika status 'registered', ambil soal aktif sesuai jenjang sesi, acak urutan & opsi dengan Fisher-Yates, ubah status ke 'in_progress', dan catat waktu mulai.
+ * 5. Kembalikan daftar soal & opsi teracak TANPA kolom is_correct.
  */
 export async function startSession(
   rawName: string,
   rawWhatsApp: string,
-  rawEducationLevel: EducationLevel = 'elementary'
+  rawEducationLevel?: EducationLevel
 ): Promise<StartSessionResult> {
   try {
-    // --------------------------------------------------------------------------
-    // 1. VALIDASI NAMA, NORMALISASI WHATSAPP, & VALIDASI JENJANG
-    // --------------------------------------------------------------------------
     const studentName = rawName?.trim();
     if (!studentName || studentName.length < 2) {
       return {
@@ -66,34 +177,24 @@ export async function startSession(
     if (!normalizedWA) {
       return {
         success: false,
-        error:
-          'Nomor WhatsApp tidak valid. Masukkan nomor ponsel aktif dengan format yang benar (contoh: 081234567890).',
+        error: 'Nomor WhatsApp tidak valid. Masukkan nomor ponsel aktif dengan format yang benar (contoh: 081234567890).',
         code: 'INVALID_INPUT',
       };
     }
 
-    const educationLevel: EducationLevel =
-      rawEducationLevel === 'high_school' ? 'high_school' : 'elementary';
-
     const supabase = createClient();
     const nowIso = new Date().toISOString();
 
-    // --------------------------------------------------------------------------
-    // 2. CEK SESI BERJALAN (CRASH RECOVERY)
-    // Sesi aktif dicocokkan berdasarkan kombinasi No WA + Nama Siswa (ilike)
-    // --------------------------------------------------------------------------
-    const { data: activeSessions, error: activeErr } = await supabase
+    // 1. Ambil seluruh sesi siswa ini
+    const { data: studentSessions, error: fetchErr } = await supabase
       .from('test_sessions')
       .select('*')
       .eq('whatsapp_number', normalizedWA)
       .ilike('student_name', studentName)
-      .eq('status', 'in_progress')
-      .gt('end_time', nowIso)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .order('created_at', { ascending: false });
 
-    if (activeErr) {
-      console.error('Error saat memeriksa sesi aktif:', activeErr);
+    if (fetchErr) {
+      console.error('Error saat memeriksa sesi peserta:', fetchErr);
       return {
         success: false,
         error: 'Terjadi gangguan saat memeriksa sesi ujian. Silakan coba kembali.',
@@ -101,17 +202,25 @@ export async function startSession(
       };
     }
 
-    // Jika siswa masih memiliki sesi yang sedang berjalan dan belum habis waktu
-    if (activeSessions && activeSessions.length > 0) {
-      const activeSession = activeSessions[0];
-      const sessionEduLevel: EducationLevel =
-        (activeSession.education_level as EducationLevel) || educationLevel;
+    // 2. Jika belum ada sesi sama sekali yang didaftarkan oleh admin
+    if (!studentSessions || studentSessions.length === 0) {
+      return {
+        success: false,
+        error: `Data atas nama "${studentName}" dengan nomor ini belum terdaftar di sistem. Silakan temui staf kami di meja pendaftaran untuk registrasi terlebih dahulu.`,
+        code: 'NOT_REGISTERED',
+      };
+    }
+
+    // 3. Cek apakah ada sesi berjalan (in_progress) -> Crash Recovery
+    const inProgressSession = studentSessions.find((s) => s.status === 'in_progress');
+    if (inProgressSession) {
+      const sessionEduLevel = (inProgressSession.education_level as EducationLevel) || rawEducationLevel || 'elementary';
 
       // Ambil jawaban yang sebelumnya sudah disimpan (auto-saved)
       const { data: answersData } = await supabase
         .from('student_answers')
         .select('question_id, selected_option_id')
-        .eq('session_id', activeSession.id);
+        .eq('session_id', inProgressSession.id);
 
       const savedAnswers: Record<string, string> = {};
       answersData?.forEach((ans) => {
@@ -120,7 +229,7 @@ export async function startSession(
         }
       });
 
-      // Ambil seluruh butir pertanyaan aktif sesuai jenjang sesi tanpa kolom is_correct
+      // Ambil soal aktif sesuai jenjang sesi tanpa is_correct
       const { data: questionsData, error: qErr } = await supabase
         .from('questions')
         .select(`
@@ -137,7 +246,7 @@ export async function startSession(
         .eq('is_active', true)
         .eq('education_level', sessionEduLevel);
 
-      if (qErr || !questionsData) {
+      if (qErr || !questionsData || questionsData.length === 0) {
         console.error('Error saat mengambil soal untuk sesi recovery:', qErr);
         return {
           success: false,
@@ -154,7 +263,6 @@ export async function startSession(
           order_index: number;
         }>) || [];
 
-        // Urutkan opsi sesuai order_index yang ada
         const sortedOptions: SanitizedOption[] = [...rawOptions]
           .sort((a, b) => a.order_index - b.order_index)
           .map((opt) => ({
@@ -175,172 +283,128 @@ export async function startSession(
         success: true,
         isResumed: true,
         session: {
-          id: activeSession.id,
-          student_name: activeSession.student_name,
-          whatsapp_number: activeSession.whatsapp_number,
+          id: inProgressSession.id,
+          student_name: inProgressSession.student_name,
+          whatsapp_number: inProgressSession.whatsapp_number,
           education_level: sessionEduLevel,
-          start_time: activeSession.start_time,
-          end_time: activeSession.end_time,
-          total_questions: activeSession.total_questions,
+          start_time: inProgressSession.start_time,
+          end_time: inProgressSession.end_time,
+          total_questions: inProgressSession.total_questions || resumedQuestions.length,
         },
         questions: resumedQuestions,
         savedAnswers,
       };
     }
 
-    // --------------------------------------------------------------------------
-    // 3. CEK FRAUD PERMANEN BERBASIS PASANGAN (NO WA + NAMA SISWA)
-    // Pemblokiran berlaku permanen bagi siswa yang sudah pernah tes,
-    // kecuali admin memberikan izin tes ulang (can_retest = true).
-    // Orang tua tetap bisa menggunakan 1 nomor WA untuk anak yang berbeda.
-    // --------------------------------------------------------------------------
-    const { data: pastSessions, error: pastErr } = await supabase
-      .from('test_sessions')
-      .select('id, student_name, status, can_retest, created_at, completed_at')
-      .eq('whatsapp_number', normalizedWA)
-      .ilike('student_name', studentName)
-      .in('status', ['completed', 'expired'])
-      .order('created_at', { ascending: false })
-      .limit(1);
+    // 4. Cek apakah ada sesi berstatus 'registered' (baru didaftarkan admin di meja registrasi)
+    const registeredSession = studentSessions.find((s) => s.status === 'registered');
+    if (registeredSession) {
+      const sessionEduLevel = (registeredSession.education_level as EducationLevel) || rawEducationLevel || 'elementary';
 
-    if (pastErr) {
-      console.error('Error saat memeriksa riwayat sesi peserta:', pastErr);
-      return {
-        success: false,
-        error: 'Terjadi gangguan saat memverifikasi data peserta.',
-        code: 'SERVER_ERROR',
-      };
-    }
+      // Ambil seluruh butir pertanyaan aktif sesuai jenjang sesi tanpa is_correct
+      const { data: questionsData, error: qErr } = await supabase
+        .from('questions')
+        .select(`
+          id,
+          question_text,
+          education_level,
+          question_options (
+            id,
+            question_id,
+            option_text,
+            order_index
+          )
+        `)
+        .eq('is_active', true)
+        .eq('education_level', sessionEduLevel);
 
-    // Jika siswa dengan kombinasi WA dan nama ini sudah pernah menyelesaikan tes
-    if (pastSessions && pastSessions.length > 0) {
-      const latestSession = pastSessions[0];
-      if (!latestSession.can_retest) {
+      const levelLabel =
+        sessionEduLevel === 'elementary' ? 'Elementary (SD)' : 'High School (SMP/SMA/Umum)';
+
+      if (qErr || !questionsData || questionsData.length === 0) {
+        console.error(`Error atau butir soal kosong untuk jenjang ${levelLabel}:`, qErr);
         return {
           success: false,
-          error: `Peserta atas nama "${studentName}" dengan nomor WhatsApp ini telah menyelesaikan tes penempatan sebelumnya. Akses tes penempatan berikutnya memerlukan izin dari Admin Up Speaking. Silakan hubungi admin untuk mendapatkan izin tes ulang.`,
-          code: 'SESSION_BLOCKED',
+          error: `Belum ada butir soal ujian aktif untuk jenjang ${levelLabel}. Silakan hubungi admin Up Speaking.`,
+          code: 'SERVER_ERROR',
         };
       }
-    }
 
-    // --------------------------------------------------------------------------
-    // 4. AMBIL PENGATURAN DURASI & BANK SOAL SESUAI JENJANG
-    // --------------------------------------------------------------------------
-    const { data: settingData } = await supabase
-      .from('settings')
-      .select('test_duration_minutes')
-      .eq('id', 1)
-      .maybeSingle();
-
-    const durationMinutes = settingData?.test_duration_minutes ?? 45;
-
-    // Ambil butir soal aktif sesuai jenjang pendidikan yang dipilih (TIDAK menyertakan is_correct)
-    const { data: questionsData, error: qErr } = await supabase
-      .from('questions')
-      .select(`
-        id,
-        question_text,
-        education_level,
-        question_options (
-          id,
-          question_id,
-          option_text,
-          order_index
-        )
-      `)
-      .eq('is_active', true)
-      .eq('education_level', educationLevel);
-
-    if (qErr || !questionsData || questionsData.length === 0) {
-      const levelLabel =
-        educationLevel === 'elementary' ? 'Elementary (SD)' : 'High School (SMP/SMA/Umum)';
-      console.error(`Error atau butir soal kosong untuk jenjang ${levelLabel}:`, qErr);
-      return {
-        success: false,
-        error: `Belum ada butir soal ujian aktif untuk jenjang ${levelLabel}. Silakan hubungi admin Up Speaking.`,
-        code: 'SERVER_ERROR',
-      };
-    }
-
-    // --------------------------------------------------------------------------
-    // 5. BUAT SESI BARU DI TEST_SESSIONS
-    // --------------------------------------------------------------------------
-    const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
-
-    const { data: createdSession, error: createSessionErr } = await supabase
-      .from('test_sessions')
-      .insert({
-        student_name: studentName,
-        whatsapp_number: normalizedWA,
-        education_level: educationLevel,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        status: 'in_progress',
-        total_questions: questionsData.length,
-        correct_answers: 0,
-        can_retest: false,
-      })
-      .select()
-      .single();
-
-    if (createSessionErr || !createdSession) {
-      console.error('Error saat membuat sesi baru:', createSessionErr);
-      return {
-        success: false,
-        error: 'Gagal memulai sesi ujian baru. Silakan coba sesaat lagi.',
-        code: 'SERVER_ERROR',
-      };
-    }
-
-    // Konsumsi izin tes ulang jika sebelumnya siswa diberikan akses retest oleh admin
-    if (pastSessions && pastSessions.length > 0 && pastSessions[0].can_retest) {
-      await supabase
+      // Perbarui sesi menjadi 'in_progress', catat waktu mulai (start_time)
+      const { error: updateErr } = await supabase
         .from('test_sessions')
-        .update({ can_retest: false })
-        .eq('id', pastSessions[0].id);
-    }
+        .update({
+          status: 'in_progress',
+          start_time: nowIso,
+          total_questions: questionsData.length,
+        })
+        .eq('id', registeredSession.id);
 
-    // --------------------------------------------------------------------------
-    // 6. ACAK URUTAN SOAL & PILIHAN OPSI (FISHER-YATES SHUFFLE)
-    // --------------------------------------------------------------------------
-    const sanitizedQuestions: SanitizedQuestion[] = shuffle(questionsData).map((q) => {
-      const rawOptions = (q.question_options as Array<{
-        id: string;
-        question_id: string;
-        option_text: string;
-        order_index: number;
-      }>) || [];
+      if (updateErr) {
+        console.error('Error saat memulai sesi ujian dari status registered:', updateErr);
+        return {
+          success: false,
+          error: 'Gagal memulai sesi ujian. Silakan coba kembali.',
+          code: 'SERVER_ERROR',
+        };
+      }
 
-      // Acak urutan opsi jawaban untuk setiap butir soal
-      const shuffledOptions: SanitizedOption[] = shuffle(rawOptions).map((opt) => ({
-        id: opt.id,
-        question_id: opt.question_id,
-        option_text: opt.option_text,
-      }));
+      // Acak urutan butir soal & opsi jawaban dengan Fisher-Yates Shuffle
+      const sanitizedQuestions: SanitizedQuestion[] = shuffle(questionsData).map((q) => {
+        const rawOptions = (q.question_options as Array<{
+          id: string;
+          question_id: string;
+          option_text: string;
+          order_index: number;
+        }>) || [];
+
+        const shuffledOptions: SanitizedOption[] = shuffle(rawOptions).map((opt) => ({
+          id: opt.id,
+          question_id: opt.question_id,
+          option_text: opt.option_text,
+        }));
+
+        return {
+          id: q.id,
+          question_text: q.question_text,
+          education_level: q.education_level as EducationLevel,
+          options: shuffledOptions,
+        };
+      });
 
       return {
-        id: q.id,
-        question_text: q.question_text,
-        education_level: q.education_level as EducationLevel,
-        options: shuffledOptions,
+        success: true,
+        isResumed: false,
+        session: {
+          id: registeredSession.id,
+          student_name: registeredSession.student_name,
+          whatsapp_number: registeredSession.whatsapp_number,
+          education_level: sessionEduLevel,
+          start_time: nowIso,
+          end_time: nowIso,
+          total_questions: questionsData.length,
+        },
+        questions: sanitizedQuestions,
       };
-    });
+    }
+
+    // 5. Jika tidak ada sesi 'in_progress' maupun 'registered', periksa apakah sudah selesai
+    const completedSession = studentSessions.find(
+      (s) => (s.status === 'submitted' || s.status === 'graded' || s.status === 'completed') && !s.can_retest
+    );
+
+    if (completedSession) {
+      return {
+        success: false,
+        error: `Peserta atas nama "${studentName}" telah menyelesaikan tes penempatan sebelumnya. Hasil tes Anda sedang atau telah dievaluasi oleh Tutor kami. Silakan hubungi staf/tutor jika Anda memerlukan bantuan atau izin tes ulang.`,
+        code: 'SESSION_BLOCKED',
+      };
+    }
 
     return {
-      success: true,
-      isResumed: false,
-      session: {
-        id: createdSession.id,
-        student_name: createdSession.student_name,
-        whatsapp_number: createdSession.whatsapp_number,
-        education_level: createdSession.education_level as EducationLevel,
-        start_time: createdSession.start_time,
-        end_time: createdSession.end_time,
-        total_questions: createdSession.total_questions,
-      },
-      questions: sanitizedQuestions,
+      success: false,
+      error: `Data pendaftaran ditemukan, namun tidak ada sesi ujian yang siap dikerjakan. Silakan hubungi staf di meja pendaftaran.`,
+      code: 'NOT_REGISTERED',
     };
   } catch (error) {
     console.error('Unexpected error di startSession:', error);
