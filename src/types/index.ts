@@ -230,3 +230,50 @@ export interface VerifyStudentAccessResult {
     status: TestSessionStatus;
   };
 }
+
+export interface TutorQueueItem {
+  id: string;
+  studentName: string;
+  whatsappNumber: string;
+  educationLevel: EducationLevel;
+  status: TestSessionStatus;
+  durationMinutes: number | null;
+  totalQuestions: number;
+  correctAnswers: number;
+  finalScorePercent: number;
+  completedAt: string;
+  assignedLevelId: number | null;
+  levelName: string | null;
+  reviewedBy: string | null;
+  reviewerName: string | null;
+}
+
+export type GetTutorQueueResult =
+  | {
+      success: true;
+      data: TutorQueueItem[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export type GradeSessionResult =
+  | {
+      success: true;
+      message: string;
+      session: {
+        id: string;
+        studentName: string;
+        educationLevel: EducationLevel;
+        status: TestSessionStatus;
+        levelId: number;
+        levelName: string;
+        reviewedBy: string;
+      };
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
