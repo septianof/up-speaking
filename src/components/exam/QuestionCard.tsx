@@ -45,9 +45,9 @@ export default function QuestionCard({
               aria-checked={isSelected}
               disabled={disabled}
               onClick={() => onSelectOption(question.id, option.id)}
-              className={`w-full p-4 sm:p-4.5 rounded-2xl flex items-center justify-between text-left transition-all duration-200 cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e263e] focus-visible:ring-offset-2 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`w-full p-4 sm:p-4.5 rounded-2xl flex items-center justify-between text-left transition-all duration-200 cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00a6f4] focus-visible:ring-offset-2 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${
                 isSelected
-                  ? 'border-2 border-[#0e263e] bg-white text-slate-900 shadow-xs'
+                  ? 'border-2 border-[#00a6f4] bg-sky-50/50 text-slate-900 shadow-xs ring-1 ring-[#00a6f4]/20'
                   : 'border border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/60 text-slate-700'
               }`}
             >
@@ -56,7 +56,7 @@ export default function QuestionCard({
                 <span
                   className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center transition-colors flex-shrink-0 ${
                     isSelected
-                      ? 'bg-[#0e263e] text-white shadow-xs'
+                      ? 'bg-[#00a6f4] text-white shadow-xs'
                       : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/70 group-hover:text-slate-700'
                   }`}
                 >
@@ -77,7 +77,7 @@ export default function QuestionCard({
               <div className="flex-shrink-0 w-6 flex items-center justify-center">
                 {isSelected ? (
                   <Check
-                    className="w-5 h-5 text-[#0e263e] stroke-[2.5] animate-scale-in"
+                    className="w-5 h-5 text-[#00a6f4] stroke-[2.5] animate-scale-in"
                     aria-hidden="true"
                   />
                 ) : (

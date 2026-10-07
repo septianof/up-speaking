@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import ExamHeader from '@/components/exam/ExamHeader';
@@ -21,7 +21,6 @@ export default function ExamPage() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTimeUp, setIsTimeUp] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Inisialisasi data ujian dari LocalStorage saat halaman dimuat (Crash Recovery STU-06)
@@ -110,17 +109,18 @@ export default function ExamPage() {
   }, [session]);
 
   // Handler pemilihan opsi jawaban (STU-04 & DB-05 Auto-save)
-  const handleSelectOption = (questionId: string, optionId: string) => {
+  const handleSelectOption = useCallback((questionId: string, optionId: string) => {
     // 1. Simpan jawaban di state lokal (optimistic update)
-    const nextAnswers = { ...answers, [questionId]: optionId };
-    setAnswers(nextAnswers);
-
-    // 2. Simpan ke LocalStorage untuk crash recovery instan (STU-06)
-    try {
-      localStorage.setItem('upspeaking_answers', JSON.stringify(nextAnswers));
-    } catch (err) {
-      console.error('Gagal menyimpan jawaban ke localStorage:', err);
-    }
+    setAnswers((prev) => {
+      const nextAnswers = { ...prev, [questionId]: optionId };
+      // 2. Simpan ke LocalStorage untuk crash recovery instan (STU-06)
+      try {
+        localStorage.setItem('upspeaking_answers', JSON.stringify(nextAnswers));
+      } catch (err) {
+        console.error('Gagal menyimpan jawaban ke localStorage:', err);
+      }
+      return nextAnswers;
+    });
 
     // 3. Auto-save ke database di background
     if (session?.id) {
@@ -145,11 +145,48 @@ export default function ExamPage() {
           setAutoSaveStatus('error');
         });
     }
-  };
+  }, [session?.id]);
+
+  // Dukungan navigasi keyboard untuk pengguna laptop / desktop
+  useEffect(() => {
+    if (isLoading || isPaletteOpen || isSubmitModalOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Abaikan jika fokus sedang berada pada elemen form atau tombol dialog
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+      } else if (e.key === 'ArrowRight') {
+        const total = questions.length || 10;
+        setCurrentIndex((prev) => Math.min(total - 1, prev + 1));
+      } else {
+        const currentQ = questions[currentIndex];
+        if (!currentQ || !currentQ.options) return;
+
+        let optIdx = -1;
+        const key = e.key.toUpperCase();
+        if (key === 'A' || e.key === '1') optIdx = 0;
+        else if (key === 'B' || e.key === '2') optIdx = 1;
+        else if (key === 'C' || e.key === '3') optIdx = 2;
+        else if (key === 'D' || e.key === '4') optIdx = 3;
+        else if (key === 'E' || e.key === '5') optIdx = 4;
+
+        if (optIdx >= 0 && optIdx < currentQ.options.length) {
+          handleSelectOption(currentQ.id, currentQ.options[optIdx].id);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoading, isPaletteOpen, isSubmitModalOpen, questions, currentIndex, handleSelectOption]);
 
   // Handler klik tombol Kumpulkan Ujian di soal terakhir (STU-07)
   const handleSubmitClick = () => {
-    setIsTimeUp(false);
     setIsSubmitModalOpen(true);
   };
 
@@ -311,7 +348,6 @@ export default function ExamPage() {
         isSubmitting={isSubmitting}
         totalQuestions={totalQuestions}
         answeredCount={answeredCount}
-        isTimeUp={isTimeUp}
       />
     </div>
   );

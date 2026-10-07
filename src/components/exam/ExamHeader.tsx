@@ -50,12 +50,11 @@ export default function ExamHeader({
   const seconds = elapsedSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-  // Persentase progres pengerjaan soal
-  const currentStep = Math.max(answeredCount, currentQuestionIndex + 1);
+  // Persentase progres pengerjaan soal berdasarkan jumlah yang telah terjawab
   const progressPercent =
     totalQuestions > 0
-      ? Math.min(100, Math.round((currentStep / totalQuestions) * 100))
-      : 10;
+      ? Math.min(100, Math.round((answeredCount / totalQuestions) * 100))
+      : 0;
 
   return (
     <header className="sticky top-0 z-40 w-full shadow-sm">
@@ -81,7 +80,9 @@ export default function ExamHeader({
                 {studentName || 'Peserta Ujian'}
               </span>
               <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-300 mt-0.5">
-                <span className="text-slate-400">Placement Test</span>
+                <span className="text-slate-400">
+                  {educationLevel === 'high_school' ? 'High School' : 'Elementary'} Test
+                </span>
                 <span className="text-slate-500">•</span>
 
                 {/* Badge Status Auto-Save */}
