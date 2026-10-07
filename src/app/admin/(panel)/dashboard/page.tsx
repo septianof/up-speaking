@@ -11,9 +11,11 @@ import {
   ArrowRight,
   RefreshCw,
   AlertCircle,
+  UserPlus,
 } from 'lucide-react';
 import { MetricCard } from '@/components/admin/MetricCard';
 import { StudentHistoryTable } from '@/components/admin/StudentHistoryTable';
+import { StudentRegisterModal } from '@/components/admin/StudentRegisterModal';
 import {
   getDashboardMetrics,
   getStudentHistory,
@@ -27,6 +29,7 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
 
   const loadDashboardData = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) {
@@ -85,6 +88,15 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            {/* Tombol Pendaftaran Siswa Baru (Meja Registrasi ADM-02) */}
+            <button
+              onClick={() => setIsRegisterModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#00a6f4] hover:bg-[#0095dc] text-white font-bold text-xs sm:text-sm transition-colors shadow-xs cursor-pointer active:scale-95"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Daftarkan Siswa Baru</span>
+            </button>
+
             {/* Tombol Refresh Data Terpadu */}
             <button
               onClick={() => loadDashboardData(true)}
@@ -186,6 +198,13 @@ export default function AdminDashboardPage() {
         isLoading={isLoading}
         isRefreshing={isRefreshing}
         onRefresh={() => loadDashboardData(true)}
+      />
+
+      {/* Modal Registrasi Siswa Baru di Meja Pendaftaran (ADM-02) */}
+      <StudentRegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={() => loadDashboardData(true)}
       />
     </div>
   );

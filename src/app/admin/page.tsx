@@ -39,10 +39,13 @@ function AdminLoginForm() {
 
       if (error) {
         console.error('Error login admin:', error.message);
-        if (error.message.includes('Invalid login credentials')) {
+        const rawMsg = error.message || '';
+        if (rawMsg.includes('Invalid login credentials')) {
           setErrorMsg('Email atau password yang Anda masukkan salah.');
+        } else if (rawMsg === '{}' || !rawMsg.trim()) {
+          setErrorMsg('Email atau password tidak cocok. Silakan periksa kembali.');
         } else {
-          setErrorMsg(error.message || 'Gagal masuk. Silakan periksa kembali akun admin Anda.');
+          setErrorMsg(rawMsg);
         }
         setIsLoading(false);
         return;
