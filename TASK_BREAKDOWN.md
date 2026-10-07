@@ -73,7 +73,7 @@ Setiap task menggunakan format checklist berikut:
 |---|---|---|---|---|---|---|
 | `[x]` | `ADM-01` | Halaman Login Admin (`/admin`): Form login email & password via Supabase Auth + middleware proteksi rute | `ENV-04` | 1.5 jam | 🔴 Wajib | Staf berhasil login dan rute terproteksi |
 | `[x]` | `ADM-02` | **Modal Form Registrasi Siswa Baru:** Tombol dan modal di dashboard admin untuk menginput Nama Siswa, No WA, dan Pilihan Jenjang (`Elementary` / `High School`) yang memicu Server Action `registerStudent` | `ADM-01`, `DB-04` | 1 jam | 🔴 Wajib | Admin berhasil mendaftarkan calon siswa baru langsung dari dashboard |
-| `[ ]` | `ADM-03` | **Dashboard Rekapitulasi Global & Retest:** 4 kartu metrik, tabel riwayat lengkap (Status: `Menunggu Review` / `Graded`, Jenjang, Durasi Riil, Skor, Tutor Penilai), pencarian Nama/WA, filter status/jenjang, tombol izin tes ulang, dan ekspor Excel/PDF | `ADM-02`, `DB-07` | 1.5 jam | 🔴 Wajib | Seluruh rekap riwayat tampil akurat, dapat difilter, diizinkan tes ulang, dan diekspor |
+| `[x]` | `ADM-03` | **Dashboard Rekapitulasi Global & Retest:** 4 kartu metrik, tabel riwayat lengkap (Status: `Menunggu Review` / `Graded`, Jenjang, Durasi Riil, Skor, Tutor Penilai), pencarian Nama/WA, filter status/jenjang, tombol izin tes ulang, dan ekspor Excel/PDF | `ADM-02`, `DB-07` | 1.5 jam | 🔴 Wajib | Seluruh rekap riwayat tampil akurat, dapat difilter, diizinkan tes ulang, dan diekspor |
 | `[x]` | `ADM-04` | Halaman Manajemen Bank Soal (`/admin/questions`): Tabel soal per jenjang, filter jenjang, modal CRUD soal dengan opsi dinamis A–D/E, penentuan kunci, dan soft delete | `ADM-01`, `DB-01` | 2 jam | 🔴 Wajib | CRUD bank soal dengan opsi dinamis dan soft delete berfungsi lancar |
 | `[x]` | `ADM-05` | Halaman Pengaturan Kontak Tutor (`/admin/settings`): Form konfigurasi nama dan nomor WhatsApp resmi Tutor Elementary dan High School | `ADM-01`, `DB-01` | 1 jam | 🔴 Wajib | Kontak tutor tersimpan ke database dan terhubung ke halaman hasil |
 
@@ -109,10 +109,10 @@ Setiap task menggunakan format checklist berikut:
 | Setup & Konfigurasi | `ENV` | 4 | 0 | 0 | **4** | 4 | 0 |
 | Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 7 | 0 |
 | Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 4 | 0 |
-| Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 4 | 1 |
+| Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 5 | 0 |
 | Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 0 | 3 |
 | Testing & Deployment | `FIN` | 4 | 0 | 0 | **4** | 2 | 2 |
-| **Total** | | **27** | **0** | **0** | **27 Task** | **21** | **6** |
+| **Total** | | **27** | **0** | **0** | **27 Task** | **22** | **5** |
 
 ---
 

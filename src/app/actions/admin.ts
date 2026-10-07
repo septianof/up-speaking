@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
-import type { EducationLevel, RegisterStudentResult } from '@/types';
+import type { EducationLevel, RegisterStudentResult, TestSessionStatus } from '@/types';
 
 export interface DashboardMetrics {
   totalParticipants: number;
@@ -30,6 +30,7 @@ export interface StudentHistoryRecord {
   studentName: string;
   whatsappNumber: string;
   educationLevel: EducationLevel;
+  status: TestSessionStatus;
   durationMinutes: number | null;
   completedAt: string;
   totalQuestions: number;
@@ -37,6 +38,7 @@ export interface StudentHistoryRecord {
   finalScorePercent: number;
   levelId: number;
   levelName: string;
+  reviewerName?: string | null;
   canRetest: boolean;
 }
 
@@ -58,7 +60,7 @@ export async function getDashboardMetrics(): Promise<GetDashboardMetricsResult> 
   try {
     const supabase = createClient();
 
-    // Ambil seluruh sesi ujian yang berstatus 'completed'
+    // Ambil seluruh sesi ujian untuk rekapitulasi metrik global
     const { data: sessions, error } = await supabase
       .from('test_sessions')
       .select(`
@@ -70,8 +72,7 @@ export async function getDashboardMetrics(): Promise<GetDashboardMetricsResult> 
           id,
           name
         )
-      `)
-      .eq('status', 'completed');
+      `);
 
     if (error) {
       console.error('Error saat mengambil data metrik dashboard:', error);
@@ -81,14 +82,20 @@ export async function getDashboardMetrics(): Promise<GetDashboardMetricsResult> 
       };
     }
 
-    const totalParticipants = sessions?.length || 0;
+    // Peserta yang telah mengerjakan (submitted, graded, atau completed)
+    const evaluatedSessions =
+      sessions?.filter(
+        (s) => s.status === 'submitted' || s.status === 'graded' || s.status === 'completed'
+      ) || [];
+
+    const totalParticipants = evaluatedSessions.length;
 
     let beginnerCount = 0;
     let intermediateCount = 0;
     let advancedCount = 0;
     let totalScore = 0;
 
-    sessions?.forEach((s) => {
+    evaluatedSessions.forEach((s) => {
       const level = Array.isArray(s.levels) ? s.levels[0] : s.levels;
       const levelName = level?.name?.toLowerCase() || '';
 
@@ -103,9 +110,12 @@ export async function getDashboardMetrics(): Promise<GetDashboardMetricsResult> 
       totalScore += Number(s.final_score_percent || 0);
     });
 
-    const beginnerPercent = totalParticipants > 0 ? Math.round((beginnerCount / totalParticipants) * 100) : 0;
-    const intermediatePercent = totalParticipants > 0 ? Math.round((intermediateCount / totalParticipants) * 100) : 0;
-    const advancedPercent = totalParticipants > 0 ? Math.round((advancedCount / totalParticipants) * 100) : 0;
+    const gradedOrLevelCount = beginnerCount + intermediateCount + advancedCount;
+    const denominator = gradedOrLevelCount > 0 ? gradedOrLevelCount : totalParticipants;
+
+    const beginnerPercent = denominator > 0 ? Math.round((beginnerCount / denominator) * 100) : 0;
+    const intermediatePercent = denominator > 0 ? Math.round((intermediateCount / denominator) * 100) : 0;
+    const advancedPercent = denominator > 0 ? Math.round((advancedCount / denominator) * 100) : 0;
     const averageScore = totalParticipants > 0 ? Math.round((totalScore / totalParticipants) * 10) / 10 : 0;
 
     return {
@@ -132,7 +142,7 @@ export async function getDashboardMetrics(): Promise<GetDashboardMetricsResult> 
 
 /**
  * Server Action: getStudentHistory
- * Mengambil daftar riwayat hasil ujian siswa yang berstatus 'completed' dari yang terbaru.
+ * Mengambil daftar riwayat hasil ujian siswa seluruh status dari yang terbaru.
  */
 export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
   try {
@@ -145,6 +155,7 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
         student_name,
         whatsapp_number,
         education_level,
+        status,
         duration_minutes,
         total_questions,
         correct_answers,
@@ -153,13 +164,17 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
         can_retest,
         completed_at,
         created_at,
+        reviewed_by,
         levels:assigned_level_id (
           id,
           name
+        ),
+        reviewer:reviewed_by (
+          id,
+          full_name
         )
       `)
-      .eq('status', 'completed')
-      .order('completed_at', { ascending: false, nullsFirst: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error saat mengambil riwayat siswa:', error);
@@ -171,11 +186,24 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
 
     const records: StudentHistoryRecord[] = (sessions || []).map((s) => {
       const level = Array.isArray(s.levels) ? s.levels[0] : s.levels;
+      const reviewer = Array.isArray(s.reviewer) ? s.reviewer[0] : s.reviewer;
+      const sessionStatus = (s.status as TestSessionStatus) || 'registered';
+
+      let defaultLevelName = 'Belum Ditentukan';
+      if (sessionStatus === 'submitted') {
+        defaultLevelName = 'Menunggu Review';
+      } else if (sessionStatus === 'registered') {
+        defaultLevelName = 'Belum Ujian';
+      } else if (sessionStatus === 'in_progress') {
+        defaultLevelName = 'Sedang Tes';
+      }
+
       return {
         id: s.id,
         studentName: s.student_name,
         whatsappNumber: s.whatsapp_number,
         educationLevel: (s.education_level as EducationLevel) || 'elementary',
+        status: sessionStatus,
         durationMinutes:
           s.duration_minutes !== null && s.duration_minutes !== undefined
             ? Number(s.duration_minutes)
@@ -185,7 +213,8 @@ export async function getStudentHistory(): Promise<GetStudentHistoryResult> {
         correctAnswers: s.correct_answers || 0,
         finalScorePercent: Number(s.final_score_percent ?? 0),
         levelId: s.assigned_level_id ?? 0,
-        levelName: level?.name || 'Belum Ditentukan',
+        levelName: level?.name || defaultLevelName,
+        reviewerName: reviewer?.full_name || null,
         canRetest: Boolean(s.can_retest),
       };
     });

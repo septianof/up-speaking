@@ -25,7 +25,7 @@ import {
 import { StudentHistoryRecord } from '@/app/actions/admin';
 import { RetestConfirmModal } from '@/components/admin/RetestConfirmModal';
 import { exportToExcel, exportToPDF } from '@/lib/export';
-import { EducationLevel } from '@/types';
+import { EducationLevel, TestSessionStatus } from '@/types';
 
 interface StudentHistoryTableProps {
   data: StudentHistoryRecord[];
@@ -46,6 +46,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
 }) => {
   const [localData, setLocalData] = useState<StudentHistoryRecord[]>(data);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [selectedEducationLevel, setSelectedEducationLevel] =
     useState<'all' | EducationLevel>('all');
@@ -140,6 +141,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     setIsExportingExcel(true);
     try {
       exportToExcel(filteredAndSortedData, {
+        status: selectedStatus,
         level: selectedLevel,
         educationLevel: selectedEducationLevel,
         search: searchTerm,
@@ -165,6 +167,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     setIsExportingPDF(true);
     try {
       exportToPDF(filteredAndSortedData, {
+        status: selectedStatus,
         level: selectedLevel,
         educationLevel: selectedEducationLevel,
         search: searchTerm,
@@ -184,6 +187,11 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
   // Filter & Pengurutan Data
   const filteredAndSortedData = useMemo(() => {
     let result = [...localData];
+
+    // Filter Status Sesi
+    if (selectedStatus !== 'all') {
+      result = result.filter((item) => item.status === selectedStatus);
+    }
 
     // Filter Jenjang Pendidikan (Elementary vs High School)
     if (selectedEducationLevel !== 'all') {
@@ -239,7 +247,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
     });
 
     return result;
-  }, [localData, selectedEducationLevel, selectedLevel, searchTerm, sortBy, sortOrder]);
+  }, [localData, selectedStatus, selectedEducationLevel, selectedLevel, searchTerm, sortBy, sortOrder]);
 
   // Pagination calculation
   const totalPages = Math.ceil(filteredAndSortedData.length / PAGE_SIZE) || 1;
@@ -250,9 +258,45 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
 
   const handleResetFilters = () => {
     setSearchTerm('');
+    setSelectedStatus('all');
     setSelectedLevel('all');
     setSelectedEducationLevel('all');
     setCurrentPage(1);
+  };
+
+  const getStatusBadge = (status: TestSessionStatus) => {
+    switch (status) {
+      case 'submitted':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs whitespace-nowrap">
+            <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
+            <span>Menunggu Review</span>
+          </span>
+        );
+      case 'graded':
+      case 'completed':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs whitespace-nowrap">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <span>Selesai Dinilai</span>
+          </span>
+        );
+      case 'in_progress':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" />
+            <span>Mengerjakan</span>
+          </span>
+        );
+      case 'registered':
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            <span>Terdaftar</span>
+          </span>
+        );
+    }
   };
 
   const getLevelBadge = (levelName: string) => {
@@ -390,8 +434,27 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           )}
         </div>
 
-        {/* Dropdown Filter Level, Jenjang & Urutan */}
+        {/* Dropdown Filter Status, Jenjang, Level & Urutan */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Filter Status Sesi */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={selectedStatus}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer pr-1"
+            >
+              <option value="all">Semua Status</option>
+              <option value="submitted">Menunggu Review</option>
+              <option value="graded">Selesai Dinilai</option>
+              <option value="in_progress">Sedang Mengerjakan</option>
+              <option value="registered">Terdaftar</option>
+            </select>
+          </div>
+
           {/* Filter Jenjang Pendidikan */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
             <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
@@ -453,7 +516,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
             </select>
           </div>
 
-          {(searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
+          {(searchTerm || selectedStatus !== 'all' || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
             <button
               onClick={handleResetFilters}
               className="px-2.5 py-1.5 text-xs font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200/80 transition-colors"
@@ -481,15 +544,17 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
           <thead>
             <tr className="bg-slate-50/80 text-slate-600 text-xs font-bold border-b border-slate-100">
               <th className="py-3.5 px-4 w-12 text-center">#</th>
-              <th className="py-3.5 px-4 min-w-[130px]">Waktu Ujian</th>
+              <th className="py-3.5 px-4 min-w-[130px]">Waktu</th>
               <th className="py-3.5 px-4 min-w-[170px]">Nama Lengkap</th>
               <th className="py-3.5 px-4 min-w-[150px]">Nomor WhatsApp</th>
-              <th className="py-3.5 px-4 min-w-[120px] text-center">Jenjang</th>
-              <th className="py-3.5 px-4 min-w-[100px] text-center">Durasi</th>
-              <th className="py-3.5 px-4 min-w-[110px] text-center">Benar / Total</th>
+              <th className="py-3.5 px-4 min-w-[110px] text-center">Jenjang</th>
+              <th className="py-3.5 px-4 min-w-[130px] text-center">Status Sesi</th>
+              <th className="py-3.5 px-4 min-w-[90px] text-center">Durasi</th>
+              <th className="py-3.5 px-4 min-w-[100px] text-center">Benar / Total</th>
               <th className="py-3.5 px-4 min-w-[90px] text-center">Skor Akhir</th>
               <th className="py-3.5 px-4 min-w-[120px] text-center">Level Siswa</th>
-              <th className="py-3.5 px-4 min-w-[140px] text-center">Aksi Retest</th>
+              <th className="py-3.5 px-4 min-w-[130px] text-center">Tutor Penilai</th>
+              <th className="py-3.5 px-4 min-w-[130px] text-center">Aksi Retest</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -514,6 +579,9 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
                   </td>
                   <td className="py-4 px-4 text-center">
+                    <div className="w-24 h-6 bg-slate-200 rounded-full mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
                     <div className="w-16 h-6 bg-slate-200 rounded-lg mx-auto" />
                   </td>
                   <td className="py-4 px-4 text-center">
@@ -526,6 +594,9 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
                   </td>
                   <td className="py-4 px-4 text-center">
+                    <div className="w-20 h-6 bg-slate-200 rounded-full mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
                     <div className="w-20 h-7 bg-slate-200 rounded-xl mx-auto" />
                   </td>
                 </tr>
@@ -533,7 +604,7 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
             ) : paginatedData.length === 0 ? (
               // Empty State
               <tr>
-                <td colSpan={10} className="py-12 px-4 text-center">
+                <td colSpan={12} className="py-12 px-4 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                     <Search className="w-6 h-6" />
                   </div>
@@ -541,11 +612,11 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                     Tidak Ada Hasil Ditemukan
                   </h4>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
-                    {searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all'
+                    {searchTerm || selectedStatus !== 'all' || selectedLevel !== 'all' || selectedEducationLevel !== 'all'
                       ? 'Tidak ada data peserta yang cocok dengan kriteria pencarian atau filter yang dipilih.'
-                      : 'Belum ada siswa yang menyelesaikan placement test.'}
+                      : 'Belum ada data siswa di sistem.'}
                   </p>
-                  {(searchTerm || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
+                  {(searchTerm || selectedStatus !== 'all' || selectedLevel !== 'all' || selectedEducationLevel !== 'all') && (
                     <button
                       onClick={handleResetFilters}
                       className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0e263e] text-white font-bold text-xs hover:bg-[#1a385c] transition-colors"
@@ -561,6 +632,8 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
               paginatedData.map((row, index) => {
                 const rowNumber = (currentPage - 1) * PAGE_SIZE + index + 1;
                 const isCopied = copiedId === row.id;
+                const isFinished =
+                  row.status === 'submitted' || row.status === 'graded' || row.status === 'completed';
 
                 return (
                   <tr
@@ -641,9 +714,19 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
                       )}
                     </td>
 
+                    {/* Status Sesi */}
+                    <td className="py-4 px-4 text-center">
+                      {getStatusBadge(row.status)}
+                    </td>
+
                     {/* Durasi Pengerjaan Riil */}
                     <td className="py-4 px-4 text-center">
-                      {row.durationMinutes !== null && row.durationMinutes !== undefined ? (
+                      {row.status === 'in_progress' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md whitespace-nowrap">
+                          <Clock className="w-3 h-3 text-sky-500 animate-spin" />
+                          <span>Berjalan...</span>
+                        </span>
+                      ) : row.durationMinutes !== null && row.durationMinutes !== undefined ? (
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap">
                           <Clock className="w-3 h-3 text-slate-500" />
                           <span>{row.durationMinutes} mnt</span>
@@ -655,24 +738,63 @@ export const StudentHistoryTable: React.FC<StudentHistoryTableProps> = ({
 
                     {/* Benar / Total */}
                     <td className="py-4 px-4 text-center">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>
-                          {row.correctAnswers} / {row.totalQuestions}
+                      {isFinished ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>
+                            {row.correctAnswers} / {row.totalQuestions}
+                          </span>
                         </span>
-                      </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-mono">-</span>
+                      )}
                     </td>
 
                     {/* Skor Akhir (%) */}
                     <td className="py-4 px-4 text-center">
-                      <span className="text-sm font-extrabold text-slate-900">
-                        {row.finalScorePercent}%
-                      </span>
+                      {isFinished ? (
+                        <span className="text-sm font-extrabold text-slate-900">
+                          {row.finalScorePercent}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-mono">-</span>
+                      )}
                     </td>
 
-                    {/* Level */}
+                    {/* Level Siswa */}
                     <td className="py-4 px-4 text-center">
-                      {getLevelBadge(row.levelName)}
+                      {row.status === 'graded' || row.status === 'completed' ? (
+                        getLevelBadge(row.levelName)
+                      ) : row.status === 'submitted' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs whitespace-nowrap">
+                          Menunggu Review
+                        </span>
+                      ) : row.status === 'in_progress' ? (
+                        <span className="text-xs text-slate-400 italic">Sedang Ujian</span>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Belum Ujian</span>
+                      )}
+                    </td>
+
+                    {/* Tutor Penilai */}
+                    <td className="py-4 px-4 text-center">
+                      {row.reviewerName ? (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/90 border border-slate-200/80">
+                          <div className="w-4 h-4 rounded-full bg-[#0e263e] text-white font-bold text-[9px] flex items-center justify-center flex-shrink-0">
+                            {row.reviewerName.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
+                            {row.reviewerName}
+                          </span>
+                        </div>
+                      ) : row.status === 'submitted' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 whitespace-nowrap">
+                          <Clock className="w-3 h-3 text-amber-500" />
+                          <span>Antrean Evaluasi</span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-mono">-</span>
+                      )}
                     </td>
 
                     {/* Aksi Retest */}
