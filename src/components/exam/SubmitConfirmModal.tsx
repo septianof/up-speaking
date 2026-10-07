@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { AlertTriangle, CheckCircle2, Clock, Loader2, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, X } from 'lucide-react';
 
 interface SubmitConfirmModalProps {
   isOpen: boolean;
@@ -11,7 +11,6 @@ interface SubmitConfirmModalProps {
   isSubmitting: boolean;
   totalQuestions: number;
   answeredCount: number;
-  isTimeUp?: boolean;
 }
 
 export default function SubmitConfirmModal({
@@ -22,19 +21,26 @@ export default function SubmitConfirmModal({
   isSubmitting,
   totalQuestions,
   answeredCount,
-  isTimeUp = false,
 }: SubmitConfirmModalProps) {
-  // Cegah scroll pada body saat modal terbuka
+  // Cegah scroll pada body saat modal terbuka & dengarkan tombol Escape
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (!isOpen) return;
+
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) return null;
 
@@ -45,10 +51,11 @@ export default function SubmitConfirmModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Konfirmasi Pengumpulan Ujian"
+      aria-labelledby="submit-modal-title"
+      aria-describedby="submit-modal-description"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs p-0 sm:p-4 transition-all duration-300 animate-fade-in"
       onClick={() => {
-        if (!isSubmitting && !isTimeUp) {
+        if (!isSubmitting) {
           onClose();
         }
       }}
@@ -63,11 +70,7 @@ export default function SubmitConfirmModal({
         {/* Modal Header & Close Button */}
         <div className="flex items-start justify-between gap-3 mb-2">
           {/* Status Icon */}
-          {isTimeUp ? (
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-600 flex items-center justify-center flex-shrink-0 shadow-xs">
-              <Clock className="w-6 h-6 animate-pulse" />
-            </div>
-          ) : isComplete ? (
+          {isComplete ? (
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-xs">
               <CheckCircle2 className="w-6 h-6" />
             </div>
@@ -77,12 +80,12 @@ export default function SubmitConfirmModal({
             </div>
           )}
 
-          {!isSubmitting && !isTimeUp && (
+          {!isSubmitting && (
             <button
               type="button"
               onClick={onClose}
               aria-label="Batal dan tutup konfirmasi"
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300 flex-shrink-0"
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300 flex-shrink-0 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -91,26 +94,26 @@ export default function SubmitConfirmModal({
 
         {/* Modal Title & Body */}
         <div className="my-2">
-          <h2 className="font-bold text-slate-900 text-lg sm:text-xl leading-snug">
-            {isTimeUp
-              ? 'Waktu Ujian Telah Habis!'
-              : isComplete
-              ? 'Kumpulkan Lembar Ujian?'
-              : 'Masih Ada Soal Belum Terjawab!'}
+          <h2
+            id="submit-modal-title"
+            className="font-bold text-slate-900 text-lg sm:text-xl leading-snug"
+          >
+            {isComplete ? 'Kumpulkan Lembar Ujian?' : 'Masih Ada Soal Belum Terjawab!'}
           </h2>
 
-          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-            {isTimeUp ? (
-              'Waktu pengerjaan tes telah berakhir. Seluruh lembar jawaban Anda sedang dikumpulkan secara otomatis oleh server ke sistem penilaian.'
-            ) : isComplete ? (
-              'Seluruh pertanyaan telah berhasil Anda jawab dengan lengkap. Setelah dikumpulkan, lembar jawaban akan langsung dinilai dan tidak dapat diubah kembali.'
+          <p
+            id="submit-modal-description"
+            className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed"
+          >
+            {isComplete ? (
+              'Seluruh pertanyaan telah berhasil Anda jawab dengan lengkap. Setelah dikumpulkan, lembar jawaban akan langsung dinilai oleh sistem dan diserahkan ke Tutor untuk evaluasi level resmi.'
             ) : (
               <>
                 Terdapat{' '}
                 <span className="font-bold text-amber-700">
                   {unansweredCount} butir pertanyaan
                 </span>{' '}
-                yang belum dijawab. Pertanyaan yang kosong akan dihitung sebagai jawaban yang tidak tepat.
+                yang belum Anda jawab. Pertanyaan yang dikosongkan tidak akan mendapatkan poin penilaian.
               </>
             )}
           </p>
@@ -142,49 +145,40 @@ export default function SubmitConfirmModal({
 
         {/* Modal Action Buttons */}
         <div className="mt-6 flex flex-col-reverse sm:flex-row items-center gap-2.5 sm:gap-3">
-          {isTimeUp ? (
-            <button
-              type="button"
-              disabled
-              className="w-full py-3 sm:py-3.5 rounded-xl bg-[#0e263e] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-not-allowed opacity-90"
-            >
-              <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
-              <span>Memproses Pengumpulan Nilai...</span>
-            </button>
-          ) : (
-            <>
-              {/* Tombol Batal / Periksa Lagi */}
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={unansweredCount > 0 ? onReview : onClose}
-                className="w-full sm:w-1/2 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {unansweredCount > 0 ? 'Periksa Lagi' : 'Cek Kembali'}
-              </button>
+          {/* Tombol Batal / Periksa Lagi */}
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={unansweredCount > 0 ? onReview : onClose}
+            className={`w-full sm:w-1/2 py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              unansweredCount > 0
+                ? 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            {unansweredCount > 0 ? 'Periksa Lagi' : 'Cek Kembali'}
+          </button>
 
-              {/* Tombol Kumpulkan */}
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={onConfirm}
-                className={`w-full sm:w-1/2 py-3 rounded-xl font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isComplete
-                    ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95'
-                    : 'bg-[#0e263e] hover:bg-[#1a385c] active:scale-95'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span>Mengirim...</span>
-                  </>
-                ) : (
-                  <span>{unansweredCount > 0 ? 'Tetap Kumpulkan' : 'Ya, Kumpulkan'}</span>
-                )}
-              </button>
-            </>
-          )}
+          {/* Tombol Kumpulkan */}
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={onConfirm}
+            className={`w-full sm:w-1/2 py-3 rounded-xl font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              isComplete
+                ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95'
+                : 'bg-[#0e263e] hover:bg-[#1a385c] active:scale-95'
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <span>Mengirim...</span>
+              </>
+            ) : (
+              <span>{unansweredCount > 0 ? 'Tetap Kumpulkan' : 'Ya, Kumpulkan'}</span>
+            )}
+          </button>
         </div>
       </div>
     </div>
