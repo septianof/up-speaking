@@ -288,3 +288,154 @@ export async function getTutorQueue(
     };
   }
 }
+
+export interface AvailableLevel {
+  id: number;
+  name: string;
+  description: string | null;
+}
+
+export interface TutorDashboardStats {
+  profile: {
+    id: string;
+    email: string;
+    fullName: string;
+    role: 'tutor' | 'admin';
+    educationLevel: EducationLevel;
+  };
+  pendingCount: number;
+  gradedCount: number;
+  totalEvaluated: number;
+  averageScore: number;
+}
+
+export type GetTutorDashboardStatsResult =
+  | {
+      success: true;
+      data: TutorDashboardStats;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+/**
+ * Server Action: getAvailableLevels
+ * Mengambil daftar level penempatan resmi dari tabel levels (Beginner, Intermediate, Advanced).
+ */
+export async function getAvailableLevels(): Promise<{
+  success: boolean;
+  data?: AvailableLevel[];
+  error?: string;
+}> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('levels')
+      .select('id, name, description')
+      .order('id', { ascending: true });
+
+    if (error) {
+      console.error('Error saat fetch levels:', error);
+      return { success: false, error: 'Gagal memuat master data level penempatan.' };
+    }
+
+    return {
+      success: true,
+      data: data || [],
+    };
+  } catch (err) {
+    console.error('Unexpected error di getAvailableLevels:', err);
+    return { success: false, error: 'Terjadi kesalahan sistem saat memuat level.' };
+  }
+}
+
+/**
+ * Server Action: getTutorDashboardStats
+ * Mengambil informasi profil tutor yang login dan metrik agregasi antrean jenjangnya.
+ */
+export async function getTutorDashboardStats(): Promise<GetTutorDashboardStatsResult> {
+  try {
+    const supabase = createClient();
+
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return {
+        success: false,
+        error: 'Akses ditolak. Anda belum login.',
+      };
+    }
+
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, role, education_level')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileErr || !profile) {
+      return {
+        success: false,
+        error: 'Profil staf tidak ditemukan.',
+      };
+    }
+
+    const tutorEducationLevel = (profile.education_level as EducationLevel) || 'elementary';
+
+    // Ambil seluruh sesi untuk jenjang ini
+    const { data: sessions, error: sessionsErr } = await supabase
+      .from('test_sessions')
+      .select('id, status, final_score_percent')
+      .eq('education_level', tutorEducationLevel)
+      .in('status', ['submitted', 'graded', 'completed']);
+
+    if (sessionsErr) {
+      console.error('Error fetch sessions stats:', sessionsErr);
+      return {
+        success: false,
+        error: 'Gagal memuat statistik antrean tutor.',
+      };
+    }
+
+    const pendingCount = (sessions || []).filter((s) => s.status === 'submitted').length;
+    const gradedSessions = (sessions || []).filter(
+      (s) => s.status === 'graded' || s.status === 'completed'
+    );
+    const gradedCount = gradedSessions.length;
+    const totalEvaluated = (sessions || []).length;
+
+    let totalScore = 0;
+    (sessions || []).forEach((s) => {
+      totalScore += Number(s.final_score_percent || 0);
+    });
+
+    const averageScore =
+      totalEvaluated > 0 ? Math.round((totalScore / totalEvaluated) * 10) / 10 : 0;
+
+    return {
+      success: true,
+      data: {
+        profile: {
+          id: profile.id,
+          email: profile.email || user.email || '',
+          fullName: profile.full_name || 'Tutor Up Speaking',
+          role: (profile.role as 'tutor' | 'admin') || 'tutor',
+          educationLevel: tutorEducationLevel,
+        },
+        pendingCount,
+        gradedCount,
+        totalEvaluated,
+        averageScore,
+      },
+    };
+  } catch (err) {
+    console.error('Unexpected error di getTutorDashboardStats:', err);
+    return {
+      success: false,
+      error: 'Terjadi kesalahan sistem saat memuat profil dan statistik tutor.',
+    };
+  }
+}

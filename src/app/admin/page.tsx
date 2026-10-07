@@ -52,8 +52,19 @@ function AdminLoginForm() {
       }
 
       if (data?.user) {
+        // Cek profil untuk menentukan redirect yang tepat (tutor -> /tutor, admin -> /admin/dashboard)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle();
+
         router.refresh();
-        router.replace(redirectPath);
+        if (profile?.role === 'tutor') {
+          router.replace('/tutor');
+        } else {
+          router.replace(redirectPath);
+        }
       }
     } catch (err) {
       console.error('Unexpected error login:', err);
@@ -76,7 +87,7 @@ function AdminLoginForm() {
 
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200/80">
           <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
-          <span>Admin Portal</span>
+          <span>Portal Staf & Tutor</span>
         </div>
       </div>
 
@@ -96,10 +107,10 @@ function AdminLoginForm() {
               />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Portal Admin Up Speaking
+              Portal Staf & Evaluator
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Masuk untuk mengelola data siswa, bank soal, dan hasil placement test
+              Masuk untuk mengelola data siswa, antrean evaluasi tutor, dan hasil placement test
             </p>
           </div>
 

@@ -83,9 +83,9 @@ Setiap task menggunakan format checklist berikut:
 
 | Selesai | ID | Deskripsi | Depends On | Estimasi | Prioritas | Kriteria Selesai |
 |---|---|---|---|---|---|---|
-| `[ ]` | `TUT-01` | **Autentikasi & Portal Login Tutor:** Halaman login dengan validasi role Tutor di Supabase Auth dan pengalihan ke antrean evaluasi | `DB-02`, `DB-03` | 1 jam | 🔴 Wajib | Akun Tutor berhasil login dan diarahkan ke dashboard evaluasi |
-| `[ ]` | `TUT-02` | **Antrean Evaluasi Siswa per Jenjang:** Dashboard khusus evaluator dengan filter otomatis sesuai jenjang tutor (Tutor Elementary hanya melihat antrean Elementary; Tutor High School melihat High School), tab filter status (`Menunggu Review` vs `Sudah Dinilai`) | `TUT-01` | 1.5 jam | 🔴 Wajib | Antrean siswa terfilter tepat per jenjang dan menampilkan skor % serta durasi riil |
-| `[ ]` | `TUT-03` | **Modal Evaluasi & Penetapan Level:** Tampilan rincian performa pengerjaan siswa, dropdown pilihan level resmi (`Beginner`, `Intermediate`, `Advanced`), input catatan evaluasi, dan aksi simpan penetapan level | `TUT-02`, `DB-07` | 1 jam | 🔴 Wajib | Tutor berhasil menetapkan level resmi dan status siswa otomatis menjadi `graded` |
+| `[x]` | `TUT-01` | **Autentikasi & Portal Login Tutor:** Halaman login dengan validasi role Tutor di Supabase Auth dan pengalihan ke antrean evaluasi | `DB-02`, `DB-03` | 1 jam | 🔴 Wajib | Akun Tutor berhasil login dan diarahkan ke dashboard evaluasi |
+| `[x]` | `TUT-02` | **Antrean Evaluasi Siswa per Jenjang:** Dashboard khusus evaluator dengan filter otomatis sesuai jenjang tutor (Tutor Elementary hanya melihat antrean Elementary; Tutor High School melihat High School), tab filter status (`Menunggu Review` vs `Sudah Dinilai`) | `TUT-01` | 1.5 jam | 🔴 Wajib | Antrean siswa terfilter tepat per jenjang dan menampilkan skor % serta durasi riil |
+| `[x]` | `TUT-03` | **Modal Evaluasi & Penetapan Level:** Tampilan rincian performa pengerjaan siswa, dropdown pilihan level resmi (`Beginner`, `Intermediate`, `Advanced`), input catatan evaluasi, dan aksi simpan penetapan level | `TUT-02`, `DB-07` | 1 jam | 🔴 Wajib | Tutor berhasil menetapkan level resmi dan status siswa otomatis menjadi `graded` |
 
 ---
 
@@ -110,9 +110,9 @@ Setiap task menggunakan format checklist berikut:
 | Skema DB & Server Actions | `DB` | 7 | 0 | 0 | **7** | 7 | 0 |
 | Alur Siswa (Peserta) | `STU` | 4 | 0 | 0 | **4** | 4 | 0 |
 | Alur Admin (Meja Registrasi & Rekap) | `ADM` | 5 | 0 | 0 | **5** | 5 | 0 |
-| Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 0 | 3 |
+| Alur Tutor (Evaluator Akademik) | `TUT` | 3 | 0 | 0 | **3** | 3 | 0 |
 | Testing & Deployment | `FIN` | 4 | 0 | 0 | **4** | 2 | 2 |
-| **Total** | | **27** | **0** | **0** | **27 Task** | **22** | **5** |
+| **Total** | | **27** | **0** | **0** | **27 Task** | **25** | **2** |
 
 ---
 
