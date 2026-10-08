@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,6 +7,10 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+}
+
+.font-fun {
+  font-family: 'Fredoka', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
 /* Sembunyikan scrollbar bawaan browser secara global (halaman tetap bisa di-scroll) */
@@ -58,5 +64,147 @@ html, body {
 
 .animate-scale-in {
   animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animations for Figma AI Landing Page */
+@keyframes heroFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ctaGlow {
+  0%, 100% {
+    box-shadow: 0 10px 30px -5px rgba(255, 255, 255, 0.3), 0 0 15px rgba(56, 189, 248, 0.2);
+  }
+  50% {
+    box-shadow: 0 15px 40px -5px rgba(255, 255, 255, 0.5), 0 0 25px rgba(56, 189, 248, 0.4);
+  }
+}
+
+.motion-fade-down {
+  animation: heroFadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.motion-fade-up {
+  opacity: 0;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.motion-delay-1 {
+  animation-delay: 0.15s;
+}
+
+.motion-delay-2 {
+  animation-delay: 0.3s;
+}
+
+.motion-delay-3 {
+  animation-delay: 0.45s;
+}
+
+.motion-cta-glow {
+  animation: ctaGlow 3.5s ease-in-out infinite;
+}
+
+/* Chamfered notched hero bottom as designed in Figma AI */
+.hero-notched {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 46px),
+    calc(50% + 225px) calc(100% - 46px),
+    calc(50% + 185px) 100%,
+    calc(50% - 185px) 100%,
+    calc(50% - 225px) calc(100% - 46px),
+    0 calc(100% - 46px)
+  );
+}
+
+@media (max-width: 639px) {
+  .hero-notched {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - 38px),
+      calc(50% + min(44vw, 190px)) calc(100% - 38px),
+      calc(50% + min(36vw, 155px)) 100%,
+      calc(50% - min(36vw, 155px)) 100%,
+      calc(50% - min(44vw, 190px)) calc(100% - 38px),
+      0 calc(100% - 38px)
+    );
+  }
+}
+
+/* Scroll reveal helper */
+.scroll-reveal {
+  opacity: 0;
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-left {
+  transform: translateX(-24px);
+}
+
+.reveal-right {
+  transform: translateX(24px);
+}
+
+.reveal-up {
+  transform: translateY(28px);
+}
+
+.reveal-delay-1 {
+  transition-delay: 0.15s;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Modal animations */
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-backdrop-in {
+  animation: modalBackdropIn 0.25s ease-out forwards;
+}
+
+.modal-fade-up {
+  animation: modalFadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
