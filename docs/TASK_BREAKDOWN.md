@@ -44,7 +44,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | **`TASK-001`** | Inisialisasi Proyek Next.js, TS, & Tailwind CSS | Fase 1 | `Done` | 2026-10-10 | next build sukses (Static 5/5) |
 | **`TASK-002`** | Pustaka Komponen Dasar (Base UI Components) | Fase 1 | `Done` | 2026-10-10 | next build sukses, lulus uji komponen |
-| **`TASK-003`** | Halaman Beranda Siswa (`SCR-001`) & Modal Akses (`SCR-002`) | Fase 2 | `Pending` | - | - |
+| **`TASK-003`** | Halaman Beranda Siswa (`SCR-001`) & Modal Akses (`SCR-002`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, lulus validasi & redirect |
 | **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Pending` | - | - |
 | **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Pending` | - | - |
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Pending` | - | - |
@@ -104,7 +104,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Halaman beranda tampil responsif di HP/desktop; tombol memicu modal input; form memvalidasi input kosong dengan pesan ramah; jika ada session aktif di `localStorage`, otomatis me-redirect ke `/test`.
 - **Verification:** Uji buka halaman di mobile viewport dan desktop; uji klik tombol dan validasi input.
 - **Risk / Notes:** Validasi nomor HP harus fleksibel menerima format nomor lokal Indonesia.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-10)
 
 #### `TASK-004`: Lembar Ujian Stepper Siswa (`SCR-003`) & Palet Soal (`CMP-001` - `CMP-004`)
 - **Goal / Scope:** Membangun antarmuka pengerjaan tes satu soal per halaman (*stepper*): sticky topbar dengan Elapsed Timer (`CMP-003`) dan status koneksi (`CMP-004`), kartu butir soal dengan opsi dinamis (`CMP-002`), tombol navigasi Prev/Next, tombol submit, dan Palet Nomor Soal (`CMP-001`) yang responsif (desktop: panel kanan sticky, mobile: bottom sheet drawer).
