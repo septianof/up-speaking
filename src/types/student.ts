@@ -4,6 +4,18 @@ export type SessionStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "FINAL
 
 export type FinalLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
+export interface QuestionOption {
+  id: string;
+  optionText: string;
+}
+
+export interface QuestionItem {
+  id: string;
+  questionText: string;
+  targetLevel: TargetLevel;
+  options: QuestionOption[];
+}
+
 export interface StudentSession {
   sessionId: string;
   studentId: string;

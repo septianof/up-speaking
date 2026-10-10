@@ -45,7 +45,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-001`** | Inisialisasi Proyek Next.js, TS, & Tailwind CSS | Fase 1 | `Done` | 2026-10-10 | next build sukses (Static 5/5) |
 | **`TASK-002`** | Pustaka Komponen Dasar (Base UI Components) | Fase 1 | `Done` | 2026-10-10 | next build sukses, lulus uji komponen |
 | **`TASK-003`** | Halaman Beranda Siswa (`SCR-001`) & Modal Akses (`SCR-002`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, lulus validasi & redirect |
-| **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Pending` | - | - |
+| **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, stepper & palet responsif |
 | **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Pending` | - | - |
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Pending` | - | - |
 | **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Pending` | - | - |
@@ -115,7 +115,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Siswa dapat berpindah nomor soal dengan tombol maupun klik nomor palet; warna nomor palet berubah hijau saat opsi dipilih; timer hitung maju berjalan; opsi jawaban mendukung format 2 s/d 5 pilihan dengan animasi transisi Framer Motion.
 - **Verification:** Uji simulasi memilih opsi pada data dummy 30 soal; periksa kelancaran transisi slide antar-nomor.
 - **Risk / Notes:** Animasi transisi harus ringan agar tidak membebani perangkat smartphone kelas pemula.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-10)
 
 #### `TASK-005`: Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`)
 - **Goal / Scope:** Membangun dialog konfirmasi sebelum submit (mendeteksi dan memberi peringatan jika masih ada nomor yang belum dijawab), serta halaman selesai (`SCR-004`) yang menampilkan konfirmasi bahwa tes berhasil dikumpulkan atau menampilkan kartu hasil resmi (**Beginner / Intermediate / Advanced**) jika status telah difinalisasi.
