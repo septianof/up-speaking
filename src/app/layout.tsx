@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import "./globals.css";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+export const metadata: Metadata = {
+  title: "Up Speaking Placement Test",
+  description: "Sistem Informasi Tes Penempatan Berbasis Web - Up Speaking Learning Centre",
+  icons: {
+    icon: "/images/logo.png",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="id" className={plusJakartaSans.variable}>
+      <body className="min-h-screen bg-surface-bg text-text-primary antialiased selection:bg-primary-100 selection:text-primary-700">
+        {children}
+      </body>
+    </html>
+  );
+}
