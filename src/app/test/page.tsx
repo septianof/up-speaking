@@ -8,6 +8,7 @@ import { QuestionCard } from "@/components/student/QuestionCard";
 import { QuestionPalette } from "@/components/student/QuestionPalette";
 import { ElapsedTimer } from "@/components/student/ElapsedTimer";
 import { OfflineBanner } from "@/components/student/OfflineBanner";
+import { SubmitConfirmModal } from "@/components/student/SubmitConfirmModal";
 import { getActiveSession, saveSession } from "@/lib/session";
 import { MOCK_QUESTIONS } from "@/lib/mock-questions";
 import { StudentSession } from "@/types/student";
@@ -26,6 +27,8 @@ export default function TestPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize or resume student session
@@ -84,16 +87,29 @@ export default function TestPage() {
     }
   };
 
-  // Submit test (Direct or via Confirm Modal in TASK-005)
-  const handleSubmit = () => {
+  // Open confirmation modal
+  const handleOpenSubmit = () => {
+    setIsSubmitModalOpen(true);
+  };
+
+  // Final confirm submit
+  const handleConfirmSubmit = async () => {
     if (!session) return;
-    const completedSession: StudentSession = {
-      ...session,
-      status: "COMPLETED",
-      completedAt: new Date().toISOString(),
-    };
-    saveSession(completedSession);
-    router.push("/result");
+    setIsSubmitting(true);
+
+    try {
+      // Mock calculation for UI phase
+      const completedSession: StudentSession = {
+        ...session,
+        status: "COMPLETED",
+        completedAt: new Date().toISOString(),
+      };
+      saveSession(completedSession);
+      setIsSubmitModalOpen(false);
+      router.push("/result");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading || !session) {
@@ -205,7 +221,7 @@ export default function TestPage() {
                 <Button
                   variant="accent"
                   size="md"
-                  onClick={handleSubmit}
+                  onClick={handleOpenSubmit}
                   className="gap-1.5"
                 >
                   <span>Kumpulkan Tes</span>
@@ -233,6 +249,16 @@ export default function TestPage() {
           </div>
         </div>
       </main>
+
+      {/* Submit Confirmation Modal */}
+      <SubmitConfirmModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        totalQuestions={totalQuestions}
+        answeredCount={answeredIndices.length}
+        isLoading={isSubmitting}
+      />
 
       {/* Mobile Bottom-Sheet Drawer for Question Palette */}
       {isDrawerOpen && (

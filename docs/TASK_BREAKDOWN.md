@@ -46,7 +46,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-002`** | Pustaka Komponen Dasar (Base UI Components) | Fase 1 | `Done` | 2026-10-10 | next build sukses, lulus uji komponen |
 | **`TASK-003`** | Halaman Beranda Siswa (`SCR-001`) & Modal Akses (`SCR-002`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, lulus validasi & redirect |
 | **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, stepper & palet responsif |
-| **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Pending` | - | - |
+| **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, konfirmasi submit & hasil |
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Pending` | - | - |
 | **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Pending` | - | - |
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Pending` | - | - |
@@ -126,7 +126,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Modal konfirmasi menghitung jumlah soal yang belum terisi dengan benar; setelah konfirmasi submit diarahkan ke `/result`; halaman menampilkan status menunggu tutor atau kartu pengumuman level resmi.
 - **Verification:** Uji klik submit dalam kondisi ada soal kosong vs semua soal terisi.
 - **Risk / Notes:** Tombol submit harus terlindungi dari *double-click* (loading state).
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-10)
 
 ---
 
