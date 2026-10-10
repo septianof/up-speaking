@@ -42,9 +42,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Phone number format validation (standard Indonesian mobile format)
-    if (!/^(^\+62|62|^08)(\d{8,12})$/.test(cleanPhone)) {
-      setError("Nomor handphone tidak valid. Gunakan format seperti 0812xxxxxxxx atau +62812xxxxxxxx.");
+    // Phone number format validation (standard Indonesian mobile format: 08xxx with 10-14 digits)
+    if (!/^08\d{8,12}$/.test(cleanPhone)) {
+      setError("Nomor handphone tidak valid. Gunakan format angka berawalan 08 (contoh: 081234567890, 10-13 digit).");
       return;
     }
 
@@ -79,6 +79,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow letters, spaces, and single quote (e.g. Syafi'i)
+    const sanitized = e.target.value.replace(/[^a-zA-Z\s']/g, "");
+    setFullName(sanitized);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow digits (0-9)
+    const digitsOnly = e.target.value.replace(/\D/g, "");
+    // Max 14 digits
+    if (digitsOnly.length <= 14) {
+      setPhone(digitsOnly);
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -107,13 +122,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               required
               disabled={isLoading}
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={handleNameChange}
               placeholder="Contoh: Muhammad Budi Pratama"
               className="w-full h-11 pl-10 pr-3.5 rounded-btn bg-surface-white border border-surface-border text-text-primary text-sm transition-all focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-100 placeholder:text-text-disabled"
             />
           </div>
           <p className="mt-1.5 text-xs text-text-muted">
-            Ketik nama sesuai data pendaftaran kursus Anda.
+            Hanya boleh huruf dan spasi (tanpa angka/simbol).
           </p>
         </div>
 
@@ -127,16 +142,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             </div>
             <input
               type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               disabled={isLoading}
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               placeholder="Contoh: 081234567890"
               className="w-full h-11 pl-10 pr-3.5 rounded-btn bg-surface-white border border-surface-border text-text-primary text-sm transition-all focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-100 placeholder:text-text-disabled"
             />
           </div>
           <p className="mt-1.5 text-xs text-text-muted">
-            Nomor aktif siswa atau orang tua yang terdaftar.
+            Hanya boleh angka (contoh: 081234567890).
           </p>
         </div>
 

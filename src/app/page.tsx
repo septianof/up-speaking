@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui";
+import { Button, Modal } from "@/components/ui";
 import { LoginModal } from "@/components/student/LoginModal";
 import { getActiveSession } from "@/lib/session";
 import {
@@ -13,12 +13,15 @@ import {
   Shuffle,
   ShieldCheck,
   ArrowRight,
-  UserCheck,
+  HelpCircle,
+  MessageCircle,
+  Lock,
 } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [activeSession, setActiveSession] = useState<ReturnType<typeof getActiveSession>>(null);
 
@@ -68,13 +71,14 @@ export default function Home() {
             </div>
           </div>
 
-          <a
-            href="/staff/login"
-            className="text-xs font-semibold text-text-muted hover:text-primary-600 transition-colors flex items-center gap-1.5 py-2 px-3 rounded-btn hover:bg-surface-subtle"
+          <button
+            type="button"
+            onClick={() => setIsHelpModalOpen(true)}
+            className="text-xs font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors flex items-center gap-1.5 py-2 px-3 rounded-btn border border-primary-100"
           >
-            <UserCheck className="w-3.5 h-3.5" />
-            <span>Login Staf</span>
-          </a>
+            <HelpCircle className="w-4 h-4 text-primary-500" />
+            <span>Butuh Bantuan?</span>
+          </button>
         </div>
       </header>
 
@@ -180,10 +184,19 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-surface-border py-6 px-6 text-center text-xs text-text-muted bg-surface-white">
-        <p>
-          &copy; {new Date().getFullYear()} Up Speaking Learning Centre. All rights reserved.
-        </p>
+      <footer className="w-full border-t border-surface-border py-6 px-6 bg-surface-white">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
+          <p>
+            &copy; {new Date().getFullYear()} Up Speaking Learning Centre. All rights reserved.
+          </p>
+          <a
+            href="/staff/login"
+            className="flex items-center gap-1.5 text-text-disabled hover:text-text-muted transition-colors py-1 px-2 rounded hover:bg-surface-subtle"
+          >
+            <Lock className="w-3 h-3" />
+            <span>Akses Staf & Tutor</span>
+          </a>
+        </div>
       </footer>
 
       {/* Student Login Modal */}
@@ -191,6 +204,47 @@ export default function Home() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {/* Student Help Modal (Opsi A) */}
+      <Modal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        title="Bantuan & Dukungan Siswa"
+        description="Mengalami kendala saat masuk ke lembar tes? Tim admin Up Speaking siap membantu Anda."
+      >
+        <div className="space-y-4 pt-2">
+          <div className="p-4 rounded-xl bg-surface-subtle border border-surface-border text-sm text-text-secondary space-y-2">
+            <p className="font-semibold text-text-primary">
+              Informasi Penting Sebelum Memulai Tes:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-xs text-text-muted">
+              <li>Pastikan Nama dan Nomor HP Anda telah didaftarkan oleh admin Up Speaking.</li>
+              <li>Gunakan nomor seluler aktif dengan format angka <code>08xxxxxxxxxx</code>.</li>
+              <li>Jika nama tidak ditemukan, konfirmasikan ke admin untuk aktivasi sesi tes Anda.</li>
+            </ul>
+          </div>
+
+          <a
+            href="https://wa.me/6281234567890?text=Halo%20Admin%20Up%20Speaking,%20saya%20memerlukan%20bantuan%20mengenai%20tes%20penempatan."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 h-11 px-5 rounded-btn bg-emerald-600 hover:bg-emerald-700 text-surface-white font-semibold text-sm transition-colors shadow-sm"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span>Hubungi Admin via WhatsApp</span>
+          </a>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsHelpModalOpen(false)}
+            >
+              Tutup
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
