@@ -7,16 +7,12 @@ import { Check } from "lucide-react";
 
 export interface QuestionCardProps {
   question: QuestionItem;
-  questionNumber: number;
-  totalQuestions: number;
   selectedOptionId?: string;
   onSelectOption: (optionId: string) => void;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
-  questionNumber,
-  totalQuestions,
   selectedOptionId,
   onSelectOption,
 }) => {
@@ -29,20 +25,10 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -12 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="w-full rounded-2xl bg-surface-white border border-surface-border p-6 sm:p-8 shadow-card"
+      className="w-full rounded-2xl bg-surface-white border border-surface-border p-5 sm:p-8 shadow-card"
     >
-      {/* Header: Question Number Badge */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-surface-border">
-        <span className="text-xs font-bold uppercase tracking-wider text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
-          Soal No. {questionNumber} dari {totalQuestions}
-        </span>
-        <span className="text-xs font-medium text-text-muted">
-          Pilihan Ganda ({question.options.length} Opsi)
-        </span>
-      </div>
-
       {/* Question Text */}
-      <h2 className="text-base sm:text-lg md:text-xl font-semibold text-text-primary leading-relaxed mb-8">
+      <h2 className="text-base sm:text-lg md:text-xl font-semibold text-text-primary leading-relaxed mb-6">
         {question.questionText}
       </h2>
 

@@ -162,17 +162,6 @@ export default function TestPage() {
               initialSeconds={session.elapsedSeconds || 0}
               onTick={handleTimerTick}
             />
-
-            {/* Mobile Drawer Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setIsDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-xl border border-surface-border bg-surface-white text-text-secondary hover:bg-surface-subtle transition-colors flex items-center gap-1.5 text-xs font-semibold"
-              aria-label="Buka palet nomor soal"
-            >
-              <LayoutGrid className="w-4 h-4 text-primary-500" />
-              <span>{answeredIndices.length}/{totalQuestions}</span>
-            </button>
           </div>
         </div>
       </header>
@@ -184,14 +173,12 @@ export default function TestPage() {
           <div className="lg:col-span-8 flex flex-col gap-6">
             <QuestionCard
               question={currentQuestion}
-              questionNumber={currentIndex + 1}
-              totalQuestions={totalQuestions}
               selectedOptionId={answers[currentQuestion.id]}
               onSelectOption={handleSelectOption}
             />
 
             {/* Navigation Stepper Action Bar */}
-            <div className="flex items-center justify-between gap-2 bg-surface-white p-3.5 sm:p-4 rounded-2xl border border-surface-border shadow-card">
+            <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-2xl border border-surface-border shadow-card">
               <Button
                 variant="outline"
                 size="md"
@@ -203,11 +190,20 @@ export default function TestPage() {
                 <span className="text-xs sm:text-sm">Sebelumnya</span>
               </Button>
 
-              <div className="text-center px-1">
-                <span className="text-[11px] sm:text-xs font-semibold text-text-muted whitespace-nowrap">
-                  Soal <span className="text-text-primary font-bold">{currentIndex + 1}</span> / {totalQuestions}
+              {/* Ergonomic Middle Palette Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsDrawerOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-subtle hover:bg-slate-200 border border-surface-border transition-colors text-xs font-semibold text-text-primary active:scale-95"
+                title="Buka palet nomor soal"
+                aria-label="Buka palet nomor soal"
+              >
+                <LayoutGrid className="w-3.5 h-3.5 text-primary-500" />
+                <span>
+                  Soal {currentIndex + 1} / {totalQuestions}
                 </span>
-              </div>
+                <span className="lg:hidden text-[10px] text-text-muted">⌃</span>
+              </button>
 
               {currentIndex < totalQuestions - 1 ? (
                 <Button
