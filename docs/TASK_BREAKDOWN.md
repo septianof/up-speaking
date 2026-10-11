@@ -51,7 +51,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard admin metrik & kelola siswa soft reset |
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, kelola tutor SCR-014 & bank soal dinamis 2-5 opsi SCR-009 |
 | **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard tutor SCR-010, evaluasi SCR-011, bank soal SCR-013, & modal penilaian CMP-007 |
-| **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Pending` | - | - |
+| **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, laporan admin & tutor dengan ekspor Excel & PDF |
 | **`TASK-011`** | Skrip DDL Basis Data (`schema.sql`) & Seed Admin (`seed.sql`) | Fase 4 | `Pending` | - | - |
 | **`TASK-012`** | Modul Algoritma Fisher-Yates Shuffle & Unit Test | Fase 4 | `Pending` | - | - |
 | **`TASK-013`** | Endpoint API Siswa (Verify, Start, Sync, Submit, Result) | Fase 4 | `Pending` | - | - |
@@ -185,7 +185,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Halaman menampilkan tabel rekapitulasi data hasil tes siswa (Nama, Jenjang, Skor, Durasi, Level Final, Catatan); tombol ekspor Excel dan PDF terpasang rapi di action bar.
 - **Verification:** Uji navigasi halaman laporan dan kelengkapan kolom tabel.
 - **Risk / Notes:** Logika generator berkas nyata akan dihubungkan di Fase 5.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-11)
 
 ---
 
