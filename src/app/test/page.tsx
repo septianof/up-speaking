@@ -46,11 +46,21 @@ export default function TestPage() {
     setIsLoading(false);
   }, [router]);
 
-  // Handle Option Select
+  // Handle Option Select / Toggle (Membatalkan pilihan jika opsi yang sama diklik lagi)
   const handleSelectOption = (optionId: string) => {
     if (!session) return;
     const currentQ = MOCK_QUESTIONS[currentIndex];
-    const newAnswers = { ...answers, [currentQ.id]: optionId };
+    const isCurrentlySelected = answers[currentQ.id] === optionId;
+
+    const newAnswers = { ...answers };
+    if (isCurrentlySelected) {
+      // Batalkan pilihan (uncheck)
+      delete newAnswers[currentQ.id];
+    } else {
+      // Pilih opsi baru
+      newAnswers[currentQ.id] = optionId;
+    }
+
     setAnswers(newAnswers);
 
     // Persist to session
