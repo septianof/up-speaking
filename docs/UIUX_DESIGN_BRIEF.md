@@ -63,11 +63,20 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | | `success-50` | `#ECFDF5` | Background badge sukses |
 | **Warning** | `warning-500` | `#F59E0B` | Banner offline, acuan level Intermediate |
 | | `warning-50` | `#FFFBEB` | Background banner peringatan pengerjaan |
+| **Kid-Friendly Palette** | `sun-400` | `#FFC93C` | Kuning matahari untuk aksen ceria, bintang, dan highlight |
+| | `mint-500` | `#10B981` | Hijau mint segar untuk tanda berhasil dan progres soal |
+| | `sky-soft` | `#F4FAFF` | Latar belakang sejuk ramah anak pada halaman siswa |
 | **Neutral Base** | `surface-white`| `#FFFFFF` | Background card, container lembar soal, navbar |
 | | `surface-bg` | `#F8FAFC` | Background utama aplikasi (Slate 50) |
 | | `border-light`| `#E2E8F0` | Garis pemisah tabel, border card (Slate 200) |
 | | `text-primary`| `#0F172A` | Teks judul, teks pertanyaan soal (Slate 900) |
 | | `text-muted` | `#64748B` | Label placeholder, caption, timer label (Slate 500) |
+
+### 5.2 Tipografi & Maskot Siswa
+- **Font Display Siswa:** `Baloo 2` (bulat, ramah, dan menyenangkan untuk judul utama).
+- **Font Teks Siswa:** `Nunito` (jelas, nyaman dibaca anak-anak dan remaja di layar HP).
+- **Font Antarmuka Staf:** `Plus Jakarta Sans` (profesional dan rapi untuk tabel & metrik admin/tutor).
+- **Maskot "Upi":** Karakter burung biru Up Speaking ceria (SVG vektor ringan) yang menyapa di landing page, memandu modal login, dan menyemangati di lembar hasil tes.
 
 ---
 

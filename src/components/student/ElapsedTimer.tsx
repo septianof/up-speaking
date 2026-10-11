@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Timer } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export interface ElapsedTimerProps {
   initialSeconds?: number;
@@ -46,10 +46,10 @@ export const ElapsedTimer: React.FC<ElapsedTimerProps> = ({
   };
 
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-subtle border border-surface-border text-text-primary text-xs font-semibold">
-      <Timer className="w-3.5 h-3.5 text-primary-500 animate-pulse" />
-      <span className="text-text-muted font-normal hidden sm:inline">Waktu Berjalan:</span>
-      <span className="font-mono text-sm tracking-wide text-text-primary">
+    <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-sky-soft border-2 border-primary-200/80 text-text-primary text-xs font-bold shadow-2xs font-kid">
+      <Clock className="w-3.5 h-3.5 text-primary-500 animate-spin" style={{ animationDuration: "10s" }} />
+      <span className="text-text-muted font-normal hidden sm:inline">Waktu Santai:</span>
+      <span className="font-mono text-xs sm:text-sm tracking-wide text-primary-800 font-bold">
         {formatTime(seconds)}
       </span>
     </div>

@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Modal, Button } from "@/components/ui";
-import { AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
+import { Mascot } from "@/components/student/Mascot";
+import { CheckCircle, AlertTriangle, Sparkles } from "lucide-react";
 
 export interface SubmitConfirmModalProps {
   isOpen: boolean;
@@ -28,64 +29,73 @@ export const SubmitConfirmModal: React.FC<SubmitConfirmModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={isLoading ? () => {} : onClose}
-      title="Konfirmasi Pengumpulan"
+      variant="kid"
+      topSlot={<Mascot mood={isAllAnswered ? "happy" : "think"} size={100} />}
+      title="Mau Kumpulkan Sekarang?"
+      description="Pastikan kamu sudah memeriksa semua jawabanmu dengan teliti ya!"
       maxWidth="md"
     >
-      <div className="space-y-3.5 pt-1">
+      <div className="space-y-4 pt-1 font-kid">
         {/* Banner Status Jawaban */}
         {isAllAnswered ? (
-          <div className="flex items-start gap-3 p-3.5 rounded-xl bg-success-50 border border-emerald-200 text-success-700">
-            <CheckCircle className="w-5 h-5 text-success-500 shrink-0 mt-0.5" />
+          <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-mint-50 border-2 border-mint-300 text-mint-900 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-mint-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+              <CheckCircle className="w-5 h-5" />
+            </div>
             <div>
-              <p className="font-bold text-sm text-emerald-900">
-                Semua Soal Sudah Terjawab
+              <p className="font-bold text-base text-mint-950 font-display">
+                Hebat! Semua Soal Sudah Terjawab 🎉
               </p>
-              <p className="text-xs text-success-600 mt-0.5">
-                Total {totalQuestions} dari {totalQuestions} soal telah terisi lengkap.
+              <p className="text-xs sm:text-sm text-mint-700 mt-0.5">
+                Total {totalQuestions} dari {totalQuestions} soal terisi lengkap.
               </p>
             </div>
           </div>
         ) : (
-          <div className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900">
-            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-sun-50 border-2 border-sun-300 text-sun-900 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-sun-400 text-amber-900 flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
             <div>
-              <p className="font-bold text-sm text-amber-950">
-                {unAnsweredCount} Soal Belum Terjawab
+              <p className="font-bold text-base text-amber-950 font-display">
+                Masih ada {unAnsweredCount} Soal Belum Terisi
               </p>
-              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
-                Anda baru mengisi {answeredCount} dari {totalQuestions} soal. Yakin ingin mengumpulkan?
+              <p className="text-xs sm:text-sm text-amber-800 mt-0.5 leading-relaxed">
+                Kamu baru mengisi {answeredCount} dari {totalQuestions} soal. Boleh diperiksa lagi lho!
               </p>
             </div>
           </div>
         )}
 
-        <div className="text-xs text-text-muted bg-surface-subtle p-3 rounded-xl border border-surface-border flex items-center gap-2">
-          <HelpCircle className="w-4 h-4 text-text-disabled shrink-0" />
+        <div className="text-xs sm:text-sm text-text-muted bg-sky-soft p-3.5 rounded-2xl border border-primary-100 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary-500 shrink-0" />
           <p className="leading-tight">
-            Jawaban yang sudah dikumpulkan tidak dapat diubah kembali.
+            Setelah dikumpulkan, Kak Tutor akan mengevaluasi hasilmu.
           </p>
         </div>
 
-        {/* Action Buttons: Simetris 50:50 di Mobile & Desktop */}
-        <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-surface-border">
+        {/* Action Buttons: Simetris 50:50 */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
           <Button
             type="button"
-            variant="outline"
+            variant="kidSoft"
+            size="lg"
             disabled={isLoading}
             onClick={onClose}
-            className="w-full"
+            className="w-full text-sm"
           >
             Periksa Lagi
           </Button>
 
           <Button
             type="button"
-            variant={isAllAnswered ? "primary" : "accent"}
+            variant="kid"
+            size="lg"
             isLoading={isLoading}
             onClick={onConfirm}
-            className="w-full shadow-sm"
+            className="w-full text-sm shadow-[0_4px_0_0_#B91C1C]"
           >
-            {isAllAnswered ? "Kumpulkan" : "Tetap Kumpulkan"}
+            {isAllAnswered ? "Kumpulkan!" : "Tetap Kumpulkan"}
           </Button>
         </div>
       </div>

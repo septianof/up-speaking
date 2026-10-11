@@ -4,17 +4,17 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Badge } from "@/components/ui";
+import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession, clearSession } from "@/lib/session";
 import { StudentSession } from "@/types/student";
 import {
-  CheckCircle2,
   Clock,
   Sparkles,
-  Award,
   ArrowRight,
   RefreshCw,
   LogOut,
   HelpCircle,
+  Smile,
 } from "lucide-react";
 
 export default function ResultPage() {
@@ -39,11 +39,12 @@ export default function ResultPage() {
 
   if (isLoading || !session) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6 bg-surface-bg">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
-          <p className="text-sm font-medium text-text-muted">
-            Memuat ringkasan hasil tes...
+      <main className="flex min-h-screen items-center justify-center p-6 bg-sky-soft font-kid">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Mascot mood="think" size={90} floating />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+          <p className="text-base font-bold text-text-secondary">
+            Memuat hasil tesmu...
           </p>
         </div>
       </main>
@@ -59,25 +60,25 @@ export default function ResultPage() {
       title: "Beginner Level",
       badge: "Beginner",
       badgeVariant: "accent" as const,
-      color: "border-accent-200 bg-accent-50/40 text-accent-700",
+      color: "border-sun-300 bg-sun-50 text-amber-900",
       description:
-        "Fokus pembelajaran pada penguatan kosakata dasar, pelafalan (pronunciation), dan pembentukan kalimat sederhana sehari-hari dengan rasa percaya diri.",
+        "Fokus pembelajaran pada penguatan kosakata dasar, pelafalan (pronunciation) seru, dan belajar berani berbicara sehari-hari dengan percaya diri!",
     },
     INTERMEDIATE: {
       title: "Intermediate Level",
       badge: "Intermediate",
-      badgeVariant: "warning" as const,
-      color: "border-amber-200 bg-amber-50/40 text-amber-800",
+      badgeVariant: "primary" as const,
+      color: "border-primary-200 bg-primary-50 text-primary-950",
       description:
-        "Fokus pembelajaran pada kelancaran percakapan (fluency), pemahaman tata bahasa kompleks, dan diskusi topik situasional interaktif.",
+        "Fokus pembelajaran pada kelancaran percakapan (fluency), cerita pengalaman, dan diskusi topik-topik menarik bersama teman kelas.",
     },
     ADVANCED: {
       title: "Advanced Level",
       badge: "Advanced",
       badgeVariant: "success" as const,
-      color: "border-emerald-200 bg-emerald-50/40 text-emerald-800",
+      color: "border-mint-300 bg-mint-50 text-mint-950",
       description:
-        "Fokus pembelajaran pada presentasi profesional, debat terstruktur, penguasaan idiom bahasa Inggris, dan kemampuan *public speaking* tingkat lanjut.",
+        "Fokus pembelajaran pada presentasi percaya diri, debat seru, penguasaan idiom bahasa Inggris, dan kemampuan *public speaking* tingkat lanjut!",
     },
   };
 
@@ -90,21 +91,21 @@ export default function ResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-bg flex flex-col justify-between">
+    <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
-      <header className="w-full bg-surface-white border-b border-surface-border py-4 px-6 sm:px-10 sticky top-0 z-20">
+      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100 py-3.5 px-6 sm:px-10 sticky top-0 z-20 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Image
             src="/images/logo.png"
             alt="Up Speaking Logo"
-            width={130}
-            height={40}
+            width={120}
+            height={38}
             priority
-            className="h-9 w-auto object-contain"
+            className="h-8.5 w-auto object-contain"
           />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-text-muted hidden sm:inline">
-              Peserta: {session.fullName}
+            <span className="text-xs sm:text-sm font-bold text-primary-700 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
+              Siswa: {session.fullName}
             </span>
           </div>
         </div>
@@ -114,48 +115,49 @@ export default function ResultPage() {
       <main className="flex-1 max-w-2xl mx-auto px-6 py-10 w-full flex flex-col items-center text-center justify-center">
         {isFinalized && activeLevel ? (
           /* KONDISI B: Status FINALIZED -> Menampilkan Kartu Level Resmi */
-          <div className="w-full bg-surface-white rounded-3xl border border-surface-border p-6 sm:p-10 shadow-float">
-            <div className="w-16 h-16 rounded-full bg-primary-50 text-primary-500 mx-auto flex items-center justify-center mb-5 border border-primary-100 shadow-sm">
-              <Award className="w-8 h-8" />
+          <div className="w-full bg-surface-white rounded-[32px] border-2 border-primary-100 p-7 sm:p-10 shadow-kid-card">
+            {/* Maskot Bersorak */}
+            <div className="flex justify-center -mt-16 mb-2">
+              <Mascot mood="cheer" size={130} floating />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-50 text-success-700 text-xs font-bold border border-emerald-200 mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-success-500" />
-              <span>Hasil Resmi Penempatan Kelas</span>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-mint-50 text-mint-800 text-xs font-bold border border-mint-200 mb-3 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-mint-600" />
+              <span>Pengumuman Level Resmi Kelasmu</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary mb-2">
-              Selamat, {session.fullName}!
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-text-primary mb-2">
+              Selamat, {session.fullName}! 🎉
             </h1>
-            <p className="text-xs sm:text-sm text-text-muted mb-8">
-              Berdasarkan evaluasi lembar tes dan tinjauan tim pengajar Up Speaking, Anda ditempatkan pada level:
+            <p className="text-sm text-text-muted mb-8 max-w-md mx-auto">
+              Berdasarkan hasil tes dan evaluasi Kak Tutor Up Speaking, kamu ditempatkan pada level:
             </p>
 
             {/* Official Level Card */}
-            <div className={`p-6 rounded-2xl border ${activeLevel.color} text-left mb-8 shadow-sm`}>
+            <div className={`p-6 sm:p-7 rounded-[24px] border-2 ${activeLevel.color} text-left mb-8 shadow-sm`}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-bold tracking-tight">
+                <h2 className="font-display text-2xl font-black tracking-tight">
                   {activeLevel.title}
                 </h2>
                 <Badge variant={activeLevel.badgeVariant} size="md">
                   {activeLevel.badge}
                 </Badge>
               </div>
-              <p className="text-xs sm:text-sm leading-relaxed">
+              <p className="text-sm sm:text-base leading-relaxed font-semibold">
                 {activeLevel.description}
               </p>
             </div>
 
             {/* Session Info Details */}
-            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-surface-subtle border border-surface-border text-xs mb-8">
-              <div className="text-left">
-                <span className="text-text-muted block">Jenjang Program:</span>
+            <div className="grid grid-cols-2 gap-3.5 p-4 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-8 text-left">
+              <div>
+                <span className="text-text-muted block font-normal">Jenjang Pilihan:</span>
                 <span className="font-bold text-text-primary capitalize">
-                  {session.targetLevel.toLowerCase().replace("_", " ")}
+                  {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
                 </span>
               </div>
-              <div className="text-left">
-                <span className="text-text-muted block">Durasi Pengerjaan:</span>
+              <div>
+                <span className="text-text-muted block font-normal">Waktu Pengerjaan:</span>
                 <span className="font-bold text-text-primary">
                   {formatElapsed(session.elapsedSeconds || 0)}
                 </span>
@@ -164,86 +166,88 @@ export default function ResultPage() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
-                variant="primary"
-                size="lg"
+                variant="kidBlue"
+                size="xl"
                 onClick={handleFinishAndExit}
-                className="w-full gap-2"
+                className="w-full gap-2 shadow-[0_5px_0_0_#206798]"
               >
                 <span>Keluar & Selesai</span>
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 ml-1" />
               </Button>
             </div>
           </div>
         ) : (
           /* KONDISI A: Status COMPLETED -> Konfirmasi Tes Berhasil Dikumpulkan */
-          <div className="w-full bg-surface-white rounded-3xl border border-surface-border p-6 sm:p-10 shadow-float">
-            <div className="w-16 h-16 rounded-full bg-success-50 text-success-500 mx-auto flex items-center justify-center mb-5 border border-emerald-100 shadow-sm animate-bounce">
-              <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+          <div className="w-full bg-surface-white rounded-[32px] border-2 border-primary-100 p-7 sm:p-10 shadow-kid-card">
+            {/* Maskot Bersorak */}
+            <div className="flex justify-center -mt-16 mb-2">
+              <Mascot mood="cheer" size={130} floating />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold border border-primary-100 mb-3">
-              <span>Status: Lembar Jawaban Berhasil Terkirim</span>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-mint-50 text-mint-800 text-xs font-bold border border-mint-200 mb-3 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-mint-600" />
+              <span>Hore! Lembar Jawaban Berhasil Terkirim</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary mb-2">
-              Terima Kasih, {session.fullName}!
+            <h1 className="font-display text-2xl sm:text-3xl font-black text-text-primary mb-2">
+              Terima Kasih, {session.fullName}! ⭐
             </h1>
-            <p className="text-sm text-text-secondary max-w-md mx-auto mb-8 leading-relaxed">
-              Jawaban tes penempatan Anda telah tersimpan dengan aman di sistem. Lembar tes Anda kini berada dalam tahap peninjauan oleh Tutor Up Speaking.
+            <p className="text-sm sm:text-base text-text-secondary max-w-md mx-auto mb-7 leading-relaxed">
+              Semua jawabanmu sudah tersimpan aman. Sekarang giliran Kak Tutor Up Speaking yang akan memeriksa lembar tesmu!
             </p>
 
             {/* Details Box */}
-            <div className="p-5 rounded-2xl bg-surface-subtle border border-surface-border text-left space-y-3 mb-8">
-              <div className="flex items-center justify-between text-xs pb-2 border-b border-surface-border">
+            <div className="p-5 rounded-2xl bg-sky-soft border border-primary-100 text-left space-y-3 mb-7 font-kid">
+              <div className="flex items-center justify-between text-xs sm:text-sm pb-2 border-b border-primary-100">
                 <span className="text-text-muted flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-text-secondary" />
+                  <Clock className="w-4 h-4 text-primary-500" />
                   Waktu Pengerjaan
                 </span>
-                <span className="font-semibold text-text-primary">
+                <span className="font-bold text-text-primary">
                   {formatElapsed(session.elapsedSeconds || 0)}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs pb-2 border-b border-surface-border">
+              <div className="flex items-center justify-between text-xs sm:text-sm pb-2 border-b border-primary-100">
                 <span className="text-text-muted">Total Soal Terisi</span>
-                <span className="font-semibold text-text-primary">
-                  {Object.keys(session.answers || {}).length} dari {session.totalQuestions || 25} Soal
+                <span className="font-bold text-text-primary">
+                  {Object.keys(session.answers || {}).length} dari {session.totalQuestions || 10} Soal
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-text-muted">Tahap Selanjutnya</span>
-                <span className="font-bold text-amber-700">
-                  Menunggu Evaluasi Tutor
+                <span className="font-bold text-amber-800 bg-sun-100 px-2.5 py-0.5 rounded-full">
+                  Menunggu Evaluasi Kak Tutor
                 </span>
               </div>
             </div>
 
             {/* Information Notice */}
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-primary-50 border border-primary-100 text-primary-800 text-xs text-left mb-8">
-              <HelpCircle className="w-4 h-4 text-primary-500 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-sun-50 border border-sun-200 text-amber-900 text-xs sm:text-sm text-left mb-8">
+              <HelpCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                Tutor kami akan meninjau jawaban dan menentukan rekomendasi kelas terbaik untuk Anda. Silakan hubungi admin Up Speaking atau kembali ke beranda.
+                Kamu boleh kembali ke beranda sekarang atau menutup halaman ini. Pengumuman resmi level kelas akan disampaikan oleh admin / Kak Tutor Up Speaking.
               </p>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3.5">
               <Button
-                variant="outline"
+                variant="kidSoft"
                 size="lg"
                 onClick={() => window.location.reload()}
-                className="w-full gap-2"
+                className="w-full gap-2 text-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Cek Status Hasil</span>
               </Button>
 
               <Button
-                variant="primary"
+                variant="kidBlue"
                 size="lg"
                 onClick={handleFinishAndExit}
-                className="w-full gap-2"
+                className="w-full gap-2 text-sm shadow-[0_4px_0_0_#206798]"
               >
                 <span>Kembali ke Beranda</span>
                 <ArrowRight className="w-4 h-4" />
@@ -254,8 +258,11 @@ export default function ResultPage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-surface-border py-4 px-6 text-center text-xs text-text-muted bg-surface-white">
-        <p>&copy; {new Date().getFullYear()} Up Speaking Learning Centre</p>
+      <footer className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid">
+        <p className="flex items-center justify-center gap-1">
+          <span>&copy; {new Date().getFullYear()} Up Speaking Learning Centre</span>
+          <Smile className="w-3.5 h-3.5 text-sun-500 inline" />
+        </p>
       </footer>
     </div>
   );

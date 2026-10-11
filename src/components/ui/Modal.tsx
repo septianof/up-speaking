@@ -13,6 +13,8 @@ export interface ModalProps {
   children: React.ReactNode;
   maxWidth?: "sm" | "md" | "lg" | "xl";
   showCloseButton?: boolean;
+  variant?: "default" | "kid";
+  topSlot?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -23,6 +25,8 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = "md",
   showCloseButton = true,
+  variant = "default",
+  topSlot,
 }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -47,6 +51,8 @@ export const Modal: React.FC<ModalProps> = ({
     xl: "max-w-xl",
   };
 
+  const isKid = variant === "kid";
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -58,7 +64,10 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className={cn(
+              "fixed inset-0 backdrop-blur-sm",
+              isKid ? "bg-primary-900/40" : "bg-slate-900/40"
+            )}
           />
 
           {/* Modal Dialog Card */}
@@ -68,25 +77,42 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={cn(
-              "relative w-full rounded-2xl bg-surface-white p-6 shadow-float border border-surface-border text-left z-10",
+              "relative w-full bg-surface-white shadow-float text-left z-10",
+              isKid
+                ? cn("rounded-[28px] p-6 sm:p-7 font-kid", topSlot && "mt-16")
+                : "rounded-2xl p-6 border border-surface-border",
               maxWidthStyles[maxWidth]
             )}
           >
+            {topSlot && <div className="flex justify-center -mt-20 mb-1">{topSlot}</div>}
+
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
+            <div className={cn("flex items-start justify-between mb-4", isKid && topSlot && "justify-center text-center")}>
               <div>
                 {title && (
-                  <h3 className="text-lg font-bold text-text-primary">{title}</h3>
+                  <h3
+                    className={cn(
+                      "font-bold text-text-primary",
+                      isKid ? "font-display text-2xl" : "text-lg"
+                    )}
+                  >
+                    {title}
+                  </h3>
                 )}
                 {description && (
-                  <p className="text-sm text-text-muted mt-1">{description}</p>
+                  <p className={cn("text-text-muted mt-1", isKid ? "text-base" : "text-sm")}>
+                    {description}
+                  </p>
                 )}
               </div>
               {showCloseButton && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors ml-2"
+                  className={cn(
+                    "rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors ml-2",
+                    isKid && "absolute top-4 right-4 bg-surface-subtle p-2"
+                  )}
                   aria-label="Tutup"
                 >
                   <X className="h-5 w-5" />
