@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
 import { StaffUser } from "@/types/staff";
+import { getMockTutors } from "@/lib/mock-tutors";
 import { Mail, Lock, AlertCircle, ArrowLeft, Shield } from "lucide-react";
 
 export default function StaffLoginPage() {
@@ -30,9 +31,33 @@ export default function StaffLoginPage() {
 
     try {
       // Mock Auth Simulation (will connect to Supabase Auth SSR in Phase 4 / Phase 5)
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
-      // Admin demo credential
+      // 1. Cek apakah cocok dengan akun di Mock Tutors
+      const existingTutors = getMockTutors();
+      const matchedTutor = existingTutors.find(
+        (t) => t.email.toLowerCase() === cleanEmail
+      );
+
+      if (matchedTutor) {
+        if (!matchedTutor.isActive) {
+          setError("Akun tutor Anda telah dinonaktifkan oleh Administrator.");
+          return;
+        }
+
+        const tutorUser: StaffUser = {
+          id: matchedTutor.id,
+          email: matchedTutor.email,
+          fullName: matchedTutor.fullName,
+          role: "TUTOR",
+          targetLevel: matchedTutor.targetLevel,
+        };
+        saveStaffSession(tutorUser);
+        router.push("/staff/tutor/dashboard");
+        return;
+      }
+
+      // 2. Admin demo credential
       if (cleanEmail === "admin@upspeaking.com" || cleanEmail.includes("admin")) {
         const adminUser: StaffUser = {
           id: "usr_admin_01",
@@ -45,13 +70,24 @@ export default function StaffLoginPage() {
         return;
       }
 
-      // Tutor demo credential (Elementary or High School)
-      if (cleanEmail.includes("tutor") || cleanEmail.includes("guru") || cleanEmail.includes("pengajar")) {
-        const isHighSchool = cleanEmail.includes("high") || cleanEmail.includes("sma");
+      // 3. Tutor demo credential umum (High School atau Elementary)
+      const isHighSchool =
+        cleanEmail.includes("high") ||
+        cleanEmail.includes("sma") ||
+        cleanEmail.includes("hs");
+
+      const isTutorGeneral =
+        cleanEmail.includes("tutor") ||
+        cleanEmail.includes("guru") ||
+        cleanEmail.includes("pengajar");
+
+      if (isHighSchool || isTutorGeneral) {
         const tutorUser: StaffUser = {
-          id: "usr_tutor_01",
+          id: isHighSchool ? "usr_tutor_hs" : "usr_tutor_elem",
           email: cleanEmail,
-          fullName: isHighSchool ? "Sarah Amalia, S.Pd (Tutor HS)" : "Dimas Arya, S.Pd (Tutor SD)",
+          fullName: isHighSchool
+            ? "Sarah Amalia, S.Pd (Tutor High School)"
+            : "Dimas Arya, S.Pd (Tutor Elementary)",
           role: "TUTOR",
           targetLevel: isHighSchool ? "HIGH_SCHOOL" : "ELEMENTARY",
         };
@@ -60,7 +96,7 @@ export default function StaffLoginPage() {
         return;
       }
 
-      // Default fallback mock login as Admin if general email
+      // 4. Default fallback mock login as Admin if general email
       const defaultUser: StaffUser = {
         id: "usr_staff_01",
         email: cleanEmail,
@@ -179,15 +215,59 @@ export default function StaffLoginPage() {
           {/* Quick Credential Hint for Testing */}
           <div className="mt-6 pt-5 border-t border-surface-border text-left">
             <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-              Akun Uji Coba (Mock State):
+              Akun Uji Coba Demo (Password Bebas):
             </p>
-            <div className="space-y-1.5 text-xs text-text-secondary bg-surface-subtle p-3 rounded-xl border border-surface-border">
-              <p>
-                <strong>Admin:</strong> <code>admin@upspeaking.com</code> (Semua pass)
-              </p>
-              <p>
-                <strong>Tutor:</strong> <code>tutor@upspeaking.com</code> (Semua pass)
-              </p>
+            <div className="space-y-2 text-xs text-text-secondary bg-surface-subtle p-3.5 rounded-xl border border-surface-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-text-primary">Tutor High School:</span>
+                  <div className="font-mono text-primary-700 text-[11px]">rian.highschool@upspeaking.com</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("rian.highschool@upspeaking.com");
+                    setPassword("123456");
+                  }}
+                  className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded hover:bg-primary-100 border border-primary-200"
+                >
+                  Gunakan
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
+                <div>
+                  <span className="font-bold text-text-primary">Tutor Elementary:</span>
+                  <div className="font-mono text-indigo-700 text-[11px]">dewi.elementary@upspeaking.com</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("dewi.elementary@upspeaking.com");
+                    setPassword("123456");
+                  }}
+                  className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200"
+                >
+                  Gunakan
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
+                <div>
+                  <span className="font-bold text-text-primary">Admin Lembaga:</span>
+                  <div className="font-mono text-slate-700 text-[11px]">admin@upspeaking.com</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("admin@upspeaking.com");
+                    setPassword("123456");
+                  }}
+                  className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 border border-slate-300"
+                >
+                  Gunakan
+                </button>
+              </div>
             </div>
           </div>
         </div>
