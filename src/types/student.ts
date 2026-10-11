@@ -14,6 +14,7 @@ export interface QuestionItem {
   questionText: string;
   targetLevel: TargetLevel;
   options: QuestionOption[];
+  correctOptionId?: string;
 }
 
 export interface StudentSession {

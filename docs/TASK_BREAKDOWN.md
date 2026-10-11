@@ -49,7 +49,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, konfirmasi submit & hasil |
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, sidebar responsive & login staff |
 | **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard admin metrik & kelola siswa soft reset |
-| **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Pending` | - | - |
+| **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, kelola tutor SCR-014 & bank soal dinamis 2-5 opsi SCR-009 |
 | **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Pending` | - | - |
 | **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Pending` | - | - |
 | **`TASK-011`** | Skrip DDL Basis Data (`schema.sql`) & Seed Admin (`seed.sql`) | Fase 4 | `Pending` | - | - |
@@ -163,7 +163,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Form tambah tutor dapat memilih jenjang pengampu; form bank soal memungkinkan menambah baris opsi hingga 5 (disable tombol jika sudah 5) dan menghapus hingga 2 (disable tombol jika sisa 2); radio kunci jawaban hanya mengizinkan 1 opsi benar per butir soal.
 - **Verification:** Uji tambah/hapus baris opsi jawaban di modal form soal; uji validasi input form tutor.
 - **Risk / Notes:** Pastikan konfirmasi dialog muncul sebelum menghapus butir soal.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-11)
 
 #### `TASK-009`: Halaman Tutor Dashboard (`SCR-010`), Penilaian Siswa (`SCR-011`), & Bank Soal Tutor (`SCR-013`)
 - **Goal / Scope:** Membangun Tutor Dashboard (`SCR-010`) dengan metrik jenjang pengampu dan tombol aksi cepat. Membangun Halaman Penilaian Siswa (`SCR-011`) dengan filter tab "Perlu Dinilai" vs "Selesai Dinilai", dan Modal Peninjauan Siswa (`CMP-007`) yang menampilkan skor %, durasi, sorotan acuan lembaga (*Beginner 0-59%, Intermediate 60-79%, Advanced 80-100%*), rincian jawaban benar/salah, radio level final, dan textarea catatan kualitatif tutor. Menyediakan Halaman Bank Soal Tutor (`SCR-013`).
