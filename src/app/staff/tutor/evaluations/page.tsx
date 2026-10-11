@@ -1,0 +1,268 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Award,
+  Search,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+} from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
+import { EvaluationModal } from "@/components/staff/EvaluationModal";
+import { getMockStudents, StudentRecord } from "@/lib/mock-data";
+import { getActiveStaff } from "@/lib/staff-session";
+import { TargetLevel } from "@/types/student";
+
+export default function TutorEvaluationsPage() {
+  const staff = getActiveStaff();
+  const tutorAssignedLevel: TargetLevel =
+    staff?.targetLevel || "ELEMENTARY";
+
+  const [students, setStudents] = useState<StudentRecord[]>([]);
+  const [activeTab, setActiveTab] = useState<"PENDING" | "FINALIZED">("PENDING");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
+
+  const loadData = () => {
+    setStudents(getMockStudents());
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Filter siswa: sesuai jenjang yang diampu tutor dan tab aktif
+  const filteredStudents = useMemo(() => {
+    return students
+      .filter((std) => {
+        // Filter jenjang tutor
+        const matchLevel = std.targetLevel === tutorAssignedLevel;
+
+        // Filter tab: PENDING (COMPLETED) vs FINALIZED
+        const matchStatus =
+          activeTab === "PENDING"
+            ? std.status === "COMPLETED"
+            : std.status === "FINALIZED";
+
+        // Filter search
+        const matchSearch =
+          std.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          std.phone.includes(searchQuery);
+
+        return matchLevel && matchStatus && matchSearch;
+      });
+  }, [students, tutorAssignedLevel, activeTab, searchQuery]);
+
+  const pendingCount = useMemo(() => {
+    return students.filter(
+      (s) => s.targetLevel === tutorAssignedLevel && s.status === "COMPLETED"
+    ).length;
+  }, [students, tutorAssignedLevel]);
+
+  const finalizedCount = useMemo(() => {
+    return students.filter(
+      (s) => s.targetLevel === tutorAssignedLevel && s.status === "FINALIZED"
+    ).length;
+  }, [students, tutorAssignedLevel]);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
+        <div>
+          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
+            <Award className="h-7 w-7 text-emerald-600" />
+            Penilaian & Evaluasi Siswa (SCR-011)
+          </h1>
+          <p className="text-sm text-text-muted mt-1">
+            Peninjauan jawaban tes objektif, rekomendasi level otomatis lembaga, dan penetapan hasil penempatan resmi.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Badge variant="primary" size="md">
+            Jenjang Binaan: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Filter Tabs and Search Bar */}
+      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-4">
+        {/* Tabs */}
+        <div className="flex items-center gap-2 border-b border-surface-border pb-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab("PENDING")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+              activeTab === "PENDING"
+                ? "bg-primary-500 text-white shadow-sm"
+                : "bg-surface-subtle text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            Perlu Dinilai
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                activeTab === "PENDING"
+                  ? "bg-white/20 text-white"
+                  : "bg-primary-100 text-primary-700"
+              }`}
+            >
+              {pendingCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("FINALIZED")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+              activeTab === "FINALIZED"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "bg-surface-subtle text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Selesai Dinilai
+            <span
+              className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                activeTab === "FINALIZED"
+                  ? "bg-white/20 text-white"
+                  : "bg-emerald-100 text-emerald-800"
+              }`}
+            >
+              {finalizedCount}
+            </span>
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Cari berdasarkan nama siswa atau nomor HP..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-xs sm:text-sm"
+          />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl bg-surface-white shadow-card border border-surface-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
+                <th className="py-3.5 px-4 w-12 text-center">No</th>
+                <th className="py-3.5 px-4">Nama Siswa</th>
+                <th className="py-3.5 px-4">Nomor HP</th>
+                <th className="py-3.5 px-4 text-center">Skor Objektif</th>
+                <th className="py-3.5 px-4 text-center">Rekomendasi Acuan</th>
+                <th className="py-3.5 px-4 text-center">Level Final</th>
+                <th className="py-3.5 px-4 text-center w-36">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
+              {filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                    <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p className="font-medium">
+                      {activeTab === "PENDING"
+                        ? "Tidak ada lembar tes siswa yang menunggu evaluasi saat ini."
+                        : "Belum ada siswa yang telah difinalisasi pada jenjang ini."}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredStudents.map((std, idx) => {
+                  const scorePercent = Math.round(
+                    ((std.score || 0) / (std.totalQuestions || 10)) * 100
+                  );
+                  const recommended =
+                    scorePercent >= 80 ? "ADVANCED" : scorePercent >= 60 ? "INTERMEDIATE" : "BEGINNER";
+
+                  return (
+                    <tr
+                      key={std.id}
+                      className="hover:bg-surface-subtle/40 transition-colors"
+                    >
+                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
+                        {idx + 1}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-text-primary">{std.fullName}</div>
+                        {std.notes && (
+                          <p className="text-[11px] text-text-muted truncate max-w-xs mt-0.5">
+                            &quot;{std.notes}&quot;
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                        {std.phone}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="font-black text-primary-600">
+                          {std.score || 0}/{std.totalQuestions || 10}
+                        </span>
+                        <span className="text-xs text-text-muted ml-1">({scorePercent}%)</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                          <Sparkles className="h-3 w-3 text-amber-500" />
+                          {recommended}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        {std.finalLevel ? (
+                          <Badge
+                            variant={
+                              std.finalLevel === "ADVANCED"
+                                ? "success"
+                                : std.finalLevel === "INTERMEDIATE"
+                                ? "primary"
+                                : "warning"
+                            }
+                            size="sm"
+                          >
+                            {std.finalLevel}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-text-muted italic">Belum ditetapkan</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStudent(std)}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm ${
+                            activeTab === "PENDING"
+                              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                              : "bg-surface-subtle text-text-primary border border-surface-border hover:bg-slate-200"
+                          }`}
+                        >
+                          {activeTab === "PENDING" ? "Buka Evaluasi" : "Ubah Evaluasi"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal Evaluasi */}
+      <EvaluationModal
+        isOpen={Boolean(selectedStudent)}
+        student={selectedStudent}
+        onClose={() => setSelectedStudent(null)}
+        onSuccess={() => loadData()}
+      />
+    </div>
+  );
+}

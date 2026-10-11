@@ -50,7 +50,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, sidebar responsive & login staff |
 | **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard admin metrik & kelola siswa soft reset |
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, kelola tutor SCR-014 & bank soal dinamis 2-5 opsi SCR-009 |
-| **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Pending` | - | - |
+| **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard tutor SCR-010, evaluasi SCR-011, bank soal SCR-013, & modal penilaian CMP-007 |
 | **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Pending` | - | - |
 | **`TASK-011`** | Skrip DDL Basis Data (`schema.sql`) & Seed Admin (`seed.sql`) | Fase 4 | `Pending` | - | - |
 | **`TASK-012`** | Modul Algoritma Fisher-Yates Shuffle & Unit Test | Fase 4 | `Pending` | - | - |
@@ -174,7 +174,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Tutor hanya melihat data sesuai jenjang binaannya; modal penilaian menyorot acuan level lembaga secara otomatis berdasarkan skor %; form menyimpan pilihan level final dan catatan evaluasi.
 - **Verification:** Uji buka modal penilaian siswa pada mock data; verifikasi sorotan kotak acuan level.
 - **Risk / Notes:** Teks catatan tutor bersifat opsional namun sangat dianjurkan.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-11)
 
 #### `TASK-010`: Halaman Laporan & Komponen Ekspor (`SCR-008` & `SCR-012`)
 - **Goal / Scope:** Membangun Halaman Hasil & Laporan untuk Admin (`SCR-008`) dan Tutor (`SCR-012`) dengan filter jenjang/status serta Action Bar berisi tombol **`Export Excel (.xlsx)`** dan **`Export PDF (.pdf)`**.

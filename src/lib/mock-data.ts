@@ -11,6 +11,7 @@ export interface StudentRecord {
   completedAt?: string;
   score?: number;
   totalQuestions?: number;
+  elapsedSeconds?: number;
   finalLevel?: FinalLevel;
   notes?: string;
   resetCount?: number;
@@ -156,6 +157,33 @@ export function resetMockStudentSession(
         completedAt: undefined,
         score: undefined,
         finalLevel: undefined,
+      };
+      return updatedRecord;
+    }
+    return std;
+  });
+
+  saveMockStudents(updated);
+  return updatedRecord;
+}
+
+export function finalizeMockStudentEvaluation(
+  studentId: string,
+  evaluation: {
+    finalLevel: FinalLevel;
+    notes: string;
+  }
+): StudentRecord | null {
+  const current = getMockStudents();
+  let updatedRecord: StudentRecord | null = null;
+
+  const updated = current.map((std) => {
+    if (std.id === studentId) {
+      updatedRecord = {
+        ...std,
+        status: "FINALIZED",
+        finalLevel: evaluation.finalLevel,
+        notes: evaluation.notes.trim(),
       };
       return updatedRecord;
     }
