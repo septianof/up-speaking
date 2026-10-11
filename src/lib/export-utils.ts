@@ -13,7 +13,6 @@ export function exportStudentsToCsv(students: StudentRecord[], filename: string)
     "Total Soal",
     "Persentase Skor",
     "Level Final Resmi",
-    "Catatan Evaluasi Tutor",
     "Tanggal Daftar",
   ];
 
@@ -32,7 +31,6 @@ export function exportStudentsToCsv(students: StudentRecord[], filename: string)
       `"${std.totalQuestions ?? 10}"`,
       `"${scorePercent}%"`,
       `"${std.finalLevel ?? "Belum Ditetapkan"}"`,
-      `"${(std.notes || "").replace(/"/g, '""')}"`,
       `"${std.createdAt}"`,
     ];
   });

@@ -82,7 +82,7 @@ export default function TutorReportsPage() {
             Laporan Hasil Penempatan {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"} (SCR-012)
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Rekapitulasi penetapan level kelas dan catatan evaluasi khusus untuk jenjang binaan Anda.
+            Rekapitulasi penetapan level kelas siswa khusus untuk jenjang binaan Anda.
           </p>
         </div>
 
@@ -186,13 +186,12 @@ export default function TutorReportsPage() {
                 <th className="py-3.5 px-4">Nomor HP</th>
                 <th className="py-3.5 px-4 text-center">Skor Objektif</th>
                 <th className="py-3.5 px-4 text-center">Level Final Resmi</th>
-                <th className="py-3.5 px-4">Catatan Evaluasi Anda</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                  <td colSpan={5} className="py-12 text-center text-text-muted">
                     <FileSpreadsheet className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
                   </td>
@@ -239,9 +238,6 @@ export default function TutorReportsPage() {
                         ) : (
                           <span className="text-xs text-text-muted italic">Belum Dinilai</span>
                         )}
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-text-secondary max-w-xs truncate">
-                        {std.notes || "-"}
                       </td>
                     </tr>
                   );

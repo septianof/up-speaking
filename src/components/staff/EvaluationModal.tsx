@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Award,
   Sparkles,
-  MessageSquare,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -25,28 +24,16 @@ const INSTITUTION_THRESHOLDS = [
     level: "BEGINNER" as FinalLevel,
     title: "Beginner",
     range: "0% – 59%",
-    min: 0,
-    max: 59,
-    description: "Membutuhkan penguatan dasar kosakata dan tata bahasa dasar.",
-    badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
   },
   {
     level: "INTERMEDIATE" as FinalLevel,
     title: "Intermediate",
     range: "60% – 79%",
-    min: 60,
-    max: 79,
-    description: "Mampu berkomunikasi aktif, butuh pengayaan struktur kompleks.",
-    badgeClass: "bg-blue-100 text-blue-800 border-blue-300",
   },
   {
     level: "ADVANCED" as FinalLevel,
     title: "Advanced",
     range: "80% – 100%",
-    min: 80,
-    max: 100,
-    description: "Pemahaman tinggi, siap untuk diskusi mendalam dan materi profesional.",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
   },
 ];
 
@@ -57,7 +44,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   onSuccess,
 }) => {
   const [selectedFinalLevel, setSelectedFinalLevel] = useState<FinalLevel>("BEGINNER");
-  const [tutorNotes, setTutorNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -73,7 +59,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   useEffect(() => {
     if (student) {
       setSelectedFinalLevel(student.finalLevel || recommendedLevel);
-      setTutorNotes(student.notes || "");
     }
   }, [student, recommendedLevel]);
 
@@ -86,7 +71,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
     setTimeout(() => {
       const updated = finalizeMockStudentEvaluation(student.id, {
         finalLevel: selectedFinalLevel,
-        notes: tutorNotes,
       });
 
       setIsSubmitting(false);
@@ -181,9 +165,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
                       <span className="text-text-primary">{tier.title}</span>
                       <span className="font-mono text-primary-700">{tier.range}</span>
                     </div>
-                    <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
-                      {tier.description}
-                    </p>
                   </div>
                 );
               })}
@@ -212,24 +193,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Textarea Catatan Kualitatif Tutor (FR-015) */}
-          <div className="space-y-1.5 pt-2">
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5 text-primary-500" />
-              Catatan Evaluasi / Rekomendasi Kelas Tutor
-            </label>
-            <textarea
-              rows={3}
-              value={tutorNotes}
-              onChange={(e) => setTutorNotes(e.target.value)}
-              placeholder="Berikan masukan terkait kelebihan siswa, fokus perbaikan kosakata, atau rekomendasi kelas tatap muka..."
-              className="w-full rounded-xl border border-surface-border p-3 text-xs sm:text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-            />
-            <p className="text-[11px] text-text-muted">
-              Catatan ini akan tersimpan pada laporan rekapitulasi penempatan.
-            </p>
           </div>
 
           {/* Actions */}

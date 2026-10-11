@@ -90,7 +90,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | **SCR-008** | Admin Hasil & Laporan | Admin | Rekapitulasi nilai seluruh jenjang dan fitur ekspor dokumen | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-009** | Admin Bank Soal | Admin | Manajemen seluruh butir soal (Elementary & High School) | Tambah Soal Dinamis, Edit, Hapus |
 | **SCR-010** | Tutor Dashboard | Tutor | Pusat ringkasan metrik jenjang dan **Tombol Aksi Cepat Tutor** | Pantau metrik, klik Aksi Cepat |
-| **SCR-011** | Tutor Penilaian Siswa | Tutor | Peninjauan detail jawaban, skor, durasi, dan formulir penetapan level | Tinjau Jawaban, Tetapkan Level & Catatan |
+| **SCR-011** | Tutor Penilaian Siswa | Tutor | Peninjauan detail jawaban, skor, durasi, dan formulir penetapan level | Tinjau Jawaban, Tetapkan Level Final |
 | **SCR-012** | Tutor Laporan & Rekap | Tutor | Rekapitulasi hasil penempatan khusus jenjang yang diampu | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-013** | Tutor Bank Soal | Tutor | Manajemen butir soal khusus jenjang yang diampu tutor | Tambah Soal Dinamis, Edit, Hapus |
 | **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Hapus (Soft Delete) |
@@ -148,7 +148,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 2. **Langkah 2: Meninjau dan Menilai Siswa (`SCR-011`)**
    - Tutor membuka menu **Penilaian Siswa** $\rightarrow$ Memilih siswa pada tab **"Perlu Dinilai"**.
    - Modal peninjauan menampilkan skor %, durasi, sorotan acuan lembaga (*Beginner 0-59%, Intermediate 60-79%, Advanced 80-100%*), dan rincian jawaban siswa.
-   - Tutor menetapkan level final, mengisi catatan evaluasi, dan menyimpan keputusan $\rightarrow$ Status menjadi `Finalized`.
+   - Tutor menetapkan level final resmi dan menyimpan keputusan $\rightarrow$ Status menjadi `Finalized`.
 3. **Langkah 3: Ekspor Laporan Jenjang (`SCR-012`)**
    - Tutor mengunduh laporan rekapitulasi hasil jenjang binaannya ke format **Excel (.xlsx)** atau **PDF (.pdf)**.
 
@@ -176,7 +176,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 - **`SCR-008`: Admin Hasil & Laporan:** Rekap nilai & Tombol Export Excel / PDF.
 - **`SCR-009`: Admin Bank Soal:** CRUD soal dinamis (min 2, max 5 opsi) seluruh jenjang.
 - **`SCR-010`: Tutor Dashboard:** Metrik evaluasi jenjang binaan & Aksi Cepat.
-- **`SCR-011`: Tutor Penilaian Siswa:** Tabel review, modal evaluasi `CMP-007`, penetapan level & catatan.
+- **`SCR-011`: Tutor Penilaian Siswa:** Tabel review, modal evaluasi `CMP-007`, penetapan level resmi.
 - **`SCR-012`: Tutor Laporan & Rekap:** Rekap nilai jenjang & Tombol Export Excel / PDF.
 - **`SCR-013`: Tutor Bank Soal:** CRUD soal khusus jenjang yang diampu tutor.
 
@@ -200,7 +200,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | **FR-012** | Semua soal aktif di bank soal diujikan | Pemuatan seluruh array soal aktif di `SCR-003` |
 | **FR-013** | Filter siswa Perlu Dinilai vs Selesai | Tab filter status pada `SCR-011` |
 | **FR-014** | Acuan panduan nilai lembaga di Tutor | Panel rekomendasi skor pada modal penilaian `SCR-011` |
-| **FR-015** | Penetapan level final & catatan Tutor | Form radio level final & input catatan pada `SCR-011` |
+| **FR-015** | Penetapan level final resmi oleh Tutor | Form penetapan level final resmi pada modal `CMP-007` (`SCR-011`) |
 | **FR-016** | Ekspor laporan ke Excel & PDF | Tombol ekspor pada `SCR-008` (Admin) & `SCR-012` (Tutor) |
 | **FR-017** | Admin mendaftarkan akun Tutor baru | Layar `SCR-014` (Admin Kelola Tutor) & Quick Action `SCR-006` |
 

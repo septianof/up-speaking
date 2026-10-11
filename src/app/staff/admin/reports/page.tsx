@@ -214,13 +214,12 @@ export default function AdminReportsPage() {
                 <th className="py-3.5 px-4">Jenjang</th>
                 <th className="py-3.5 px-4 text-center">Skor Objektif</th>
                 <th className="py-3.5 px-4 text-center">Level Final Resmi</th>
-                <th className="py-3.5 px-4">Catatan Evaluasi Tutor</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
                     <FileSpreadsheet className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
                   </td>
@@ -270,9 +269,6 @@ export default function AdminReportsPage() {
                         ) : (
                           <span className="text-xs text-text-muted italic">Belum Dinilai</span>
                         )}
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-text-secondary max-w-xs truncate">
-                        {std.notes || "-"}
                       </td>
                     </tr>
                   );

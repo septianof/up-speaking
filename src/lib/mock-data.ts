@@ -171,7 +171,7 @@ export function finalizeMockStudentEvaluation(
   studentId: string,
   evaluation: {
     finalLevel: FinalLevel;
-    notes: string;
+    notes?: string;
   }
 ): StudentRecord | null {
   const current = getMockStudents();
@@ -183,7 +183,7 @@ export function finalizeMockStudentEvaluation(
         ...std,
         status: "FINALIZED",
         finalLevel: evaluation.finalLevel,
-        notes: evaluation.notes.trim(),
+        notes: evaluation.notes ? evaluation.notes.trim() : undefined,
       };
       return updatedRecord;
     }

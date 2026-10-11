@@ -10,7 +10,6 @@ import {
   HelpCircle,
   FileSpreadsheet,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
@@ -197,14 +196,13 @@ export default function TutorDashboardPage() {
                 <th className="py-3 px-4">Nama Siswa</th>
                 <th className="py-3 px-4">Nomor HP</th>
                 <th className="py-3 px-4 text-center">Skor Objektif</th>
-                <th className="py-3 px-4 text-center">Acuan Lembaga</th>
                 <th className="py-3 px-4 text-center w-32">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {pendingStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-text-muted">
+                  <td colSpan={4} className="py-8 text-center text-text-muted">
                     <CheckCircle2 className="h-6 w-6 mx-auto mb-1 text-emerald-500 opacity-60" />
                     <p className="font-medium text-xs">Semua lembar tes yang terkumpul pada jenjang Anda telah selesai dievaluasi!</p>
                   </td>
@@ -214,8 +212,6 @@ export default function TutorDashboardPage() {
                   const scorePercent = Math.round(
                     ((std.score || 0) / (std.totalQuestions || 10)) * 100
                   );
-                  const recommended =
-                    scorePercent >= 80 ? "ADVANCED" : scorePercent >= 60 ? "INTERMEDIATE" : "BEGINNER";
 
                   return (
                     <tr key={std.id} className="hover:bg-surface-subtle/30 transition-colors">
@@ -227,12 +223,6 @@ export default function TutorDashboardPage() {
                       </td>
                       <td className="py-3 px-4 text-center font-bold text-primary-600">
                         {std.score || 0}/{std.totalQuestions || 10} ({scorePercent}%)
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                          <Sparkles className="h-3 w-3 text-amber-500" />
-                          {recommended}
-                        </span>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <button

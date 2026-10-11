@@ -6,7 +6,6 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -160,7 +159,6 @@ export default function TutorEvaluationsPage() {
                 <th className="py-3.5 px-4">Nama Siswa</th>
                 <th className="py-3.5 px-4">Nomor HP</th>
                 <th className="py-3.5 px-4 text-center">Skor Objektif</th>
-                <th className="py-3.5 px-4 text-center">Rekomendasi Acuan</th>
                 <th className="py-3.5 px-4 text-center">Level Final</th>
                 <th className="py-3.5 px-4 text-center w-36">Aksi</th>
               </tr>
@@ -168,7 +166,7 @@ export default function TutorEvaluationsPage() {
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
                     <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">
                       {activeTab === "PENDING"
@@ -182,8 +180,6 @@ export default function TutorEvaluationsPage() {
                   const scorePercent = Math.round(
                     ((std.score || 0) / (std.totalQuestions || 10)) * 100
                   );
-                  const recommended =
-                    scorePercent >= 80 ? "ADVANCED" : scorePercent >= 60 ? "INTERMEDIATE" : "BEGINNER";
 
                   return (
                     <tr
@@ -195,11 +191,6 @@ export default function TutorEvaluationsPage() {
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-text-primary">{std.fullName}</div>
-                        {std.notes && (
-                          <p className="text-[11px] text-text-muted truncate max-w-xs mt-0.5">
-                            &quot;{std.notes}&quot;
-                          </p>
-                        )}
                       </td>
                       <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
                         {std.phone}
@@ -209,12 +200,6 @@ export default function TutorEvaluationsPage() {
                           {std.score || 0}/{std.totalQuestions || 10}
                         </span>
                         <span className="text-xs text-text-muted ml-1">({scorePercent}%)</span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                          <Sparkles className="h-3 w-3 text-amber-500" />
-                          {recommended}
-                        </span>
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {std.finalLevel ? (
