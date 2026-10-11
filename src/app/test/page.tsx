@@ -191,20 +191,22 @@ export default function TestPage() {
             />
 
             {/* Navigation Stepper Action Bar */}
-            <div className="flex items-center justify-between bg-surface-white p-4 rounded-2xl border border-surface-border shadow-card">
+            <div className="flex items-center justify-between gap-2 bg-surface-white p-3.5 sm:p-4 rounded-2xl border border-surface-border shadow-card">
               <Button
                 variant="outline"
                 size="md"
                 disabled={currentIndex === 0}
                 onClick={() => handleNavigate(currentIndex - 1)}
-                className="gap-1.5"
+                className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>Sebelumnya</span>
+                <span className="text-xs sm:text-sm">Sebelumnya</span>
               </Button>
 
-              <div className="text-xs font-semibold text-text-muted">
-                Soal <span className="text-text-primary">{currentIndex + 1}</span> dari {totalQuestions}
+              <div className="text-center px-1">
+                <span className="text-[11px] sm:text-xs font-semibold text-text-muted whitespace-nowrap">
+                  Soal <span className="text-text-primary font-bold">{currentIndex + 1}</span> / {totalQuestions}
+                </span>
               </div>
 
               {currentIndex < totalQuestions - 1 ? (
@@ -212,9 +214,9 @@ export default function TestPage() {
                   variant="primary"
                   size="md"
                   onClick={() => handleNavigate(currentIndex + 1)}
-                  className="gap-1.5"
+                  className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
                 >
-                  <span>Selanjutnya</span>
+                  <span className="text-xs sm:text-sm">Selanjutnya</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               ) : (
@@ -222,10 +224,10 @@ export default function TestPage() {
                   variant="accent"
                   size="md"
                   onClick={handleOpenSubmit}
-                  className="gap-1.5"
+                  className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
                 >
-                  <span>Kumpulkan Tes</span>
-                  <Send className="w-4 h-4" />
+                  <span className="text-xs sm:text-sm">Kumpulkan</span>
+                  <Send className="w-3.5 h-3.5" />
                 </Button>
               )}
             </div>

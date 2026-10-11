@@ -29,8 +29,8 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
         </span>
       </div>
 
-      {/* Grid of question buttons */}
-      <div className="grid grid-cols-5 gap-2 max-h-[340px] overflow-y-auto pr-1">
+      {/* Grid of question buttons with inner padding to prevent ring cutoff */}
+      <div className="grid grid-cols-5 gap-2.5 max-h-[340px] overflow-y-auto p-1.5">
         {Array.from({ length: totalQuestions }, (_, i) => {
           const isCurrent = currentIndex === i;
           const isAnswered = answeredSet.has(i);
@@ -42,7 +42,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
           }
 
           if (isCurrent) {
-            buttonStyle = `${buttonStyle} ring-2 ring-primary-500 ring-offset-2 font-bold`;
+            buttonStyle = `${buttonStyle} ring-2 ring-primary-500 ring-offset-1 font-bold z-10`;
           }
 
           return (
