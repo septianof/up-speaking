@@ -178,15 +178,15 @@ export default function TestPage() {
             />
 
             {/* Navigation Stepper Action Bar */}
-            <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-2xl border border-surface-border shadow-card">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-3 bg-surface-white p-3 sm:p-4 rounded-2xl border border-surface-border shadow-card">
               <Button
                 variant="outline"
                 size="md"
                 disabled={currentIndex === 0}
                 onClick={() => handleNavigate(currentIndex - 1)}
-                className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
+                className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 shrink-0" />
                 <span className="text-xs sm:text-sm">Sebelumnya</span>
               </Button>
 
@@ -194,15 +194,15 @@ export default function TestPage() {
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-subtle hover:bg-slate-200 border border-surface-border transition-colors text-xs font-semibold text-text-primary active:scale-95"
+                className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-btn bg-surface-subtle hover:bg-slate-200 border border-surface-border transition-colors text-xs font-semibold text-text-primary active:scale-95 shrink-0 whitespace-nowrap"
                 title="Buka palet nomor soal"
                 aria-label="Buka palet nomor soal"
               >
-                <LayoutGrid className="w-3.5 h-3.5 text-primary-500" />
+                <LayoutGrid className="w-3.5 h-3.5 text-primary-500 shrink-0" />
                 <span>
-                  Soal {currentIndex + 1} / {totalQuestions}
+                  {currentIndex + 1} / {totalQuestions}
                 </span>
-                <span className="lg:hidden text-[10px] text-text-muted">⌃</span>
+                <span className="text-[10px] text-text-muted">⌃</span>
               </button>
 
               {currentIndex < totalQuestions - 1 ? (
@@ -210,20 +210,20 @@ export default function TestPage() {
                   variant="primary"
                   size="md"
                   onClick={() => handleNavigate(currentIndex + 1)}
-                  className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
+                  className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
                 >
                   <span className="text-xs sm:text-sm">Selanjutnya</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 shrink-0" />
                 </Button>
               ) : (
                 <Button
                   variant="accent"
                   size="md"
                   onClick={handleOpenSubmit}
-                  className="gap-1 sm:gap-1.5 px-3 sm:px-5 shrink-0"
+                  className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
                 >
                   <span className="text-xs sm:text-sm">Kumpulkan</span>
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3.5 h-3.5 shrink-0" />
                 </Button>
               )}
             </div>
