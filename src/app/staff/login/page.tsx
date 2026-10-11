@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
 import { StaffUser } from "@/types/staff";
-import { getMockTutors } from "@/lib/mock-tutors";
+import { getAllMockTutors } from "@/lib/mock-tutors";
 import { Mail, Lock, AlertCircle, ArrowLeft, Shield } from "lucide-react";
 
 export default function StaffLoginPage() {
@@ -34,14 +34,14 @@ export default function StaffLoginPage() {
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       // 1. Cek apakah cocok dengan akun di Mock Tutors
-      const existingTutors = getMockTutors();
-      const matchedTutor = existingTutors.find(
+      const allTutors = getAllMockTutors();
+      const matchedTutor = allTutors.find(
         (t) => t.email.toLowerCase() === cleanEmail
       );
 
       if (matchedTutor) {
-        if (!matchedTutor.isActive) {
-          setError("Akun tutor Anda telah dinonaktifkan oleh Administrator.");
+        if (matchedTutor.isDeleted || !matchedTutor.isActive) {
+          setError("Akun tutor ini telah dihapus oleh Administrator.");
           return;
         }
 

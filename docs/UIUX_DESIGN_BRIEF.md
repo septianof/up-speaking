@@ -93,7 +93,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | **SCR-011** | Tutor Penilaian Siswa | Tutor | Peninjauan detail jawaban, skor, durasi, dan formulir penetapan level | Tinjau Jawaban, Tetapkan Level & Catatan |
 | **SCR-012** | Tutor Laporan & Rekap | Tutor | Rekapitulasi hasil penempatan khusus jenjang yang diampu | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-013** | Tutor Bank Soal | Tutor | Manajemen butir soal khusus jenjang yang diampu tutor | Tambah Soal Dinamis, Edit, Hapus |
-| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Nonaktifkan, Hapus |
+| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Hapus (Soft Delete) |
 
 ---
 

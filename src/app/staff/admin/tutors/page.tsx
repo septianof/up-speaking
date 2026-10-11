@@ -5,8 +5,6 @@ import {
   GraduationCap,
   UserPlus,
   Search,
-  CheckCircle2,
-  XCircle,
   Mail,
   Calendar,
   Pencil,
@@ -14,14 +12,12 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TutorRegisterModal } from "@/components/staff/TutorRegisterModal";
 import {
   getMockTutors,
-  toggleMockTutorStatus,
-  deleteMockTutor,
+  softDeleteMockTutor,
   TutorAccount,
 } from "@/lib/mock-tutors";
 import { TargetLevel } from "@/types/student";
@@ -35,6 +31,7 @@ export default function AdminTutorsPage() {
   const [deleteTargetTutor, setDeleteTargetTutor] = useState<TutorAccount | null>(null);
 
   const loadData = () => {
+    // getMockTutors() secara default hanya mengambil tutor aktif (non-deleted)
     setTutors(getMockTutors());
   };
 
@@ -55,14 +52,10 @@ export default function AdminTutorsPage() {
     });
   }, [tutors, searchQuery, selectedLevel]);
 
-  const handleToggleStatus = (id: string) => {
-    toggleMockTutorStatus(id);
-    loadData();
-  };
-
   const handleDeleteConfirm = () => {
     if (!deleteTargetTutor) return;
-    deleteMockTutor(deleteTargetTutor.id);
+    // Soft Delete: tandai isDeleted: true
+    softDeleteMockTutor(deleteTargetTutor.id);
     setDeleteTargetTutor(null);
     loadData();
   };
@@ -107,7 +100,7 @@ export default function AdminTutorsPage() {
             Kelola Akun Tutor (SCR-014)
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Daftarkan pengajar baru, edit jenjang penugasan, kelola status aktif, atau hapus akun tutor.
+            Daftarkan pengajar baru, edit jenjang penugasan, atau hapus akun tutor (soft delete).
           </p>
         </div>
 
@@ -165,14 +158,13 @@ export default function AdminTutorsPage() {
                 <th className="py-3.5 px-4">Email Staf</th>
                 <th className="py-3.5 px-4">Jenjang Pengampu</th>
                 <th className="py-3.5 px-4">Terdaftar</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-center w-40">Aksi</th>
+                <th className="py-3.5 px-4 text-center w-28">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {filteredTutors.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
                     <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">Tidak ada akun tutor yang ditemukan.</p>
                   </td>
@@ -199,35 +191,8 @@ export default function AdminTutorsPage() {
                         {formatDate(tut.createdAt)}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      {tut.isActive ? (
-                        <Badge variant="success" size="sm">
-                          <CheckCircle2 className="h-3 w-3 mr-1 inline" />
-                          Aktif
-                        </Badge>
-                      ) : (
-                        <Badge variant="neutral" size="sm">
-                          <XCircle className="h-3 w-3 mr-1 inline" />
-                          Nonaktif
-                        </Badge>
-                      )}
-                    </td>
                     <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        {/* Toggle Status */}
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(tut.id)}
-                          className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
-                            tut.isActive
-                              ? "border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100"
-                              : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                          }`}
-                          title={tut.isActive ? "Nonaktifkan akun" : "Aktifkan akun"}
-                        >
-                          {tut.isActive ? "Nonaktif" : "Aktifkan"}
-                        </button>
-
                         {/* Edit Tutor */}
                         <button
                           type="button"
@@ -235,17 +200,17 @@ export default function AdminTutorsPage() {
                           className="p-1.5 rounded-lg text-text-muted hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors"
                           title="Edit profil atau jenjang tutor"
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="h-4 w-4" />
                         </button>
 
-                        {/* Hapus Tutor */}
+                        {/* Hapus Tutor (Soft Delete) */}
                         <button
                           type="button"
                           onClick={() => setDeleteTargetTutor(tut)}
                           className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 border border-transparent hover:border-accent-200 transition-colors"
-                          title="Hapus akun tutor"
+                          title="Hapus akun tutor (soft delete)"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
@@ -268,20 +233,24 @@ export default function AdminTutorsPage() {
         onSuccess={() => loadData()}
       />
 
-      {/* Modal Konfirmasi Hapus Tutor */}
+      {/* Modal Konfirmasi Hapus Tutor (Soft Delete) */}
       <Modal
         isOpen={Boolean(deleteTargetTutor)}
         onClose={() => setDeleteTargetTutor(null)}
-        title="Hapus Akun Tutor"
+        title="Konfirmasi Hapus Akun Tutor"
         maxWidth="sm"
       >
         <div className="space-y-4 pt-1">
           <div className="p-3.5 rounded-xl bg-accent-50 border border-accent-200 text-xs text-accent-700 flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 shrink-0 text-accent-500" />
-            <p className="leading-relaxed">
-              Apakah Anda yakin ingin menghapus akun pengajar <strong>{deleteTargetTutor?.fullName}</strong>?
-              Tutor tidak akan dapat lagi masuk ke portal sistem.
-            </p>
+            <div className="leading-relaxed space-y-1">
+              <p>
+                Apakah Anda yakin ingin menghapus akun pengajar <strong>{deleteTargetTutor?.fullName}</strong>?
+              </p>
+              <p className="text-[11px] text-accent-800">
+                Akun akan dihapus dari sistem (soft delete). Riwayat penilaian siswa yang pernah dilakukan pengajar tetap aman tersimpan dalam database.
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-surface-border">
@@ -294,7 +263,7 @@ export default function AdminTutorsPage() {
               Batal
             </Button>
             <Button
-              type="button"
+              type="submit"
               variant="accent"
               size="md"
               onClick={handleDeleteConfirm}
