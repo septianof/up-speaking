@@ -6,6 +6,7 @@ import {
   Plus,
   Search,
   Trash2,
+  Pencil,
   CheckCircle2,
   GraduationCap,
   AlertTriangle,
@@ -26,6 +27,7 @@ export default function AdminQuestionsPage() {
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<QuestionItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<QuestionItem | null>(null);
 
   const loadData = () => {
@@ -165,14 +167,25 @@ export default function AdminQuestionsPage() {
                   </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(q)}
-                  className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 transition-colors"
-                  title="Hapus butir soal ini"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditTarget(q)}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                    title="Edit butir soal ini"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(q)}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 transition-colors"
+                    title="Hapus butir soal ini"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Question Text */}
@@ -214,10 +227,14 @@ export default function AdminQuestionsPage() {
         )}
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal (Create & Edit) */}
       <QuestionFormModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
+        isOpen={isFormOpen || Boolean(editTarget)}
+        initialQuestion={editTarget}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditTarget(null);
+        }}
         defaultLevel={selectedLevel === "HIGH_SCHOOL" ? "HIGH_SCHOOL" : "ELEMENTARY"}
         onSuccess={() => loadData()}
       />

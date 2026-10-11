@@ -174,3 +174,34 @@ export function deleteMockQuestion(id: string): void {
   const updated = current.filter((q) => q.id !== id);
   saveMockQuestions(updated);
 }
+
+export function updateMockQuestion(
+  id: string,
+  updatedData: {
+    questionText: string;
+    targetLevel: TargetLevel;
+    options: { id: string; optionText: string }[];
+    correctOptionId: string;
+  }
+): QuestionItem | null {
+  const current = getMockQuestions();
+  let updatedItem: QuestionItem | null = null;
+
+  const updated = current.map((q) => {
+    if (q.id === id) {
+      updatedItem = {
+        ...q,
+        questionText: updatedData.questionText.trim(),
+        targetLevel: updatedData.targetLevel,
+        options: updatedData.options,
+        correctOptionId: updatedData.correctOptionId,
+      };
+      return updatedItem;
+    }
+    return q;
+  });
+
+  saveMockQuestions(updated);
+  return updatedItem;
+}
+

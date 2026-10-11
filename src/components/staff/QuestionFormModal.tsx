@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { TargetLevel } from "@/types/student";
-import { addMockQuestion } from "@/lib/mock-questions";
+import { TargetLevel, QuestionItem } from "@/types/student";
+import { addMockQuestion, updateMockQuestion } from "@/lib/mock-questions";
 
 interface QuestionFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultLevel?: TargetLevel;
+  initialQuestion?: QuestionItem | null;
   onSuccess?: () => void;
 }
 
@@ -26,8 +27,10 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
   isOpen,
   onClose,
   defaultLevel = "ELEMENTARY",
+  initialQuestion = null,
   onSuccess,
 }) => {
+  const isEditing = Boolean(initialQuestion);
   const [targetLevel, setTargetLevel] = useState<TargetLevel>(defaultLevel);
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState<FormOption[]>([
@@ -40,6 +43,32 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Sync state saat modal dibuka atau saat initialQuestion berubah
+  useEffect(() => {
+    if (initialQuestion) {
+      setTargetLevel(initialQuestion.targetLevel);
+      setQuestionText(initialQuestion.questionText);
+      const mapped = initialQuestion.options.map((opt, idx) => ({
+        tempId: opt.id || `opt-${idx + 1}`,
+        text: opt.optionText,
+      }));
+      setOptions(mapped);
+      setCorrectTempId(initialQuestion.correctOptionId || mapped[0]?.tempId || "opt-1");
+    } else {
+      setTargetLevel(defaultLevel);
+      setQuestionText("");
+      setOptions([
+        { tempId: "opt-1", text: "" },
+        { tempId: "opt-2", text: "" },
+        { tempId: "opt-3", text: "" },
+        { tempId: "opt-4", text: "" },
+      ]);
+      setCorrectTempId("opt-1");
+    }
+    setErrorMsg(null);
+    setSuccessMessage(null);
+  }, [initialQuestion, defaultLevel, isOpen]);
 
   // Tambah opsi jawaban (max 5)
   const handleAddOption = () => {
@@ -55,7 +84,6 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
     const newOptions = options.filter((_, idx) => idx !== indexToRemove);
     setOptions(newOptions);
 
-    // Jika opsi yang dihapus adalah kunci jawaban, alihkan ke opsi pertama
     if (correctTempId === removedOption.tempId) {
       setCorrectTempId(newOptions[0].tempId);
     }
@@ -97,36 +125,39 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
     setIsSubmitting(true);
     setTimeout(() => {
       const formattedOptions = options.map((opt, idx) => ({
-        id: `opt-${idx + 1}-${Date.now().toString().slice(-4)}`,
+        id: opt.tempId.startsWith("opt-") && opt.tempId.length > 8
+          ? opt.tempId
+          : `opt-${idx + 1}-${Date.now().toString().slice(-4)}`,
         optionText: opt.text.trim(),
       }));
 
-      // Cari indeks correctTempId
+      // Cari kunci jawaban
       const correctIdx = options.findIndex((o) => o.tempId === correctTempId);
       const correctOptionId =
         correctIdx >= 0 ? formattedOptions[correctIdx].id : formattedOptions[0].id;
 
-      addMockQuestion({
-        questionText,
-        targetLevel,
-        options: formattedOptions,
-        correctOptionId,
-      });
+      if (isEditing && initialQuestion) {
+        updateMockQuestion(initialQuestion.id, {
+          questionText,
+          targetLevel,
+          options: formattedOptions,
+          correctOptionId,
+        });
+        setSuccessMessage("Perubahan butir soal berhasil disimpan!");
+      } else {
+        addMockQuestion({
+          questionText,
+          targetLevel,
+          options: formattedOptions,
+          correctOptionId,
+        });
+        setSuccessMessage("Butir soal baru berhasil disimpan ke Bank Soal!");
+      }
 
       setIsSubmitting(false);
-      setSuccessMessage("Butir soal baru berhasil disimpan ke Bank Soal!");
 
       setTimeout(() => {
         setSuccessMessage(null);
-        setQuestionText("");
-        setOptions([
-          { tempId: "opt-1", text: "" },
-          { tempId: "opt-2", text: "" },
-          { tempId: "opt-3", text: "" },
-          { tempId: "opt-4", text: "" },
-        ]);
-        setCorrectTempId("opt-1");
-        setErrorMsg(null);
         onSuccess?.();
         onClose();
       }, 1000);
@@ -142,8 +173,12 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
           onClose();
         }
       }}
-      title="Tambah Butir Soal Baru"
-      description="Buat butir soal pilihan ganda dinamis (2 hingga 5 pilihan) beserta penentuan kunci jawaban."
+      title={isEditing ? "Edit Butir Soal" : "Tambah Butir Soal Baru"}
+      description={
+        isEditing
+          ? "Ubah teks pertanyaan, opsi pilihan, atau kunci jawaban butir soal ini."
+          : "Buat butir soal pilihan ganda dinamis (2 hingga 5 pilihan) beserta penentuan kunci jawaban."
+      }
       maxWidth="lg"
     >
       {successMessage ? (
@@ -152,7 +187,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <p className="text-base font-semibold text-text-primary">{successMessage}</p>
-          <p className="text-xs text-text-muted mt-1">Soal telah aktif diujikan pada sesi tes.</p>
+          <p className="text-xs text-text-muted mt-1">Data bank soal aktif telah diperbarui.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4 pt-1 max-h-[75vh] overflow-y-auto pr-1">
@@ -308,7 +343,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
               size="md"
               isLoading={isSubmitting}
             >
-              Simpan Butir Soal
+              {isEditing ? "Perbarui Butir Soal" : "Simpan Butir Soal"}
             </Button>
           </div>
         </form>

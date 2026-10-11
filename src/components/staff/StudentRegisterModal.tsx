@@ -1,30 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Phone, GraduationCap, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TargetLevel } from "@/types/student";
-import { addMockStudent, StudentRecord } from "@/lib/mock-data";
+import { addMockStudent, updateMockStudent, StudentRecord } from "@/lib/mock-data";
 
 interface StudentRegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (newStudent: StudentRecord) => void;
+  initialStudent?: StudentRecord | null;
+  onSuccess?: (student: StudentRecord) => void;
 }
 
 export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
   isOpen,
   onClose,
+  initialStudent = null,
   onSuccess,
 }) => {
+  const isEditing = Boolean(initialStudent);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [targetLevel, setTargetLevel] = useState<TargetLevel>("ELEMENTARY");
   const [errors, setErrors] = useState<{ fullName?: string; phone?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialStudent) {
+      setFullName(initialStudent.fullName);
+      setPhone(initialStudent.phone);
+      setTargetLevel(initialStudent.targetLevel);
+    } else {
+      setFullName("");
+      setPhone("");
+      setTargetLevel("ELEMENTARY");
+    }
+    setErrors({});
+    setSuccessMessage(null);
+  }, [initialStudent, isOpen]);
 
   // Sanitasi Nama Lengkap: hanya huruf dan spasi
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,24 +84,31 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const created = addMockStudent({
-        fullName,
-        phone,
-        targetLevel,
-      });
+      let saved: StudentRecord | null = null;
+
+      if (isEditing && initialStudent) {
+        saved = updateMockStudent(initialStudent.id, {
+          fullName,
+          phone,
+          targetLevel,
+        });
+        setSuccessMessage(`Data siswa ${fullName} berhasil diperbarui!`);
+      } else {
+        saved = addMockStudent({
+          fullName,
+          phone,
+          targetLevel,
+        });
+        setSuccessMessage(`Siswa ${saved.fullName} berhasil didaftarkan!`);
+      }
 
       setIsSubmitting(false);
-      setSuccessMessage(`Siswa ${created.fullName} berhasil didaftarkan!`);
 
       setTimeout(() => {
         setSuccessMessage(null);
-        setFullName("");
-        setPhone("");
-        setTargetLevel("ELEMENTARY");
-        setErrors({});
-        onSuccess?.(created);
+        if (saved) onSuccess?.(saved);
         onClose();
-      }, 1200);
+      }, 1000);
     }, 400);
   };
 
@@ -97,8 +121,12 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
           onClose();
         }
       }}
-      title="Daftarkan Siswa Baru"
-      description="Masukkan data siswa baru untuk menerbitkan sesi tes penempatan resmi."
+      title={isEditing ? "Edit Data Siswa" : "Daftarkan Siswa Baru"}
+      description={
+        isEditing
+          ? "Perbarui nama lengkap, nomor telepon, atau jenjang pendidikan siswa."
+          : "Masukkan data siswa baru untuk menerbitkan sesi tes penempatan resmi."
+      }
       maxWidth="md"
     >
       {successMessage ? (
@@ -204,7 +232,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
               size="md"
               isLoading={isSubmitting}
             >
-              Daftarkan Siswa
+              {isEditing ? "Simpan Perubahan" : "Daftarkan Siswa"}
             </Button>
           </div>
         </form>

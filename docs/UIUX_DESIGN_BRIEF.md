@@ -86,14 +86,14 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | :--- | :--- | :--- | :--- | :--- |
 | **SCR-005** | Staff Authentication | Admin & Tutor | Autentikasi email dan password staf lembaga | Input email/password, klik "Masuk" |
 | **SCR-006** | Admin Dashboard | Admin | Pusat ringkasan metrik dan **Tombol Aksi Cepat Admin** | Pantau metrik, klik Aksi Cepat |
-| **SCR-007** | Admin Kelola Siswa | Admin | Pendaftaran siswa baru, daftar data siswa, dan Soft Reset Sesi | Daftarkan Siswa, Reset Sesi Tes |
+| **SCR-007** | Admin Kelola Siswa | Admin | Pendaftaran siswa baru, daftar data siswa, dan Soft Reset Sesi | Daftarkan Siswa, Edit Siswa, Hapus Siswa (Belum Tes), Reset Sesi Tes |
 | **SCR-008** | Admin Hasil & Laporan | Admin | Rekapitulasi nilai seluruh jenjang dan fitur ekspor dokumen | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-009** | Admin Bank Soal | Admin | Manajemen seluruh butir soal (Elementary & High School) | Tambah Soal Dinamis, Edit, Hapus |
 | **SCR-010** | Tutor Dashboard | Tutor | Pusat ringkasan metrik jenjang dan **Tombol Aksi Cepat Tutor** | Pantau metrik, klik Aksi Cepat |
 | **SCR-011** | Tutor Penilaian Siswa | Tutor | Peninjauan detail jawaban, skor, durasi, dan formulir penetapan level | Tinjau Jawaban, Tetapkan Level & Catatan |
 | **SCR-012** | Tutor Laporan & Rekap | Tutor | Rekapitulasi hasil penempatan khusus jenjang yang diampu | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-013** | Tutor Bank Soal | Tutor | Manajemen butir soal khusus jenjang yang diampu tutor | Tambah Soal Dinamis, Edit, Hapus |
-| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Jenjang, Nonaktifkan |
+| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Nonaktifkan, Hapus |
 
 ---
 

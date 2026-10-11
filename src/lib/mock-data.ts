@@ -193,3 +193,38 @@ export function finalizeMockStudentEvaluation(
   saveMockStudents(updated);
   return updatedRecord;
 }
+
+export function updateMockStudent(
+  studentId: string,
+  updatedData: {
+    fullName: string;
+    phone: string;
+    targetLevel: TargetLevel;
+  }
+): StudentRecord | null {
+  const current = getMockStudents();
+  let updatedRecord: StudentRecord | null = null;
+
+  const updated = current.map((std) => {
+    if (std.id === studentId) {
+      updatedRecord = {
+        ...std,
+        fullName: updatedData.fullName.trim(),
+        phone: updatedData.phone.trim(),
+        targetLevel: updatedData.targetLevel,
+      };
+      return updatedRecord;
+    }
+    return std;
+  });
+
+  saveMockStudents(updated);
+  return updatedRecord;
+}
+
+export function deleteMockStudent(studentId: string): void {
+  const current = getMockStudents();
+  const updated = current.filter((std) => std.id !== studentId);
+  saveMockStudents(updated);
+}
+

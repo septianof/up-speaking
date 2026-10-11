@@ -7,13 +7,21 @@ import {
   Search,
   RotateCcw,
   GraduationCap,
+  Pencil,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { StudentRegisterModal } from "@/components/staff/StudentRegisterModal";
 import { ResetSessionModal } from "@/components/staff/ResetSessionModal";
-import { getMockStudents, StudentRecord } from "@/lib/mock-data";
+import {
+  getMockStudents,
+  deleteMockStudent,
+  StudentRecord,
+} from "@/lib/mock-data";
 import { TargetLevel, SessionStatus } from "@/types/student";
 
 export default function AdminStudentsPage() {
@@ -23,6 +31,8 @@ export default function AdminStudentsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [editTargetStudent, setEditTargetStudent] = useState<StudentRecord | null>(null);
+  const [deleteTargetStudent, setDeleteTargetStudent] = useState<StudentRecord | null>(null);
   const [resetTargetStudent, setResetTargetStudent] = useState<StudentRecord | null>(null);
 
   // Load students
@@ -50,6 +60,13 @@ export default function AdminStudentsPage() {
       return matchSearch && matchLevel && matchStatus;
     });
   }, [students, searchQuery, selectedLevel, selectedStatus]);
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTargetStudent) return;
+    deleteMockStudent(deleteTargetStudent.id);
+    setDeleteTargetStudent(null);
+    loadData();
+  };
 
   const getStatusBadge = (status: SessionStatus) => {
     switch (status) {
@@ -112,10 +129,10 @@ export default function AdminStudentsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <Users className="h-7 w-7 text-primary-500" />
-            Kelola Siswa & Sesi Tes
+            Kelola Siswa & Sesi Tes (SCR-007)
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Daftarkan peserta baru, pantau status pengerjaan, dan kelola soft reset sesi pengerjaan siswa.
+            Daftarkan peserta baru, koreksi data siswa, hapus pendaftaran, dan kelola soft reset sesi pengerjaan siswa.
           </p>
         </div>
 
@@ -123,7 +140,10 @@ export default function AdminStudentsPage() {
           type="button"
           variant="primary"
           size="md"
-          onClick={() => setIsRegisterOpen(true)}
+          onClick={() => {
+            setEditTargetStudent(null);
+            setIsRegisterOpen(true);
+          }}
           className="shrink-0 gap-2"
         >
           <UserPlus className="h-4 w-4" />
@@ -206,7 +226,7 @@ export default function AdminStudentsPage() {
                 <th className="py-3.5 px-4">Jenjang</th>
                 <th className="py-3.5 px-4">Status Sesi</th>
                 <th className="py-3.5 px-4">Tanggal Daftar</th>
-                <th className="py-3.5 px-4 text-center w-28">Aksi</th>
+                <th className="py-3.5 px-4 text-center w-44">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -250,24 +270,47 @@ export default function AdminStudentsPage() {
                         {formatDate(std.createdAt)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => setResetTargetStudent(std)}
-                          disabled={!canReset}
-                          title={
-                            canReset
-                              ? "Lakukan soft reset sesi tes siswa"
-                              : "Reset hanya untuk siswa berstatus Sedang Tes atau Selesai"
-                          }
-                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                            canReset
-                              ? "bg-accent-50 text-accent-700 hover:bg-accent-100 border border-accent-200"
-                              : "bg-surface-subtle text-slate-300 border border-slate-200 cursor-not-allowed"
-                          }`}
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" />
-                          <span>Reset</span>
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          {/* Soft Reset */}
+                          <button
+                            type="button"
+                            onClick={() => setResetTargetStudent(std)}
+                            disabled={!canReset}
+                            title={
+                              canReset
+                                ? "Lakukan soft reset sesi tes siswa"
+                                : "Reset hanya untuk siswa berstatus Sedang Tes atau Selesai"
+                            }
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                              canReset
+                                ? "bg-accent-50 text-accent-700 hover:bg-accent-100 border border-accent-200"
+                                : "bg-surface-subtle text-slate-300 border border-slate-200 cursor-not-allowed"
+                            }`}
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            <span>Reset</span>
+                          </button>
+
+                          {/* Edit Siswa */}
+                          <button
+                            type="button"
+                            onClick={() => setEditTargetStudent(std)}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-200 transition-colors"
+                            title="Edit identitas atau jenjang siswa"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+
+                          {/* Hapus Siswa */}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTargetStudent(std)}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 border border-transparent hover:border-accent-200 transition-colors"
+                            title="Hapus data pendaftaran siswa"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -278,10 +321,14 @@ export default function AdminStudentsPage() {
         </div>
       </div>
 
-      {/* Registration Modal */}
+      {/* Registration & Edit Modal */}
       <StudentRegisterModal
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
+        isOpen={isRegisterOpen || Boolean(editTargetStudent)}
+        initialStudent={editTargetStudent}
+        onClose={() => {
+          setIsRegisterOpen(false);
+          setEditTargetStudent(null);
+        }}
         onSuccess={() => loadData()}
       />
 
@@ -292,6 +339,47 @@ export default function AdminStudentsPage() {
         onClose={() => setResetTargetStudent(null)}
         onSuccess={() => loadData()}
       />
+
+      {/* Delete Student Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(deleteTargetStudent)}
+        onClose={() => setDeleteTargetStudent(null)}
+        title="Hapus Data Siswa"
+        maxWidth="sm"
+      >
+        <div className="space-y-4 pt-1">
+          <div className="p-3.5 rounded-xl bg-accent-50 border border-accent-200 text-xs text-accent-700 flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-accent-500" />
+            <p className="leading-relaxed">
+              Apakah Anda yakin ingin menghapus data siswa <strong>{deleteTargetStudent?.fullName}</strong>?
+              {deleteTargetStudent?.status !== "NOT_STARTED" && (
+                <span className="block mt-1 font-semibold text-accent-800">
+                  Perhatian: Siswa ini memiliki status pengerjaan ({deleteTargetStudent?.status}). Riwayat sesi akan ikut terhapus.
+                </span>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-surface-border">
+            <Button
+              type="button"
+              variant="outline"
+              size="md"
+              onClick={() => setDeleteTargetStudent(null)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="accent"
+              size="md"
+              onClick={handleDeleteConfirm}
+            >
+              Hapus Siswa
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

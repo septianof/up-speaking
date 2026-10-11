@@ -6,6 +6,7 @@ import {
   Plus,
   Search,
   Trash2,
+  Pencil,
   CheckCircle2,
   GraduationCap,
   AlertTriangle,
@@ -28,6 +29,7 @@ export default function TutorQuestionsPage() {
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<QuestionItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<QuestionItem | null>(null);
 
   const loadData = () => {
@@ -134,14 +136,25 @@ export default function TutorQuestionsPage() {
                   </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(q)}
-                  className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 transition-colors"
-                  title="Hapus butir soal ini"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditTarget(q)}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                    title="Edit butir soal ini"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(q)}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 transition-colors"
+                    title="Hapus butir soal ini"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               <p className="text-sm font-semibold text-text-primary leading-relaxed pl-8">
@@ -180,10 +193,14 @@ export default function TutorQuestionsPage() {
         )}
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal (Create & Edit) */}
       <QuestionFormModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
+        isOpen={isFormOpen || Boolean(editTarget)}
+        initialQuestion={editTarget}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditTarget(null);
+        }}
         defaultLevel={tutorLevel}
         onSuccess={() => loadData()}
       />

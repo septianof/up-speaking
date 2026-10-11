@@ -1,24 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Mail, Lock, GraduationCap, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TargetLevel } from "@/types/student";
-import { addMockTutor, TutorAccount } from "@/lib/mock-tutors";
+import { addMockTutor, updateMockTutor, TutorAccount } from "@/lib/mock-tutors";
 
 interface TutorRegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (newTutor: TutorAccount) => void;
+  initialTutor?: TutorAccount | null;
+  onSuccess?: (tutor: TutorAccount) => void;
 }
 
 export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   isOpen,
   onClose,
+  initialTutor = null,
   onSuccess,
 }) => {
+  const isEditing = Boolean(initialTutor);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [tempPassword, setTempPassword] = useState("TutorUp2026!");
@@ -26,6 +29,22 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   const [errors, setErrors] = useState<{ fullName?: string; email?: string; tempPassword?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialTutor) {
+      setFullName(initialTutor.fullName);
+      setEmail(initialTutor.email);
+      setTargetLevel(initialTutor.targetLevel);
+      setTempPassword(""); // Kosongkan saat edit karena opsional
+    } else {
+      setFullName("");
+      setEmail("");
+      setTempPassword("TutorUp2026!");
+      setTargetLevel("ELEMENTARY");
+    }
+    setErrors({});
+    setSuccessMessage(null);
+  }, [initialTutor, isOpen]);
 
   const validate = (): boolean => {
     const newErrors: { fullName?: string; email?: string; tempPassword?: string } = {};
@@ -42,9 +61,10 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
       newErrors.email = "Format email tidak valid";
     }
 
-    if (!tempPassword.trim()) {
+    // Password hanya wajib saat tambah baru, atau jika diisi saat edit
+    if (!isEditing && !tempPassword.trim()) {
       newErrors.tempPassword = "Password sementara wajib diisi";
-    } else if (tempPassword.length < 6) {
+    } else if (tempPassword && tempPassword.length < 6) {
       newErrors.tempPassword = "Password minimal 6 karakter";
     }
 
@@ -58,25 +78,31 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const created = addMockTutor({
-        fullName,
-        email,
-        targetLevel,
-      });
+      let saved: TutorAccount | null = null;
+
+      if (isEditing && initialTutor) {
+        saved = updateMockTutor(initialTutor.id, {
+          fullName,
+          email,
+          targetLevel,
+        });
+        setSuccessMessage(`Data tutor ${fullName} berhasil diperbarui!`);
+      } else {
+        saved = addMockTutor({
+          fullName,
+          email,
+          targetLevel,
+        });
+        setSuccessMessage(`Akun tutor untuk ${fullName} berhasil dibuat!`);
+      }
 
       setIsSubmitting(false);
-      setSuccessMessage(`Akun tutor untuk ${created.fullName} berhasil dibuat!`);
 
       setTimeout(() => {
         setSuccessMessage(null);
-        setFullName("");
-        setEmail("");
-        setTempPassword("TutorUp2026!");
-        setTargetLevel("ELEMENTARY");
-        setErrors({});
-        onSuccess?.(created);
+        if (saved) onSuccess?.(saved);
         onClose();
-      }, 1200);
+      }, 1000);
     }, 400);
   };
 
@@ -89,8 +115,12 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
           onClose();
         }
       }}
-      title="Tambah Akun Tutor Baru"
-      description="Daftarkan akun staf pengajar untuk melakukan penilaian dan kurasi tes penempatan."
+      title={isEditing ? "Edit Akun Tutor" : "Tambah Akun Tutor Baru"}
+      description={
+        isEditing
+          ? "Perbarui nama pengajar, email akun, atau alihkan jenjang penugasan pengajar."
+          : "Daftarkan akun staf pengajar untuk melakukan penilaian dan kurasi tes penempatan."
+      }
       maxWidth="md"
     >
       {successMessage ? (
@@ -100,7 +130,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
           </div>
           <p className="text-base font-semibold text-text-primary">{successMessage}</p>
           <p className="text-xs text-text-muted mt-1">
-            Akun telah aktif dan pengajar dapat login melalui portal staf.
+            Perubahan telah aktif dan pengajar dapat login melalui portal staf.
           </p>
         </div>
       ) : (
@@ -152,11 +182,12 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
           {/* Password Sementara */}
           <div>
             <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
-              Password Sementara <span className="text-accent-500">*</span>
+              {isEditing ? "Ganti Password Baru (Opsional)" : "Password Sementara"} {!isEditing && <span className="text-accent-500">*</span>}
             </label>
             <div className="relative">
               <Input
                 type="text"
+                placeholder={isEditing ? "Kosongkan jika tidak ingin mengubah password" : "TutorUp2026!"}
                 value={tempPassword}
                 onChange={(e) => {
                   setTempPassword(e.target.value);
@@ -167,7 +198,11 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
               />
               <Lock className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
             </div>
-            <p className="text-[11px] text-text-muted mt-1">Berikan password ini kepada pengajar untuk akses awal.</p>
+            <p className="text-[11px] text-text-muted mt-1">
+              {isEditing
+                ? "Isi kolom ini jika ingin mereset password staf pengajar."
+                : "Berikan password ini kepada pengajar untuk akses login awal."}
+            </p>
           </div>
 
           {/* Jenjang Pengampu */}
@@ -223,7 +258,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
               size="md"
               isLoading={isSubmitting}
             >
-              Simpan Akun Tutor
+              {isEditing ? "Simpan Perubahan" : "Simpan Akun Tutor"}
             </Button>
           </div>
         </form>

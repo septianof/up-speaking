@@ -106,8 +106,8 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 
 ### F-01: User, Tutor, & Student Management
 - Autentikasi email & password untuk staf (`Admin`, `Tutor Elementary`, `Tutor High School`).
-- **Manajemen Akun Tutor oleh Admin:** Form pendaftaran akun tutor baru (Nama, Email, Password Sementara, Jenjang yang Diampu).
-- Pendaftaran siswa oleh Admin (Nama Lengkap, Nomor HP Siswa/Ortu, Pilihan Jenjang: *Elementary* / *High School*).
+- **Manajemen Akun Tutor oleh Admin:** Form pendaftaran akun tutor baru, pengeditan profil & jenjang penugasan, penonaktifan akun, serta penghapusan akun tutor.
+- **Manajemen Siswa oleh Admin:** Pendaftaran siswa (Nama Lengkap, Nomor HP Siswa/Ortu, Pilihan Jenjang: *Elementary* / *High School*), pengeditan identitas siswa (koreksi nama/HP/jenjang), dan penghapusan data siswa yang belum mengikuti tes.
 - Autentikasi siswa langsung berbasis **Nama Lengkap + Nomor HP** (tanpa layar perantara, langsung membuka lembar soal).
 - Role-Based Access Control (RBAC) ketat antara Tutor Elementary dan High School.
 
@@ -126,7 +126,7 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 - **Submission Gate:** Validasi koneksi internet saat tombol submit ditekan untuk memastikan kalkulasi nilai berhasil.
 
 ### F-04: Dynamic Question Bank Management
-- CRUD bank soal teks pilihan ganda terisolasi per jenjang.
+- **CRUD Bank Soal Lengkap:** Pembuatan (*Create*), Peninjauan (*Read*), Pengeditan (*Update* redaksi pertanyaan, opsi, dan kunci jawaban), dan Penghapusan (*Delete*) butir soal terisolasi per jenjang.
 - Fleksibilitas jumlah opsi jawaban per butir soal (dinamis: 2, 3, 4, atau 5 opsi).
 - Seluruh butir soal yang berstatus aktif di bank soal otomatis menjadi paket soal ujian bagi jenjang terkait.
 

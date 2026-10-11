@@ -95,3 +95,38 @@ export function toggleMockTutorStatus(tutorId: string): TutorAccount | null {
   saveMockTutors(updated);
   return updatedRecord;
 }
+
+export function updateMockTutor(
+  tutorId: string,
+  updatedData: {
+    fullName: string;
+    email: string;
+    targetLevel: TargetLevel;
+  }
+): TutorAccount | null {
+  const current = getMockTutors();
+  let updatedRecord: TutorAccount | null = null;
+
+  const updated = current.map((t) => {
+    if (t.id === tutorId) {
+      updatedRecord = {
+        ...t,
+        fullName: updatedData.fullName.trim(),
+        email: updatedData.email.trim().toLowerCase(),
+        targetLevel: updatedData.targetLevel,
+      };
+      return updatedRecord;
+    }
+    return t;
+  });
+
+  saveMockTutors(updated);
+  return updatedRecord;
+}
+
+export function deleteMockTutor(tutorId: string): void {
+  const current = getMockTutors();
+  const updated = current.filter((t) => t.id !== tutorId);
+  saveMockTutors(updated);
+}
+
