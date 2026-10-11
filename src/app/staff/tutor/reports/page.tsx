@@ -79,7 +79,7 @@ export default function TutorReportsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <FileSpreadsheet className="h-7 w-7 text-emerald-600" />
-            Laporan Hasil Penempatan {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"} (SCR-012)
+            Laporan Hasil Penempatan {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Rekapitulasi penetapan level kelas siswa khusus untuk jenjang binaan Anda.

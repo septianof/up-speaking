@@ -80,7 +80,7 @@ export default function AdminQuestionsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <HelpCircle className="h-7 w-7 text-amber-500" />
-            Bank Soal Ujian (SCR-009)
+            Bank Soal Ujian
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola paket butir soal penempatan dengan format pilihan dinamis (2 hingga 5 opsi pilihan).

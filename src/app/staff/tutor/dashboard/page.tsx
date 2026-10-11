@@ -120,7 +120,7 @@ export default function TutorDashboardPage() {
       {/* Baris Tombol Aksi Cepat Tutor (Quick Actions) */}
       <div className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-text-muted">
-          Aksi Cepat Pengajar (Tutor Quick Actions)
+          Aksi Cepat Pengajar
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Penilaian Siswa */}

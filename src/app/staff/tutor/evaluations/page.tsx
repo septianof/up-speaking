@@ -73,10 +73,10 @@ export default function TutorEvaluationsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <Award className="h-7 w-7 text-emerald-600" />
-            Penilaian & Evaluasi Siswa (SCR-011)
+            Penilaian & Evaluasi Siswa
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Peninjauan jawaban tes objektif, rekomendasi level otomatis lembaga, dan penetapan hasil penempatan resmi.
+            Peninjauan hasil lembar tes objektif dan penetapan hasil penempatan level resmi.
           </p>
         </div>
 

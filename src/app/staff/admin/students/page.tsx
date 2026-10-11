@@ -129,7 +129,7 @@ export default function AdminStudentsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <Users className="h-7 w-7 text-primary-500" />
-            Kelola Siswa & Sesi Tes (SCR-007)
+            Kelola Siswa & Sesi Tes
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Daftarkan peserta baru, koreksi data siswa, hapus pendaftaran, dan kelola soft reset sesi pengerjaan siswa.

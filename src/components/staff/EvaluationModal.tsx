@@ -93,7 +93,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
           onClose();
         }
       }}
-      title="Evaluasi & Penetapan Level Siswa (CMP-007)"
+      title="Evaluasi & Penetapan Level Siswa"
       description="Tinjau hasil lembar tes penempatan dan tetapkan level kelas resmi bagi siswa."
       maxWidth="lg"
     >
@@ -133,12 +133,12 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
             </div>
           </div>
 
-          {/* Acuan Rentang Nilai Lembaga (FR-014) */}
+          {/* Acuan Rentang Nilai Lembaga */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                Panduan Acuan Skor Lembaga (Up Speaking Guideline)
+                Panduan Acuan Skor Lembaga
               </label>
               <span className="text-[11px] text-text-muted">Rekomendasi otomatis tersorot</span>
             </div>

@@ -94,7 +94,7 @@ export default function AdminReportsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <FileSpreadsheet className="h-7 w-7 text-emerald-600" />
-            Hasil & Laporan Keseluruhan (SCR-008)
+            Hasil & Laporan Keseluruhan
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Rekapitulasi resmi hasil penempatan seluruh jenjang, statistik capaian skor, dan ekspor dokumen.

@@ -64,7 +64,7 @@ export default function TutorQuestionsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <HelpCircle className="h-7 w-7 text-amber-500" />
-            Bank Soal Jenjang {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"} (SCR-013)
+            Bank Soal Jenjang {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola dan tambahkan butir soal dinamis khusus untuk jenjang yang Anda ampu sebagai Tutor.

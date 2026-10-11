@@ -97,7 +97,7 @@ export default function AdminTutorsPage() {
         <div>
           <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
             <GraduationCap className="h-7 w-7 text-indigo-600" />
-            Kelola Akun Tutor (SCR-014)
+            Kelola Akun Tutor
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Daftarkan pengajar baru, edit jenjang penugasan, atau hapus akun tutor (soft delete).
