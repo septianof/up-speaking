@@ -168,6 +168,21 @@ export default function TestPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Mobile Student Info Sub-bar (Tampil hanya di Mobile) */}
+        <div className="md:hidden flex items-center justify-between mb-4 px-3.5 py-2 rounded-xl bg-surface-white border border-surface-border text-xs shadow-xs">
+          <div className="flex items-center gap-2 truncate">
+            <div className="w-6 h-6 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+              <User className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold text-text-primary truncate">
+              {session.fullName}
+            </span>
+          </div>
+          <span className="shrink-0 ml-2 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 font-medium text-[11px] border border-primary-100">
+            {session.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Question Stepper (8 cols) */}
           <div className="lg:col-span-8 flex flex-col gap-6">
@@ -178,29 +193,30 @@ export default function TestPage() {
             />
 
             {/* Navigation Stepper Action Bar */}
-            <div className="flex items-center justify-between gap-1.5 sm:gap-3 bg-surface-white p-3 sm:p-4 rounded-2xl border border-surface-border shadow-card">
+            <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-2xl border border-surface-border shadow-card">
               <Button
                 variant="outline"
                 size="md"
                 disabled={currentIndex === 0}
                 onClick={() => handleNavigate(currentIndex - 1)}
-                className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
+                className="gap-1 px-3 sm:px-4 shrink-0 h-11 min-w-[44px]"
+                aria-label="Soal sebelumnya"
               >
                 <ChevronLeft className="w-4 h-4 shrink-0" />
-                <span className="text-xs sm:text-sm">Sebelumnya</span>
+                <span className="hidden sm:inline text-xs sm:text-sm">Sebelumnya</span>
               </Button>
 
               {/* Ergonomic Middle Palette Trigger Button */}
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-btn bg-surface-subtle hover:bg-slate-200 border border-surface-border transition-colors text-xs font-semibold text-text-primary active:scale-95 shrink-0 whitespace-nowrap"
+                className="flex items-center justify-center gap-1.5 px-3.5 sm:px-4 h-11 rounded-btn bg-surface-subtle hover:bg-slate-200 border border-surface-border transition-colors text-xs font-semibold text-text-primary active:scale-95 shrink-0 whitespace-nowrap shadow-xs"
                 title="Buka palet nomor soal"
                 aria-label="Buka palet nomor soal"
               >
                 <LayoutGrid className="w-3.5 h-3.5 text-primary-500 shrink-0" />
                 <span>
-                  {currentIndex + 1} / {totalQuestions}
+                  Soal {currentIndex + 1} / {totalQuestions}
                 </span>
                 <span className="text-[10px] text-text-muted">⌃</span>
               </button>
@@ -210,9 +226,10 @@ export default function TestPage() {
                   variant="primary"
                   size="md"
                   onClick={() => handleNavigate(currentIndex + 1)}
-                  className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
+                  className="gap-1 px-3 sm:px-4 shrink-0 h-11 min-w-[44px]"
+                  aria-label="Soal selanjutnya"
                 >
-                  <span className="text-xs sm:text-sm">Selanjutnya</span>
+                  <span className="hidden sm:inline text-xs sm:text-sm">Selanjutnya</span>
                   <ChevronRight className="w-4 h-4 shrink-0" />
                 </Button>
               ) : (
@@ -220,7 +237,8 @@ export default function TestPage() {
                   variant="accent"
                   size="md"
                   onClick={handleOpenSubmit}
-                  className="gap-1 px-2.5 sm:px-4 shrink-0 h-11"
+                  className="gap-1 px-3.5 sm:px-4 shrink-0 h-11"
+                  aria-label="Kumpulkan tes"
                 >
                   <span className="text-xs sm:text-sm">Kumpulkan</span>
                   <Send className="w-3.5 h-3.5 shrink-0" />
