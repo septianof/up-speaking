@@ -47,8 +47,8 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-003`** | Halaman Beranda Siswa (`SCR-001`) & Modal Akses (`SCR-002`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, lulus validasi & redirect |
 | **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, stepper & palet responsif |
 | **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, konfirmasi submit & hasil |
-| **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Pending` | - | - |
-| **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Pending` | - | - |
+| **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, sidebar responsive & login staff |
+| **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `In Progress` | - | - |
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Pending` | - | - |
 | **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Pending` | - | - |
 | **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Pending` | - | - |
@@ -141,7 +141,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Form login staf memiliki validasi email/password; sidebar menampilkan profil staf, badge peran (`Admin` / `Tutor`), daftar menu yang sesuai dengan peran, dan tombol logout; menu hamburger berfungsi mulus di mobile.
 - **Verification:** Uji navigasi sidebar di berbagai ukuran viewport (360px hingga 1440px).
 - **Risk / Notes:** Pastikan pemisahan menu sidebar antara peran Admin dan Tutor terisolasi dengan rapi.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-11)
 
 #### `TASK-007`: Halaman Admin Dashboard (`SCR-006`) & Kelola Siswa (`SCR-007`)
 - **Goal / Scope:** Membangun Admin Dashboard (`SCR-006`) berisi 4 kartu metrik (Total Siswa, Belum Mulai, Sedang Tes, Selesai), tabel aktivitas hari ini, dan Baris Tombol Aksi Cepat (*Quick Actions*). Membangun Halaman Kelola Siswa (`SCR-007`) berisi form modal pendaftaran siswa baru (Nama, HP, Jenjang), tabel status pengerjaan, dan modal konfirmasi Soft Reset Sesi Tes.
