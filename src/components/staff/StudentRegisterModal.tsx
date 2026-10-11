@@ -1,0 +1,214 @@
+"use client";
+
+import React, { useState } from "react";
+import { User, Phone, GraduationCap, CheckCircle2 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { TargetLevel } from "@/types/student";
+import { addMockStudent, StudentRecord } from "@/lib/mock-data";
+
+interface StudentRegisterModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: (newStudent: StudentRecord) => void;
+}
+
+export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [targetLevel, setTargetLevel] = useState<TargetLevel>("ELEMENTARY");
+  const [errors, setErrors] = useState<{ fullName?: string; phone?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Sanitasi Nama Lengkap: hanya huruf dan spasi
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+    setFullName(sanitized);
+    if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
+  };
+
+  // Sanitasi No HP: hanya angka
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = e.target.value.replace(/\D/g, "");
+    setPhone(sanitized);
+    if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
+  };
+
+  const validate = (): boolean => {
+    const newErrors: { fullName?: string; phone?: string } = {};
+
+    if (!fullName.trim()) {
+      newErrors.fullName = "Nama lengkap wajib diisi";
+    } else if (fullName.trim().length < 3) {
+      newErrors.fullName = "Nama lengkap minimal 3 karakter";
+    }
+
+    if (!phone.trim()) {
+      newErrors.phone = "Nomor WhatsApp/HP wajib diisi";
+    } else if (!phone.startsWith("08")) {
+      newErrors.phone = "Nomor HP harus diawali '08'";
+    } else if (phone.length < 10 || phone.length > 14) {
+      newErrors.phone = "Nomor HP harus terdiri dari 10 - 14 digit";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const created = addMockStudent({
+        fullName,
+        phone,
+        targetLevel,
+      });
+
+      setIsSubmitting(false);
+      setSuccessMessage(`Siswa ${created.fullName} berhasil didaftarkan!`);
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+        setFullName("");
+        setPhone("");
+        setTargetLevel("ELEMENTARY");
+        setErrors({});
+        onSuccess?.(created);
+        onClose();
+      }, 1200);
+    }, 400);
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        if (!isSubmitting) {
+          setSuccessMessage(null);
+          onClose();
+        }
+      }}
+      title="Daftarkan Siswa Baru"
+      description="Masukkan data siswa baru untuk menerbitkan sesi tes penempatan resmi."
+      maxWidth="md"
+    >
+      {successMessage ? (
+        <div className="py-6 flex flex-col items-center text-center">
+          <div className="h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+          <p className="text-base font-semibold text-text-primary">{successMessage}</p>
+          <p className="text-xs text-text-muted mt-1">Data siswa telah tersimpan dan siap mengakses tes.</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {/* Input Nama Lengkap */}
+          <div>
+            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
+              Nama Lengkap Siswa <span className="text-accent-500">*</span>
+            </label>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Contoh: Muhammad Rizky"
+                value={fullName}
+                onChange={handleNameChange}
+                error={errors.fullName}
+                className="pl-10 text-sm"
+                autoFocus
+              />
+              <User className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
+            </div>
+            <p className="text-[11px] text-text-muted mt-1">Hanya huruf alfabet dan spasi.</p>
+          </div>
+
+          {/* Input Nomor HP */}
+          <div>
+            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
+              Nomor WhatsApp / HP <span className="text-accent-500">*</span>
+            </label>
+            <div className="relative">
+              <Input
+                type="tel"
+                placeholder="08xxxxxxxxxx"
+                value={phone}
+                onChange={handlePhoneChange}
+                error={errors.phone}
+                className="pl-10 text-sm"
+                maxLength={14}
+              />
+              <Phone className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
+            </div>
+            <p className="text-[11px] text-text-muted mt-1">Format angka diawali 08 (10–14 digit).</p>
+          </div>
+
+          {/* Pilihan Jenjang */}
+          <div>
+            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
+              Jenjang Sasaran <span className="text-accent-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setTargetLevel("ELEMENTARY")}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                  targetLevel === "ELEMENTARY"
+                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-500"
+                    : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
+                }`}
+              >
+                <GraduationCap className="h-5 w-5 mb-1 text-primary-600" />
+                <span className="text-xs font-bold text-text-primary">Elementary</span>
+                <span className="text-[10px] text-text-muted">Tingkat SD</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTargetLevel("HIGH_SCHOOL")}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                  targetLevel === "HIGH_SCHOOL"
+                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-500"
+                    : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
+                }`}
+              >
+                <GraduationCap className="h-5 w-5 mb-1 text-primary-600" />
+                <span className="text-xs font-bold text-text-primary">High School</span>
+                <span className="text-[10px] text-text-muted">Tingkat SMP / SMA</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="md"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isSubmitting}
+            >
+              Daftarkan Siswa
+            </Button>
+          </div>
+        </form>
+      )}
+    </Modal>
+  );
+};

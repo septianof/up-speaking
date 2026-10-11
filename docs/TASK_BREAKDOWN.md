@@ -48,7 +48,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-004`** | Lembar Ujian Stepper (`SCR-003`) & Palet Soal (`CMP-001`–`004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, stepper & palet responsif |
 | **`TASK-005`** | Modal Konfirmasi Submit & Layar Selesai Siswa (`SCR-004`) | Fase 2 | `Done` | 2026-10-10 | next build sukses, konfirmasi submit & hasil |
 | **`TASK-006`** | Layout Sidebar Staf (`CMP-005`) & Login Staf (`SCR-005`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, sidebar responsive & login staff |
-| **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `In Progress` | - | - |
+| **`TASK-007`** | Dashboard Admin (`SCR-006`) & Kelola Siswa (`SCR-007`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard admin metrik & kelola siswa soft reset |
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Pending` | - | - |
 | **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Pending` | - | - |
 | **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Pending` | - | - |
@@ -152,7 +152,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Kartu metrik dan quick actions tampil rapi; modal pendaftaran memvalidasi input; tombol "Reset Tes" di tabel hanya aktif pada siswa yang sedang mengerjakan atau selesai; modal konfirmasi reset memunculkan peringatan audit trail yang jelas.
 - **Verification:** Uji isi form pendaftaran siswa dan buka modal reset tes pada mock data.
 - **Risk / Notes:** Sediakan filter pencarian nama siswa di tabel.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-11)
 
 #### `TASK-008`: Halaman Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`)
 - **Goal / Scope:** Membangun Halaman Kelola Tutor (`SCR-014`) lengkap dengan modal form pendaftaran akun pengajar baru (Nama, Email, Password Sementara, Jenjang: Elementary / High School). Membangun Halaman Admin Bank Soal (`SCR-009`) dengan tab filter jenjang dan modal form pembuatan butir soal dengan opsi dinamis (min 2, max 5 baris dengan radio kunci jawaban).
