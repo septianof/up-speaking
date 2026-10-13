@@ -32,4 +32,5 @@ export interface StudentSession {
   startedAt: string;
   completedAt?: string;
   finalLevel?: FinalLevel;
+  notes?: string;
 }

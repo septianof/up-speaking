@@ -99,6 +99,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           startedAt: found.startedAt ?? new Date().toISOString(),
           completedAt: found.completedAt,
           finalLevel: found.finalLevel,
+          notes: found.notes,
         };
         saveSession(resultSession);
         onClose();

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button, Badge } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession, clearSession, saveSession } from "@/lib/session";
 import { getMockStudents } from "@/lib/mock-data";
@@ -13,7 +13,6 @@ import {
   Sparkles,
   ArrowRight,
   RefreshCw,
-  LogOut,
   Smile,
 } from "lucide-react";
 
@@ -42,6 +41,7 @@ export default function ResultPage() {
           completedAt: latestRecord.completedAt ?? active.completedAt,
           elapsedSeconds: latestRecord.elapsedSeconds ?? active.elapsedSeconds,
           totalQuestions: latestRecord.totalQuestions ?? active.totalQuestions,
+          notes: latestRecord.notes ?? active.notes,
         };
         saveSession(refreshedSession);
         setSession(refreshedSession);
@@ -74,33 +74,21 @@ export default function ResultPage() {
   }
 
   // Check if session status is FINALIZED by Tutor or still COMPLETED (pending tutor evaluation)
-  const isFinalized = session.status === "FINALIZED" && !!session.finalLevel;
+  const isFinalized = (session.status === "FINALIZED" || session.status === "COMPLETED") && !!session.finalLevel;
 
   // Level configuration
   const levelConfig = {
     BEGINNER: {
       title: "Beginner Level",
-      badge: "Beginner",
-      badgeVariant: "accent" as const,
       color: "border-sun-300 bg-sun-50 text-amber-900",
-      description:
-        "Fokus pembelajaran pada penguatan kosakata dasar, pelafalan (pronunciation) seru, dan belajar berani berbicara sehari-hari dengan percaya diri!",
     },
     INTERMEDIATE: {
       title: "Intermediate Level",
-      badge: "Intermediate",
-      badgeVariant: "primary" as const,
       color: "border-primary-200 bg-primary-50 text-primary-950",
-      description:
-        "Fokus pembelajaran pada kelancaran percakapan (fluency), cerita pengalaman, dan diskusi topik-topik menarik bersama teman kelas.",
     },
     ADVANCED: {
       title: "Advanced Level",
-      badge: "Advanced",
-      badgeVariant: "success" as const,
       color: "border-mint-300 bg-mint-50 text-mint-950",
-      description:
-        "Fokus pembelajaran pada presentasi percaya diri, debat seru, penguasaan idiom bahasa Inggris, dan kemampuan *public speaking* tingkat lanjut!",
     },
   };
 
@@ -141,7 +129,7 @@ export default function ResultPage() {
       {/* Main Container */}
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full flex flex-col items-center text-center justify-center">
         {isFinalized && activeLevel ? (
-          /* KONDISI B: Status FINALIZED -> Menampilkan Kartu Level Resmi */
+          /* KONDISI B: Status FINALIZED -> Menampilkan Kartu Level Resmi yang Ramping */
           <div className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card">
             {/* Maskot Bersorak */}
             <div className="flex justify-center -mt-12 sm:-mt-16 mb-1 sm:mb-2">
@@ -162,40 +150,36 @@ export default function ResultPage() {
               Selamat, {session.fullName}! 🎉
             </h1>
             <p className="text-xs sm:text-sm text-text-muted mb-5 max-w-md mx-auto">
-              Berdasarkan evaluasi hasil tes, hasil penempatan kelasmu adalah:
+              Kamu resmi ditempatkan di kelas:
             </p>
 
-            {/* Official Level Card */}
-            <div className={`p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border-2 ${activeLevel.color} text-left mb-5 shadow-sm`}>
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight">
-                  {activeLevel.title}
-                </h2>
-                <Badge variant={activeLevel.badgeVariant} size="md">
-                  {activeLevel.badge}
-                </Badge>
-              </div>
-              <p className="text-xs sm:text-sm leading-relaxed font-semibold">
-                {activeLevel.description}
-              </p>
+            {/* Official Level Card - Bersih, Tegas, Berwibawa */}
+            <div className={`p-6 sm:p-7 rounded-[22px] sm:rounded-[26px] border-2 ${activeLevel.color} text-center mb-5 shadow-2xs`}>
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-text-muted mb-1 block">
+                Level Penempatan Resmi
+              </span>
+              <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
+                {activeLevel.title}
+              </h2>
             </div>
 
-            {/* Session Info Details */}
-            <div className="grid grid-cols-2 gap-3 p-3.5 sm:p-4 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6 text-left">
-              <div>
-                <span className="text-text-muted block font-normal">Jenjang Pilihan:</span>
-                <span className="font-bold text-text-primary capitalize">
-                  {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
-                </span>
-              </div>
-              <div>
-                <span className="text-text-muted block font-normal">Waktu Pengerjaan:</span>
-                <span className="font-bold text-text-primary">
-                  {formatElapsed(session.elapsedSeconds || 0)}
-                </span>
-              </div>
+            {/* Info Jenjang Singkat */}
+            <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-5">
+              <span className="text-text-muted">Jenjang Pendidikan</span>
+              <span className="font-bold text-text-primary">
+                {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+              </span>
             </div>
 
+            {/* Catatan Evaluasi jika ada */}
+            {session.notes && (
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-left mb-5 text-xs sm:text-sm">
+                <span className="font-bold text-amber-900 block mb-0.5">Catatan Evaluasi:</span>
+                <p className="text-amber-800 italic leading-relaxed">&ldquo;{session.notes}&rdquo;</p>
+              </div>
+            )}
+
+            {/* Tombol Aksi Bersahabat */}
             <div className="flex flex-col gap-2">
               <Button
                 variant="kidBlue"
@@ -203,8 +187,8 @@ export default function ResultPage() {
                 onClick={handleFinishAndExit}
                 className="w-full gap-2 text-sm shadow-[0_4px_0_0_#206798]"
               >
-                <span>Keluar & Selesai</span>
-                <LogOut className="w-4 h-4 ml-1" />
+                <span>Kembali ke Beranda</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
           </div>
