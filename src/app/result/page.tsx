@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession, clearSession, saveSession } from "@/lib/session";
@@ -13,7 +14,6 @@ import {
   Sparkles,
   ArrowRight,
   RefreshCw,
-  Smile,
 } from "lucide-react";
 
 export default function ResultPage() {
@@ -130,7 +130,12 @@ export default function ResultPage() {
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full flex flex-col items-center text-center justify-center">
         {isFinalized && activeLevel ? (
           /* KONDISI B: Status FINALIZED -> Menampilkan Kartu Level Resmi yang Ramping */
-          <div className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card"
+          >
             {/* Maskot Bersorak */}
             <div className="flex justify-center -mt-12 sm:-mt-16 mb-1 sm:mb-2">
               <div className="sm:hidden">
@@ -141,38 +146,63 @@ export default function ResultPage() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs"
+            >
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
               <span>Hasil Penempatan Kelas</span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
-              Selamat, {session.fullName}! 🎉
-            </h1>
+            <motion.h1
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.35 }}
+              className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1"
+            >
+              Selamat, {session.fullName}!
+            </motion.h1>
             <p className="text-xs sm:text-sm text-text-muted mb-5 max-w-md mx-auto">
               Kamu resmi ditempatkan di kelas:
             </p>
 
             {/* Official Level Card - Bersih, Tegas, Berwibawa */}
-            <div className={`p-6 sm:p-7 rounded-[22px] sm:rounded-[26px] border-2 ${activeLevel.color} text-center mb-5 shadow-2xs`}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, duration: 0.35 }}
+              className={`p-6 sm:p-7 rounded-[22px] sm:rounded-[26px] border-2 ${activeLevel.color} text-center mb-5 shadow-2xs`}
+            >
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-text-muted mb-1 block">
                 Level Penempatan Resmi
               </span>
               <h2 className="font-display text-2xl sm:text-4xl font-black tracking-tight">
                 {activeLevel.title}
               </h2>
-            </div>
+            </motion.div>
 
             {/* Info Jenjang Singkat */}
-            <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+              className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6"
+            >
               <span className="text-text-muted">Jenjang Pendidikan</span>
               <span className="font-bold text-text-primary">
                 {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
               </span>
-            </div>
+            </motion.div>
 
             {/* Tombol Aksi Bersahabat */}
-            <div className="flex flex-col gap-2">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.3 }}
+              className="flex flex-col gap-2"
+            >
               <Button
                 variant="kidBlue"
                 size="lg"
@@ -182,11 +212,16 @@ export default function ResultPage() {
                 <span>Kembali ke Beranda</span>
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         ) : (
           /* KONDISI A: Status COMPLETED -> Konfirmasi Tes Berhasil Dikumpulkan */
-          <div className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card"
+          >
             {/* Maskot Bersorak */}
             <div className="flex justify-center -mt-12 sm:-mt-16 mb-1 sm:mb-2">
               <div className="sm:hidden">
@@ -197,20 +232,35 @@ export default function ResultPage() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs"
+            >
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
               <span>Lembar Jawaban Berhasil Dikumpulkan</span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
+            <motion.h1
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.35 }}
+              className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1"
+            >
               Terima Kasih, {session.fullName}! ⭐
-            </h1>
+            </motion.h1>
             <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto mb-4 sm:mb-5 leading-relaxed">
               Lembar jawabanmu telah berhasil dikumpulkan dan akan segera dinilai.
             </p>
 
             {/* Details Box */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-sky-soft border border-primary-100 text-left space-y-2 sm:space-y-2.5 mb-5 font-kid text-xs sm:text-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.35 }}
+              className="p-3.5 sm:p-4 rounded-2xl bg-sky-soft border border-primary-100 text-left space-y-2 sm:space-y-2.5 mb-5 font-kid text-xs sm:text-sm"
+            >
               <div className="flex items-center justify-between pb-1.5 border-b border-primary-100/60">
                 <span className="text-text-muted flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-primary-500" />
@@ -230,14 +280,23 @@ export default function ResultPage() {
 
               <div className="flex items-center justify-between">
                 <span className="text-text-muted">Status</span>
-                <span className="font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full text-[11px] sm:text-xs">
+                <motion.span
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full text-[11px] sm:text-xs"
+                >
                   Menunggu Penilaian Hasil Tes
-                </span>
+                </motion.span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-2.5">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.3 }}
+              className="flex flex-col gap-2.5"
+            >
               <Button
                 variant="kidBlue"
                 size="lg"
@@ -256,16 +315,15 @@ export default function ResultPage() {
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Cek Ulang Status Hasil</span>
               </button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
       </main>
 
       {/* Footer */}
       <footer className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid">
         <p className="flex items-center justify-center gap-1">
-          <span>&copy; {new Date().getFullYear()} Up Speaking Learning Centre</span>
-          <Smile className="w-3.5 h-3.5 text-sun-500 inline" />
+          <span>&copy; {new Date().getFullYear()} Up Speaking Learning Centre. All rights reserved.</span>
         </p>
       </footer>
     </div>

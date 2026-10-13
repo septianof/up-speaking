@@ -21,6 +21,7 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -206,38 +207,46 @@ export default function Home() {
         </div>
 
         {/* Laci Navigasi Dropdown Mobile */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-primary-100/70 bg-surface-white px-5 py-4 shadow-lg animate-in slide-in-from-top-2 duration-200">
-            <nav className="flex flex-col gap-1 pb-3">
-              {navLinks.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors"
-                >
-                  <span>{item.label}</span>
-                  <ChevronRight className="w-4 h-4 text-text-muted" />
-                </a>
-              ))}
-            </nav>
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-primary-100/70 bg-surface-white px-5 py-4 shadow-lg"
+            >
+              <nav className="flex flex-col gap-1 pb-3">
+                {navLinks.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors"
+                  >
+                    <span>{item.label}</span>
+                    <ChevronRight className="w-4 h-4 text-text-muted" />
+                  </a>
+                ))}
+              </nav>
 
-            <div className="pt-2 border-t border-slate-100">
-              <Button
-                variant="kid"
-                size="md"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsModalOpen(true);
-                }}
-                className="w-full text-sm h-10 justify-center shadow-[0_3px_0_0_#B91C1C]"
-              >
-                <span>Mulai Tes Sekarang</span>
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </div>
-          </div>
-        )}
+              <div className="pt-2 border-t border-slate-100">
+                <Button
+                  variant="kid"
+                  size="md"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full text-sm h-10 justify-center shadow-[0_3px_0_0_#B91C1C]"
+                >
+                  <span>Mulai Tes Sekarang</span>
+                  <ArrowRight className="w-4 h-4 ml-1.5" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Backdrop Mobile Drawer */}
@@ -255,76 +264,111 @@ export default function Home() {
           {/* Teks Hero */}
           <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-800 mb-5 border border-sun-300 shadow-xs">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-800 mb-5 border border-sun-300 shadow-xs"
+            >
               <Sparkles className="w-4 h-4 text-amber-600 animate-spin" style={{ animationDuration: "6s" }} />
               <span>Tes Penempatan Bahasa Inggris 🌟</span>
-            </div>
+            </motion.div>
 
-            {/* Judul Utama */}
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary tracking-tight leading-tight mb-4">
-              Tes Penempatan <br className="hidden sm:inline" />
-              <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2">
-                Bahasa Inggris
-              </span>
-            </h1>
+            {/* Judul Utama + Deskripsi + Tombol CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              {/* Judul Utama */}
+              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary tracking-tight leading-tight mb-4">
+                Tes Penempatan <br className="hidden sm:inline" />
+                <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2">
+                  Bahasa Inggris
+                </span>
+              </h1>
 
-            {/* Deskripsi */}
-            <p className="text-base sm:text-lg text-text-secondary max-w-xl mb-7 leading-relaxed">
-              Kerjakan tes penempatan secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
-            </p>
+              {/* Deskripsi */}
+              <p className="text-base sm:text-lg text-text-secondary max-w-xl mb-7 leading-relaxed">
+                Kerjakan tes penempatan secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
+              </p>
 
-            {/* Tombol CTA */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-              <Button
-                size="xl"
-                variant="kid"
-                onClick={() => setIsModalOpen(true)}
-                className="w-full sm:w-auto px-9 text-lg gap-2.5 shadow-[0_6px_0_0_#B91C1C]"
-              >
-                <span>Mulai Tes Sekarang</span>
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </div>
+              {/* Tombol CTA */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                <Button
+                  size="xl"
+                  variant="kid"
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full sm:w-auto px-9 text-lg gap-2.5 shadow-[0_6px_0_0_#B91C1C]"
+                >
+                  <span>Mulai Tes Sekarang</span>
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </div>
+            </motion.div>
           </div>
 
           {/* Maskot Ilustrasi Hero */}
-          <div className="flex-1 flex justify-center items-center relative">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="flex-1 flex justify-center items-center relative"
+          >
             {/* Blob Background Dekoratif */}
             <div className="absolute w-64 h-64 sm:w-80 sm:h-80 bg-primary-100/70 rounded-full blur-2xl -z-10 animate-pulse" />
             <div className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 backdrop-blur-xs border-2 border-primary-200/50 shadow-kid-card flex flex-col items-center">
               <Mascot mood="wave" size={210} floating />
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* SECTION: 3 LANGKAH PELAKSANAAN TES */}
         <section id="alur" className="w-full bg-surface-white py-14 px-6 border-y border-primary-100/60 scroll-mt-20">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center max-w-xl mx-auto mb-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              className="text-center max-w-xl mx-auto mb-10"
+            >
               <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
                 3 Langkah Pelaksanaan Tes
               </h2>
               <p className="text-sm sm:text-base text-text-muted mt-2">
                 Ikuti alur pengerjaan tes dengan tertib dan teliti:
               </p>
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Langkah 1 */}
-              <div className="p-6 rounded-[24px] bg-sky-soft border-2 border-primary-100 shadow-sm flex flex-col items-center text-center relative group hover:border-primary-300 transition-colors">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0 }}
+                className="p-6 rounded-[24px] bg-sky-soft border-2 border-primary-100 shadow-sm flex flex-col items-center text-center relative group hover:border-primary-300 transition-colors"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-primary-500 text-white font-display text-xl font-black flex items-center justify-center mb-4 shadow-[0_3px_0_0_#206798]">
                   1
                 </div>
                 <h3 className="font-display text-lg font-bold text-text-primary mb-1.5">
-                  Isi Nama & No. HP
+                  Isi Nama &amp; No. HP
                 </h3>
                 <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
                   Masukkan nama lengkap dan nomor telepon yang telah didaftarkan pada sistem Up Speaking.
                 </p>
-              </div>
+              </motion.div>
 
               {/* Langkah 2 */}
-              <div className="p-6 rounded-[24px] bg-sun-50 border-2 border-sun-300/80 shadow-sm flex flex-col items-center text-center relative group hover:border-sun-400 transition-colors">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="p-6 rounded-[24px] bg-sun-50 border-2 border-sun-300/80 shadow-sm flex flex-col items-center text-center relative group hover:border-sun-400 transition-colors"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white font-display text-xl font-black flex items-center justify-center mb-4 shadow-[0_3px_0_0_#B45309]">
                   2
                 </div>
@@ -334,10 +378,16 @@ export default function Home() {
                 <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
                   Pilih satu jawaban yang menurutmu paling tepat. Baca perlahan karena tidak ada batasan waktu kaku.
                 </p>
-              </div>
+              </motion.div>
 
               {/* Langkah 3 */}
-              <div className="p-6 rounded-[24px] bg-mint-50 border-2 border-mint-400/60 shadow-sm flex flex-col items-center text-center relative group hover:border-mint-500 transition-colors">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="p-6 rounded-[24px] bg-mint-50 border-2 border-mint-400/60 shadow-sm flex flex-col items-center text-center relative group hover:border-mint-500 transition-colors"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-mint-500 text-white font-display text-xl font-black flex items-center justify-center mb-4 shadow-[0_3px_0_0_#047857]">
                   3
                 </div>
@@ -347,25 +397,37 @@ export default function Home() {
                 <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
                   Setelah tes dikumpulkan, lembar jawabanmu akan dinilai untuk penentuan kelas yang paling tepat.
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
         {/* SECTION: KETENTUAN PENGERJAAN TES */}
         <section id="ketentuan" className="w-full max-w-5xl mx-auto px-6 py-14 sm:py-18 scroll-mt-20">
-          <div className="text-center max-w-xl mx-auto mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="text-center max-w-xl mx-auto mb-10"
+          >
             <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
               Ketentuan Pengerjaan Tes
             </h2>
             <p className="text-sm sm:text-base text-text-muted mt-2">
               Sistem tes dirancang agar pelaksanaan ujian berjalan tertib, mandiri, dan akurat.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Poin 1 */}
-            <div className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0 }}
+              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+            >
               <div className="p-3 rounded-2xl bg-primary-100 text-primary-600 shrink-0">
                 <Shuffle className="w-6 h-6" />
               </div>
@@ -377,10 +439,16 @@ export default function Home() {
                   Setiap peserta mendapatkan susunan soal acak secara adil. Fokuslah pada lembar tes masing-masing.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Poin 2 */}
-            <div className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.08 }}
+              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+            >
               <div className="p-3 rounded-2xl bg-sun-100 text-amber-600 shrink-0">
                 <Timer className="w-6 h-6" />
               </div>
@@ -392,10 +460,16 @@ export default function Home() {
                   Waktu pengerjaan dicatat secara otomatis oleh sistem selama sesi tes berlangsung tanpa alarm mendadak.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Poin 3 */}
-            <div className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.16 }}
+              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+            >
               <div className="p-3 rounded-2xl bg-mint-100 text-mint-600 shrink-0">
                 <ShieldCheck className="w-6 h-6" />
               </div>
@@ -407,10 +481,16 @@ export default function Home() {
                   Semua jawaban tersimpan otomatis di perangkat sehingga tidak hilang jika terjadi kendala jaringan.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Poin 4 */}
-            <div className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.24 }}
+              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+            >
               <div className="p-3 rounded-2xl bg-accent-100 text-accent-600 shrink-0">
                 <BookOpen className="w-6 h-6" />
               </div>
@@ -422,22 +502,28 @@ export default function Home() {
                   Lembar tes akan dinilai langsung oleh tim pengajar untuk menentukan hasil penempatan kelas.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* SECTION: FAQ (PERTANYAAN UMUM) */}
         <section id="faq" className="w-full bg-surface-white py-14 px-6 border-t border-primary-100/60 scroll-mt-20">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              className="text-center mb-10"
+            >
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-xs font-bold mb-2">
                 <HelpCircle className="w-3.5 h-3.5" />
-                <span>Bantuan & Tanya Jawab</span>
+                <span>Bantuan &amp; Tanya Jawab</span>
               </div>
               <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
                 Pertanyaan yang Sering Diajukan
               </h2>
-            </div>
+            </motion.div>
 
             <div className="space-y-3.5">
               {faqs.map((faq, idx) => {
@@ -459,11 +545,19 @@ export default function Home() {
                         }`}
                       />
                     </button>
-                    {isOpen && (
-                      <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-text-secondary leading-relaxed border-t border-primary-100/50 bg-white">
-                        {faq.a}
-                      </div>
-                    )}
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="px-5 pb-5 pt-1 text-xs sm:text-sm text-text-secondary leading-relaxed border-t border-primary-100/50 bg-white overflow-hidden"
+                        >
+                          {faq.a}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}
@@ -473,7 +567,13 @@ export default function Home() {
 
         {/* BANNER AJAKAN AKHIR */}
         <section className="w-full max-w-4xl mx-auto px-6 py-12">
-          <div className="rounded-[32px] bg-gradient-to-r from-primary-500 to-primary-600 p-8 sm:p-10 text-white text-center shadow-kid relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="rounded-[32px] bg-gradient-to-r from-primary-500 to-primary-600 p-8 sm:p-10 text-white text-center shadow-kid relative overflow-hidden"
+          >
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
             <h2 className="font-display text-2xl sm:text-3xl font-black mb-3">
               Siap Memulai Tes Penempatan?
@@ -490,7 +590,7 @@ export default function Home() {
               <span>Mulai Tes Sekarang</span>
               <ArrowRight className="w-5 h-5 ml-1 shrink-0" />
             </Button>
-          </div>
+          </motion.div>
         </section>
       </main>
 
@@ -506,7 +606,7 @@ export default function Home() {
           />
 
           <p className="text-xs text-text-secondary max-w-md">
-            Pusat Pelatihan & Pembelajaran Bahasa Inggris — Up Speaking Learning Centre.
+            Pusat Pelatihan &amp; Pembelajaran Bahasa Inggris — Up Speaking Learning Centre.
           </p>
 
           {/* Deretan Tombol Ikon Sosial Media Minimalis */}

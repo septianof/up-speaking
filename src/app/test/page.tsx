@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui";
 import { QuestionCard } from "@/components/student/QuestionCard";
 import { QuestionPalette } from "@/components/student/QuestionPalette";
@@ -25,6 +26,13 @@ import {
   Smile,
 } from "lucide-react";
 
+// Slide variants for QuestionCard transitions
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
+};
+
 export default function TestPage() {
   const router = useRouter();
   const [session, setSession] = useState<StudentSession | null>(null);
@@ -35,6 +43,7 @@ export default function TestPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
     const active = getActiveSession();
@@ -83,6 +92,7 @@ export default function TestPage() {
   // Navigate between questions
   const handleNavigate = (newIndex: number) => {
     if (newIndex < 0 || newIndex >= questions.length) return;
+    setDirection(newIndex > currentIndex ? 1 : -1);
     setCurrentIndex(newIndex);
     setIsDrawerOpen(false);
 
@@ -222,9 +232,11 @@ export default function TestPage() {
           </span>
           {/* Progress Bar */}
           <div className="flex-1 h-3 bg-sky-soft rounded-full overflow-hidden border border-primary-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-sun-400 via-primary-500 to-mint-500 transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
+            <motion.div
+              animate={{ width: progressPercent + "%" }}
+              transition={{ type: "spring", stiffness: 60, damping: 15 }}
+              style={{ height: "100%" }}
+              className="rounded-full bg-gradient-to-r from-sun-400 via-primary-500 to-mint-500"
             />
           </div>
           {/* Angka ringkas */}
@@ -255,25 +267,39 @@ export default function TestPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Question Stepper (8 cols) */}
           <div className="lg:col-span-8 flex flex-col gap-5">
-            <QuestionCard
-              question={currentQuestion}
-              selectedOptionId={answers[currentQuestion.id]}
-              onSelectOption={handleSelectOption}
-            />
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+              >
+                <QuestionCard
+                  question={currentQuestion}
+                  selectedOptionId={answers[currentQuestion.id]}
+                  onSelectOption={handleSelectOption}
+                />
+              </motion.div>
+            </AnimatePresence>
 
             {/* Navigation Stepper Action Bar */}
             <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-[24px] border-2 border-primary-100 shadow-kid-card overflow-hidden">
-              <Button
-                variant="kidSoft"
-                size="md"
-                disabled={currentIndex === 0}
-                onClick={() => handleNavigate(currentIndex - 1)}
-                className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
-                aria-label="Soal sebelumnya"
-              >
-                <ChevronLeft className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline">Sebelumnya</span>
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  variant="kidSoft"
+                  size="md"
+                  disabled={currentIndex === 0}
+                  onClick={() => handleNavigate(currentIndex - 1)}
+                  className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
+                  aria-label="Soal sebelumnya"
+                >
+                  <ChevronLeft className="w-4 h-4 shrink-0" />
+                  <span className="hidden sm:inline">Sebelumnya</span>
+                </Button>
+              </motion.div>
 
               {/* Ergonomic Middle Palette Trigger Button */}
               <button
@@ -291,27 +317,31 @@ export default function TestPage() {
               </button>
 
               {currentIndex < totalQuestions - 1 ? (
-                <Button
-                  variant="kidBlue"
-                  size="md"
-                  onClick={() => handleNavigate(currentIndex + 1)}
-                  className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
-                  aria-label="Soal selanjutnya"
-                >
-                  <span className="hidden sm:inline">Selanjutnya</span>
-                  <ChevronRight className="w-4 h-4 shrink-0" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    variant="kidBlue"
+                    size="md"
+                    onClick={() => handleNavigate(currentIndex + 1)}
+                    className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
+                    aria-label="Soal selanjutnya"
+                  >
+                    <span className="hidden sm:inline">Selanjutnya</span>
+                    <ChevronRight className="w-4 h-4 shrink-0" />
+                  </Button>
+                </motion.div>
               ) : (
-                <Button
-                  variant="kid"
-                  size="md"
-                  onClick={handleOpenSubmit}
-                  className="gap-1.5 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C] min-w-0"
-                  aria-label="Kumpulkan tes"
-                >
-                  <span>Kumpulkan</span>
-                  <Send className="w-3.5 h-3.5 shrink-0" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    variant="kid"
+                    size="md"
+                    onClick={handleOpenSubmit}
+                    className="gap-1.5 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C] min-w-0"
+                    aria-label="Kumpulkan tes"
+                  >
+                    <span>Kumpulkan</span>
+                    <Send className="w-3.5 h-3.5 shrink-0" />
+                  </Button>
+                </motion.div>
               )}
             </div>
           </div>
@@ -350,40 +380,48 @@ export default function TestPage() {
       />
 
       {/* Mobile Bottom-Sheet Drawer for Question Palette */}
-      {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
-          {/* Backdrop */}
-          <div
-            onClick={() => setIsDrawerOpen(false)}
-            className="fixed inset-0 bg-primary-950/40 backdrop-blur-xs transition-opacity"
-          />
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
+            {/* Backdrop — kept separate, not animated via motion */}
+            <div
+              onClick={() => setIsDrawerOpen(false)}
+              className="fixed inset-0 bg-primary-950/40 backdrop-blur-xs transition-opacity"
+            />
 
-          {/* Drawer Sheet */}
-          <div className="relative bg-surface-white rounded-t-[32px] p-6 shadow-float border-t-2 border-primary-100 z-10 max-h-[80vh] flex flex-col font-kid">
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-primary-100">
-              <h3 className="font-display text-lg font-bold text-text-primary">
-                Palet Nomor Soal
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(false)}
-                className="p-1.5 rounded-full text-text-muted hover:bg-sky-soft hover:text-text-primary"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+            {/* Drawer Sheet */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative bg-surface-white rounded-t-[32px] p-6 shadow-float border-t-2 border-primary-100 z-10 max-h-[80vh] flex flex-col font-kid"
+            >
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-primary-100">
+                <h3 className="font-display text-lg font-bold text-text-primary">
+                  Palet Nomor Soal
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="p-1.5 rounded-full text-text-muted hover:bg-sky-soft hover:text-text-primary"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-            <div className="overflow-y-auto">
-              <QuestionPalette
-                totalQuestions={totalQuestions}
-                currentIndex={currentIndex}
-                answeredQuestionIndices={answeredIndices}
-                onSelectQuestion={handleNavigate}
-              />
-            </div>
+              <div className="overflow-y-auto">
+                <QuestionPalette
+                  totalQuestions={totalQuestions}
+                  currentIndex={currentIndex}
+                  answeredQuestionIndices={answeredIndices}
+                  onSelectQuestion={handleNavigate}
+                />
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid">
