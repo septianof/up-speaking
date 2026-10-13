@@ -153,27 +153,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
           </div>
 
           {/* User Profile Card */}
-          <div className="p-4 mx-3 my-3 rounded-2xl bg-surface-subtle border border-surface-border flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary-500 text-surface-white font-bold flex items-center justify-center shrink-0 text-sm shadow-xs">
+          <div className="px-4 py-3 mx-2 my-2 rounded-xl bg-surface-subtle border border-surface-border flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-primary-500 text-white font-bold flex items-center justify-center shrink-0 text-sm">
               {user.fullName.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-text-primary truncate">
-                {user.fullName}
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[10px] font-semibold text-primary-700 bg-primary-50 px-1.5 py-0.2 rounded border border-primary-100">
-                  {isAdmin ? "Admin Pusat" : `Tutor ${user.targetLevel === "ELEMENTARY" ? "SD" : "SMA"}`}
-                </span>
-              </div>
+              <p className="text-xs font-bold text-text-primary truncate">{user.fullName}</p>
+              <p className="text-[11px] text-text-muted mt-0.5">{isAdmin ? 'Administrator' : `Tutor ${user.targetLevel === 'ELEMENTARY' ? 'SD' : 'SMA'}`}</p>
             </div>
           </div>
 
           {/* Nav Items */}
           <nav className="px-3 space-y-1">
-            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
-              Navigasi Utama
-            </p>
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -185,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                   onClick={() => setIsMobileOpen(false)}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-primary-50 text-primary-700 border border-primary-100 shadow-xs"
+                      ? "bg-primary-50 text-primary-700 border-l-2 border-primary-500"
                       : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   }`}
                 >

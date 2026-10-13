@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Phone, GraduationCap, CheckCircle2 } from "lucide-react";
+import { User, Phone, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -124,8 +124,8 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
       title={isEditing ? "Edit Data Siswa" : "Daftarkan Siswa Baru"}
       description={
         isEditing
-          ? "Perbarui nama lengkap, nomor telepon, atau jenjang pendidikan siswa."
-          : "Masukkan data siswa baru untuk menerbitkan sesi tes penempatan resmi."
+          ? "Perbarui data siswa yang sudah terdaftar."
+          : "Isi data siswa baru untuk mendaftarkannya ke sistem."
       }
       maxWidth="md"
     >
@@ -138,11 +138,11 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
           <p className="text-xs text-text-muted mt-1">Data siswa telah tersimpan dan siap mengakses tes.</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
           {/* Input Nama Lengkap */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
-              Nama Lengkap Siswa <span className="text-accent-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Nama lengkap <span className="text-accent-500">*</span>
             </label>
             <div className="relative">
               <Input
@@ -156,12 +156,11 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
               />
               <User className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
             </div>
-            <p className="text-[11px] text-text-muted mt-1">Hanya huruf alfabet dan spasi.</p>
           </div>
 
           {/* Input Nomor HP */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Nomor WhatsApp / HP <span className="text-accent-500">*</span>
             </label>
             <div className="relative">
@@ -176,47 +175,41 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
               />
               <Phone className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
             </div>
-            <p className="text-[11px] text-text-muted mt-1">Format angka diawali 08 (10–14 digit).</p>
           </div>
 
           {/* Pilihan Jenjang */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
-              Jenjang Sasaran <span className="text-accent-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Jenjang sasaran <span className="text-accent-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setTargetLevel("ELEMENTARY")}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all ${
                   targetLevel === "ELEMENTARY"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-500"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
                     : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                <GraduationCap className="h-5 w-5 mb-1 text-primary-600" />
-                <span className="text-xs font-bold text-text-primary">Elementary</span>
-                <span className="text-[10px] text-text-muted">Tingkat SD</span>
+                Elementary <span className="text-xs font-normal opacity-70">SD</span>
               </button>
-
               <button
                 type="button"
                 onClick={() => setTargetLevel("HIGH_SCHOOL")}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all ${
                   targetLevel === "HIGH_SCHOOL"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-500"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
                     : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                <GraduationCap className="h-5 w-5 mb-1 text-primary-600" />
-                <span className="text-xs font-bold text-text-primary">High School</span>
-                <span className="text-[10px] text-text-muted">Tingkat SMP / SMA</span>
+                High School <span className="text-xs font-normal opacity-70">SMP/SMA</span>
               </button>
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-6">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-2">
             <Button
               type="button"
               variant="outline"

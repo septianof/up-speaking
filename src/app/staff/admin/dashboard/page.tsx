@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
+      <div className="pb-4 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
             Dashboard Utama Admin
@@ -85,72 +85,66 @@ export default function AdminDashboardPage() {
             Selamat datang kembali, <strong>{staff?.fullName || "Administrator"}</strong>. Berikut ringkasan aktivitas tes hari ini.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" size="md">
-            🛡️ Hak Akses: Administrator
-          </Badge>
-        </div>
       </div>
 
       {/* 4 Kartu Metrik Ringkasan */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Siswa */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Total Peserta</p>
-            <p className="text-2xl sm:text-3xl font-black text-text-primary mt-1">{metrics.total}</p>
-            <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 text-primary-500" />
-              Siswa terdaftar di sistem
-            </p>
+      <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Siswa */}
+          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Total Peserta</p>
+              <p className="text-2xl sm:text-3xl font-black text-text-primary mt-1">{metrics.total}</p>
+              <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 text-primary-500" />
+                Siswa terdaftar di sistem
+              </p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+              <Users className="h-6 w-6" />
+            </div>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-            <Users className="h-6 w-6" />
-          </div>
-        </div>
 
-        {/* Belum Mulai */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Belum Mulai</p>
-            <p className="text-2xl sm:text-3xl font-black text-slate-700 mt-1">{metrics.notStarted}</p>
-            <p className="text-[11px] text-text-muted mt-1">Menunggu masuk ke tes</p>
+          {/* Belum Mulai */}
+          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Belum Mulai</p>
+              <p className="text-2xl sm:text-3xl font-black text-slate-700 mt-1">{metrics.notStarted}</p>
+              <p className="text-[11px] text-text-muted mt-1">Menunggu masuk ke tes</p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <Clock className="h-6 w-6" />
+            </div>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-            <Clock className="h-6 w-6" />
-          </div>
-        </div>
 
-        {/* Sedang Mengerjakan */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Sedang Tes</p>
-            <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{metrics.inProgress}</p>
-            <p className="text-[11px] text-amber-600/80 mt-1">Sesi aktif berjalan</p>
+          {/* Sedang Mengerjakan */}
+          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Sedang Tes</p>
+              <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{metrics.inProgress}</p>
+              <p className="text-[11px] text-amber-600/80 mt-1">Sesi aktif berjalan</p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <PlayCircle className="h-6 w-6" />
+            </div>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <PlayCircle className="h-6 w-6" />
-          </div>
-        </div>
 
-        {/* Selesai / Dinilai */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Selesai</p>
-            <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">{metrics.finished}</p>
-            <p className="text-[11px] text-emerald-600/80 mt-1">Terkumpul / Dinilai</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="h-6 w-6" />
+          {/* Selesai / Dinilai */}
+          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Selesai</p>
+              <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">{metrics.finished}</p>
+              <p className="text-[11px] text-emerald-600/80 mt-1">Terkumpul / Dinilai</p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Baris Tombol Aksi Cepat (Quick Actions) */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-text-muted">
-          Aksi Cepat Admin
-        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Daftarkan Siswa Baru */}
           <button

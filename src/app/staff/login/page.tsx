@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
 import { StaffUser } from "@/types/staff";
 import { getAllMockTutors } from "@/lib/mock-tutors";
-import { Mail, Lock, AlertCircle, ArrowLeft, Shield } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowLeft, Shield, Eye, EyeOff, ChevronDown } from "lucide-react";
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -15,6 +15,8 @@ export default function StaffLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,7 +140,7 @@ export default function StaffLoginPage() {
               priority
               className="h-11 w-auto object-contain mb-4"
             />
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-1.5">
               <Shield className="w-3.5 h-3.5 text-slate-500" />
               <span>Portal Akses Staf Lembaga</span>
             </div>
@@ -160,7 +162,7 @@ export default function StaffLoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-text-primary mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Email Staf <span className="text-accent-500">*</span>
               </label>
               <div className="relative">
@@ -180,7 +182,7 @@ export default function StaffLoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-text-primary mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 Kata Sandi <span className="text-accent-500">*</span>
               </label>
               <div className="relative">
@@ -188,14 +190,22 @@ export default function StaffLoginPage() {
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   disabled={isLoading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-11 pl-10 pr-3.5 rounded-btn bg-surface-white border border-surface-border text-text-primary text-sm transition-all focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-100 placeholder:text-text-disabled"
+                  className="w-full h-11 pl-10 pr-10 rounded-btn bg-surface-white border border-surface-border text-text-primary text-sm transition-all focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-100 placeholder:text-text-disabled"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-text-muted hover:text-text-primary transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
@@ -213,62 +223,69 @@ export default function StaffLoginPage() {
           </form>
 
           {/* Quick Credential Hint for Testing */}
-          <div className="mt-6 pt-5 border-t border-surface-border text-left">
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-              Akun Uji Coba Demo (Password Bebas):
-            </p>
-            <div className="space-y-2 text-xs text-text-secondary bg-surface-subtle p-3.5 rounded-xl border border-surface-border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-text-primary">Tutor High School:</span>
-                  <div className="font-mono text-primary-700 text-[11px]">rian.highschool@upspeaking.com</div>
+          <div className="mt-5 pt-4 border-t border-surface-border">
+            <button
+              type="button"
+              onClick={() => setShowHint(!showHint)}
+              className="flex items-center justify-between w-full text-xs text-text-muted hover:text-text-primary transition-colors"
+            >
+              <span className="font-medium">Akun demo tersedia</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${showHint ? "rotate-180" : ""}`} />
+            </button>
+            {showHint && (
+              <div className="mt-3 space-y-2 text-xs text-text-secondary bg-surface-subtle p-3 rounded-xl border border-surface-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-text-primary">Tutor High School:</span>
+                    <div className="font-mono text-primary-700 text-[11px]">rian.highschool@upspeaking.com</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail("rian.highschool@upspeaking.com");
+                      setPassword("123456");
+                    }}
+                    className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded hover:bg-primary-100 border border-primary-200"
+                  >
+                    Gunakan
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail("rian.highschool@upspeaking.com");
-                    setPassword("123456");
-                  }}
-                  className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded hover:bg-primary-100 border border-primary-200"
-                >
-                  Gunakan
-                </button>
-              </div>
 
-              <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
-                <div>
-                  <span className="font-bold text-text-primary">Tutor Elementary:</span>
-                  <div className="font-mono text-indigo-700 text-[11px]">dewi.elementary@upspeaking.com</div>
+                <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
+                  <div>
+                    <span className="font-bold text-text-primary">Tutor Elementary:</span>
+                    <div className="font-mono text-indigo-700 text-[11px]">dewi.elementary@upspeaking.com</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail("dewi.elementary@upspeaking.com");
+                      setPassword("123456");
+                    }}
+                    className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200"
+                  >
+                    Gunakan
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail("dewi.elementary@upspeaking.com");
-                    setPassword("123456");
-                  }}
-                  className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200"
-                >
-                  Gunakan
-                </button>
-              </div>
 
-              <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
-                <div>
-                  <span className="font-bold text-text-primary">Admin Lembaga:</span>
-                  <div className="font-mono text-slate-700 text-[11px]">admin@upspeaking.com</div>
+                <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
+                  <div>
+                    <span className="font-bold text-text-primary">Admin Lembaga:</span>
+                    <div className="font-mono text-slate-700 text-[11px]">admin@upspeaking.com</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail("admin@upspeaking.com");
+                      setPassword("123456");
+                    }}
+                    className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 border border-slate-300"
+                  >
+                    Gunakan
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail("admin@upspeaking.com");
-                    setPassword("123456");
-                  }}
-                  className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 border border-slate-300"
-                >
-                  Gunakan
-                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

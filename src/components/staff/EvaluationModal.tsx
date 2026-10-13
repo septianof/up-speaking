@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  CheckCircle2,
-  Award,
-  Sparkles,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -36,6 +32,12 @@ const INSTITUTION_THRESHOLDS = [
     range: "80% – 100%",
   },
 ];
+
+const LEVEL_META: Record<FinalLevel, { name: string; range: string }> = {
+  BEGINNER: { name: "Beginner", range: "0% – 59%" },
+  INTERMEDIATE: { name: "Intermediate", range: "60% – 79%" },
+  ADVANCED: { name: "Advanced", range: "80% – 100%" },
+};
 
 export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   student,
@@ -108,26 +110,26 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
           </p>
         </div>
       ) : (
-        <form onSubmit={handleFinalize} className="space-y-4 pt-1 max-h-[75vh] overflow-y-auto pr-1">
+        <form onSubmit={handleFinalize} className="space-y-3 pt-2 max-h-[75vh] overflow-y-auto pr-1">
           {/* Header Ringkasan Peserta */}
-          <div className="p-4 rounded-2xl bg-surface-subtle border border-surface-border grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="p-3.5 rounded-2xl bg-surface-subtle border border-surface-border grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
-              <p className="text-text-muted">Nama Siswa</p>
-              <p className="font-bold text-text-primary text-sm mt-0.5">{student.fullName}</p>
+              <p className="text-xs text-text-muted">Nama Siswa</p>
+              <p className="font-semibold text-text-primary text-sm mt-0.5">{student.fullName}</p>
             </div>
             <div>
-              <p className="text-text-muted">No. WhatsApp</p>
-              <p className="font-mono text-text-secondary mt-0.5">{student.phone}</p>
+              <p className="text-xs text-text-muted">No. WhatsApp</p>
+              <p className="font-mono font-semibold text-text-primary text-sm mt-0.5">{student.phone}</p>
             </div>
             <div>
-              <p className="text-text-muted">Jenjang Ujian</p>
+              <p className="text-xs text-text-muted">Jenjang Ujian</p>
               <Badge variant="primary" size="sm" className="mt-0.5">
                 {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
               </Badge>
             </div>
             <div>
-              <p className="text-text-muted">Skor Tes Objektif</p>
-              <p className="font-black text-primary-600 text-sm mt-0.5">
+              <p className="text-xs text-text-muted">Skor Tes Objektif</p>
+              <p className="font-semibold text-text-primary text-sm mt-0.5">
                 {student.score || 0}/{student.totalQuestions || 10} ({scorePercent}%)
               </p>
             </div>
@@ -135,13 +137,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
 
           {/* Acuan Rentang Nilai Lembaga */}
           <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                Panduan Acuan Skor Lembaga
-              </label>
-              <span className="text-[11px] text-text-muted">Rekomendasi otomatis tersorot</span>
-            </div>
+            <p className="text-xs font-medium text-text-muted mb-2">Acuan skor lembaga</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {INSTITUTION_THRESHOLDS.map((tier) => {
@@ -150,7 +146,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
                 return (
                   <div
                     key={tier.level}
-                    className={`p-3 rounded-xl border text-xs transition-all relative ${
+                    className={`p-2.5 rounded-xl border text-xs transition-all relative ${
                       isRecommended
                         ? "border-primary-500 bg-primary-50/60 shadow-sm ring-1 ring-primary-500"
                         : "border-surface-border bg-surface-white opacity-70"
@@ -173,9 +169,9 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
 
           {/* Formulir Penetapan Level Final oleh Tutor (FR-015) */}
           <div className="space-y-2 pt-2">
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider">
-              Tetapkan Level Final Siswa <span className="text-accent-500">*</span>
-            </label>
+            <p className="text-sm font-medium text-text-secondary mb-2">
+              Tetapkan level final <span className="text-accent-500">*</span>
+            </p>
             <div className="grid grid-cols-3 gap-3">
               {(["BEGINNER", "INTERMEDIATE", "ADVANCED"] as FinalLevel[]).map((lvl) => (
                 <button
@@ -188,8 +184,8 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
                       : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                   }`}
                 >
-                  <Award className="h-5 w-5 mx-auto mb-1 text-emerald-600" />
-                  <span className="text-xs">{lvl}</span>
+                  <span className="text-sm font-bold block">{LEVEL_META[lvl].name}</span>
+                  <span className="text-[11px] text-text-muted">{LEVEL_META[lvl].range}</span>
                 </button>
               ))}
             </div>
