@@ -16,7 +16,7 @@ export default function NotFound() {
       <div className="absolute top-10 left-10 w-48 h-48 bg-primary-100/60 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-16 right-10 w-60 h-60 bg-sun-100/60 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center text-center max-w-md">
+      <div className="relative z-10 flex flex-col items-center text-center max-w-lg w-full">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
@@ -82,9 +82,9 @@ export default function NotFound() {
             variant="kid"
             size="lg"
             onClick={() => router.push("/")}
-            className="w-full sm:w-auto px-8 gap-2 shadow-[0_5px_0_0_#B91C1C]"
+            className="w-full sm:flex-1 gap-2 shadow-[0_5px_0_0_#B91C1C] whitespace-nowrap"
           >
-            <Home className="w-4 h-4" />
+            <Home className="w-4 h-4 shrink-0" />
             <span>Kembali ke Beranda</span>
           </Button>
 
@@ -92,9 +92,9 @@ export default function NotFound() {
             variant="kidSoft"
             size="lg"
             onClick={() => router.back()}
-            className="w-full sm:w-auto px-8 gap-2"
+            className="w-full sm:flex-1 gap-2 whitespace-nowrap"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 shrink-0" />
             <span>Halaman Sebelumnya</span>
           </Button>
         </motion.div>
