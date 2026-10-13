@@ -186,7 +186,12 @@ export default function TestPage() {
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Topbar Header */}
-      <header className="sticky top-0 z-30 bg-surface-white/95 backdrop-blur-md border-b border-primary-100 px-4 sm:px-8 py-3 shadow-xs">
+      <motion.header
+        initial={{ y: -15, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="sticky top-0 z-30 bg-surface-white/95 backdrop-blur-md border-b border-primary-100 px-4 sm:px-8 py-3 shadow-xs"
+      >
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           {/* Logo & Student Name */}
           <div className="flex items-center gap-3">
@@ -220,7 +225,7 @@ export default function TestPage() {
             />
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* PROGRES BAR — Sticky di bawah header agar selalu terlihat */}
       <div className="sticky top-[57px] z-20 w-full bg-surface-white/95 backdrop-blur-sm border-b border-primary-100 shadow-2xs">
@@ -424,9 +429,14 @@ export default function TestPage() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid"
+      >
         <p>Up Speaking Learning Centre &bull; Lembar Tes Penempatan Siswa</p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

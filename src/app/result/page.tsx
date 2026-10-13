@@ -108,7 +108,12 @@ export default function ResultPage() {
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
-      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100 py-3 px-4 sm:px-8 sticky top-0 z-20 shadow-xs">
+      <motion.header
+        initial={{ y: -15, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100 py-3 px-4 sm:px-8 sticky top-0 z-20 shadow-xs"
+      >
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Image
             src="/images/logo.png"
@@ -124,7 +129,7 @@ export default function ResultPage() {
             </span>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Container */}
       <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full flex flex-col items-center text-center justify-center">
@@ -321,11 +326,16 @@ export default function ResultPage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid"
+      >
         <p className="flex items-center justify-center gap-1">
           <span>&copy; {new Date().getFullYear()} Up Speaking Learning Centre. All rights reserved.</span>
         </p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

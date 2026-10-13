@@ -144,12 +144,20 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
-      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100/60 sticky top-0 z-30 shadow-xs">
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100/60 sticky top-0 z-30 shadow-xs"
+      >
         <div className="max-w-6xl mx-auto flex items-center justify-between py-3 px-4 sm:px-8 gap-3">
           {/* Logo Brand */}
-          <a
+          <motion.a
             href="#hero"
             onClick={() => setIsMobileMenuOpen(false)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
             className="flex items-center gap-3 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg"
           >
             <Image
@@ -160,39 +168,49 @@ export default function Home() {
               priority
               className="h-8 sm:h-9 w-auto object-contain"
             />
-          </a>
+          </motion.a>
 
           {/* Navigasi Desktop di Bagian Tengah */}
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((item) => (
-              <a
+              <motion.a
                 key={item.href}
                 href={item.href}
-                className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-all duration-150 cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors duration-150 cursor-pointer"
               >
                 {item.label}
-              </a>
+              </motion.a>
             ))}
           </nav>
 
           {/* Aksi Kanan: Tombol CTA & Hamburger Mobile */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Button
-              size="md"
-              variant="kid"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setIsModalOpen(true);
-              }}
-              className="text-xs sm:text-sm px-3.5 sm:px-5 h-9 sm:h-10 shadow-[0_3px_0_0_#B91C1C]"
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
             >
-              <span>Mulai Tes</span>
-              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
-            </Button>
+              <Button
+                size="md"
+                variant="kid"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsModalOpen(true);
+                }}
+                className="text-xs sm:text-sm px-3.5 sm:px-5 h-9 sm:h-10 shadow-[0_3px_0_0_#B91C1C]"
+              >
+                <span>Mulai Tes</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
+              </Button>
+            </motion.div>
 
             {/* Tombol Hamburger Mobile */}
-            <button
+            <motion.button
               type="button"
+              whileTap={{ scale: 0.9 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Tutup menu" : "Buka menu navigasi"}
               className="md:hidden w-9 h-9 rounded-xl bg-sky-soft hover:bg-primary-50 text-text-primary border border-primary-100 flex items-center justify-center transition-colors active:scale-95 cursor-pointer"
@@ -202,7 +220,7 @@ export default function Home() {
               ) : (
                 <Menu className="w-5 h-5 text-text-secondary" />
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -247,7 +265,7 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
+      </motion.header>
 
       {/* Backdrop Mobile Drawer */}
       {isMobileMenuOpen && (
@@ -529,8 +547,13 @@ export default function Home() {
               {faqs.map((faq, idx) => {
                 const isOpen = openFaqIndex === idx;
                 return (
-                  <div
+                  <motion.div
                     key={idx}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.35, delay: idx * 0.08, ease: "easeOut" }}
+                    whileHover={{ scale: 1.01 }}
                     className="rounded-2xl border-2 border-primary-100 overflow-hidden bg-sky-soft/40 transition-colors"
                   >
                     <button
@@ -558,7 +581,7 @@ export default function Home() {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -595,15 +618,26 @@ export default function Home() {
       </main>
 
       {/* FOOTER BERSIH & MINIMALIS */}
-      <footer className="w-full border-t border-primary-100/80 py-8 px-6 bg-surface-white text-center">
+      <motion.footer
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full border-t border-primary-100/80 py-8 px-6 bg-surface-white text-center"
+      >
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-3.5">
-          <Image
-            src="/images/logo.png"
-            alt="Up Speaking Logo"
-            width={110}
-            height={34}
-            className="h-8 w-auto object-contain opacity-90"
-          />
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <Image
+              src="/images/logo.png"
+              alt="Up Speaking Logo"
+              width={110}
+              height={34}
+              className="h-8 w-auto object-contain opacity-90"
+            />
+          </motion.div>
 
           <p className="text-xs text-text-secondary max-w-md">
             Pusat Pelatihan &amp; Pembelajaran Bahasa Inggris — Up Speaking Learning Centre.
@@ -611,49 +645,61 @@ export default function Home() {
 
           {/* Deretan Tombol Ikon Sosial Media Minimalis */}
           <div className="flex items-center justify-center gap-2.5 pt-1">
-            <a
+            <motion.a
               href={SITE_CONFIG.socials.instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram Up Speaking"
-              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-pink-50 text-slate-500 hover:text-pink-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+              whileHover={{ scale: 1.15, y: -2 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-pink-50 text-slate-500 hover:text-pink-600 flex items-center justify-center transition-colors border border-primary-100 shadow-2xs cursor-pointer"
             >
               <InstagramIcon className="w-4 h-4" />
-            </a>
-            <a
+            </motion.a>
+            <motion.a
               href={SITE_CONFIG.socials.tiktok}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok Up Speaking"
-              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-slate-900 text-slate-500 hover:text-white flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+              whileHover={{ scale: 1.15, y: -2 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-slate-900 text-slate-500 hover:text-white flex items-center justify-center transition-colors border border-primary-100 shadow-2xs cursor-pointer"
             >
               <TikTokIcon className="w-4 h-4" />
-            </a>
-            <a
+            </motion.a>
+            <motion.a
               href={SITE_CONFIG.socials.facebook}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook Up Speaking"
-              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-blue-50 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+              whileHover={{ scale: 1.15, y: -2 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-blue-50 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-colors border border-primary-100 shadow-2xs cursor-pointer"
             >
               <FacebookIcon className="w-4 h-4" />
-            </a>
-            <a
+            </motion.a>
+            <motion.a
               href={SITE_CONFIG.socials.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp Up Speaking"
-              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+              whileHover={{ scale: 1.15, y: -2 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 flex items-center justify-center transition-colors border border-primary-100 shadow-2xs cursor-pointer"
             >
               <WhatsAppIcon className="w-4 h-4" />
-            </a>
+            </motion.a>
           </div>
 
           <p className="text-[11px] text-text-muted pt-2 border-t border-slate-100 w-full">
             &copy; {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
           </p>
         </div>
-      </footer>
+      </motion.footer>
 
       {/* Student Login Modal */}
       <LoginModal
