@@ -13,7 +13,6 @@ import {
   ArrowRight,
   RefreshCw,
   LogOut,
-  HelpCircle,
   Smile,
 } from "lucide-react";
 
@@ -112,44 +111,49 @@ export default function ResultPage() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-2xl mx-auto px-6 py-10 w-full flex flex-col items-center text-center justify-center">
+      <main className="flex-1 max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full flex flex-col items-center text-center justify-center">
         {isFinalized && activeLevel ? (
           /* KONDISI B: Status FINALIZED -> Menampilkan Kartu Level Resmi */
-          <div className="w-full bg-surface-white rounded-[32px] border-2 border-primary-100 p-7 sm:p-10 shadow-kid-card">
+          <div className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card">
             {/* Maskot Bersorak */}
-            <div className="flex justify-center -mt-16 mb-2">
-              <Mascot mood="cheer" size={130} floating />
+            <div className="flex justify-center -mt-12 sm:-mt-16 mb-1 sm:mb-2">
+              <div className="sm:hidden">
+                <Mascot mood="cheer" size={88} floating />
+              </div>
+              <div className="hidden sm:block">
+                <Mascot mood="cheer" size={120} floating />
+              </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-mint-50 text-mint-800 text-xs font-bold border border-mint-200 mb-3 shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
               <span>Pengumuman Level Resmi Kelasmu</span>
             </div>
 
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-text-primary mb-2">
+            <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
               Selamat, {session.fullName}! 🎉
             </h1>
-            <p className="text-sm text-text-muted mb-8 max-w-md mx-auto">
-              Berdasarkan hasil tes dan evaluasi Kak Tutor Up Speaking, kamu ditempatkan pada level:
+            <p className="text-xs sm:text-sm text-text-muted mb-5 max-w-md mx-auto">
+              Berdasarkan hasil evaluasi Kak Tutor, kamu ditempatkan pada level:
             </p>
 
             {/* Official Level Card */}
-            <div className={`p-6 sm:p-7 rounded-[24px] border-2 ${activeLevel.color} text-left mb-8 shadow-sm`}>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-display text-2xl font-black tracking-tight">
+            <div className={`p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border-2 ${activeLevel.color} text-left mb-5 shadow-sm`}>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight">
                   {activeLevel.title}
                 </h2>
                 <Badge variant={activeLevel.badgeVariant} size="md">
                   {activeLevel.badge}
                 </Badge>
               </div>
-              <p className="text-sm sm:text-base leading-relaxed font-semibold">
+              <p className="text-xs sm:text-sm leading-relaxed font-semibold">
                 {activeLevel.description}
               </p>
             </div>
 
             {/* Session Info Details */}
-            <div className="grid grid-cols-2 gap-3.5 p-4 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-8 text-left">
+            <div className="grid grid-cols-2 gap-3 p-3.5 sm:p-4 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6 text-left">
               <div>
                 <span className="text-text-muted block font-normal">Jenjang Pilihan:</span>
                 <span className="font-bold text-text-primary capitalize">
@@ -164,12 +168,12 @@ export default function ResultPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-2">
               <Button
                 variant="kidBlue"
-                size="xl"
+                size="lg"
                 onClick={handleFinishAndExit}
-                className="w-full gap-2 shadow-[0_5px_0_0_#206798]"
+                className="w-full gap-2 text-sm shadow-[0_4px_0_0_#206798]"
               >
                 <span>Keluar & Selesai</span>
                 <LogOut className="w-4 h-4 ml-1" />
@@ -178,29 +182,34 @@ export default function ResultPage() {
           </div>
         ) : (
           /* KONDISI A: Status COMPLETED -> Konfirmasi Tes Berhasil Dikumpulkan */
-          <div className="w-full bg-surface-white rounded-[32px] border-2 border-primary-100 p-7 sm:p-10 shadow-kid-card">
+          <div className="w-full bg-surface-white rounded-[28px] sm:rounded-[32px] border-2 border-primary-100 p-5 sm:p-8 shadow-kid-card">
             {/* Maskot Bersorak */}
-            <div className="flex justify-center -mt-16 mb-2">
-              <Mascot mood="cheer" size={130} floating />
+            <div className="flex justify-center -mt-12 sm:-mt-16 mb-1 sm:mb-2">
+              <div className="sm:hidden">
+                <Mascot mood="cheer" size={88} floating />
+              </div>
+              <div className="hidden sm:block">
+                <Mascot mood="cheer" size={120} floating />
+              </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-mint-50 text-mint-800 text-xs font-bold border border-mint-200 mb-3 shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
               <span>Hore! Lembar Jawaban Berhasil Terkirim</span>
             </div>
 
-            <h1 className="font-display text-2xl sm:text-3xl font-black text-text-primary mb-2">
+            <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
               Terima Kasih, {session.fullName}! ⭐
             </h1>
-            <p className="text-sm sm:text-base text-text-secondary max-w-md mx-auto mb-7 leading-relaxed">
-              Semua jawabanmu sudah tersimpan aman. Sekarang giliran Kak Tutor Up Speaking yang akan memeriksa lembar tesmu!
+            <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto mb-4 sm:mb-5 leading-relaxed">
+              Jawabanmu tersimpan aman dan sedang ditinjau oleh Kak Tutor Up Speaking.
             </p>
 
             {/* Details Box */}
-            <div className="p-5 rounded-2xl bg-sky-soft border border-primary-100 text-left space-y-3 mb-7 font-kid">
-              <div className="flex items-center justify-between text-xs sm:text-sm pb-2 border-b border-primary-100">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-sky-soft border border-primary-100 text-left space-y-2 sm:space-y-2.5 mb-5 font-kid text-xs sm:text-sm">
+              <div className="flex items-center justify-between pb-1.5 border-b border-primary-100/60">
                 <span className="text-text-muted flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-primary-500" />
+                  <Clock className="w-3.5 h-3.5 text-primary-500" />
                   Waktu Pengerjaan
                 </span>
                 <span className="font-bold text-text-primary">
@@ -208,41 +217,23 @@ export default function ResultPage() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs sm:text-sm pb-2 border-b border-primary-100">
+              <div className="flex items-center justify-between pb-1.5 border-b border-primary-100/60">
                 <span className="text-text-muted">Total Soal Terisi</span>
                 <span className="font-bold text-text-primary">
                   {Object.keys(session.answers || {}).length} dari {session.totalQuestions || 10} Soal
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-text-muted">Tahap Selanjutnya</span>
-                <span className="font-bold text-amber-800 bg-sun-100 px-2.5 py-0.5 rounded-full">
+                <span className="font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full text-[11px] sm:text-xs">
                   Menunggu Evaluasi Kak Tutor
                 </span>
               </div>
             </div>
 
-            {/* Information Notice */}
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-sun-50 border border-sun-200 text-amber-900 text-xs sm:text-sm text-left mb-8">
-              <HelpCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <p className="leading-relaxed">
-                Kamu boleh kembali ke beranda sekarang atau menutup halaman ini. Pengumuman resmi level kelas akan disampaikan oleh admin / Kak Tutor Up Speaking.
-              </p>
-            </div>
-
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3.5">
-              <Button
-                variant="kidSoft"
-                size="lg"
-                onClick={() => window.location.reload()}
-                className="w-full gap-2 text-sm"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Cek Status Hasil</span>
-              </Button>
-
+            <div className="flex flex-col gap-2.5">
               <Button
                 variant="kidBlue"
                 size="lg"
@@ -252,6 +243,15 @@ export default function ResultPage() {
                 <span>Kembali ke Beranda</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
+
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="text-xs font-bold text-primary-600 hover:text-primary-800 flex items-center justify-center gap-1.5 py-1 transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Cek Ulang Status Hasil</span>
+              </button>
             </div>
           </div>
         )}

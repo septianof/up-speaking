@@ -32,7 +32,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
       </div>
 
       {/* Grid of question buttons with inner padding */}
-      <div className="grid grid-cols-5 gap-2.5 max-h-[340px] overflow-y-auto p-1.5">
+      <div className="grid grid-cols-5 gap-2.5 max-h-[340px] overflow-y-auto p-1.5 custom-scrollbar">
         {Array.from({ length: totalQuestions }, (_, i) => {
           const isCurrent = currentIndex === i;
           const isAnswered = answeredSet.has(i);
