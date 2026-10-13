@@ -164,20 +164,12 @@ export default function ResultPage() {
             </div>
 
             {/* Info Jenjang Singkat */}
-            <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-5">
+            <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6">
               <span className="text-text-muted">Jenjang Pendidikan</span>
               <span className="font-bold text-text-primary">
                 {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
               </span>
             </div>
-
-            {/* Catatan Evaluasi jika ada */}
-            {session.notes && (
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-left mb-5 text-xs sm:text-sm">
-                <span className="font-bold text-amber-900 block mb-0.5">Catatan Evaluasi:</span>
-                <p className="text-amber-800 italic leading-relaxed">&ldquo;{session.notes}&rdquo;</p>
-              </div>
-            )}
 
             {/* Tombol Aksi Bersahabat */}
             <div className="flex flex-col gap-2">
