@@ -50,7 +50,7 @@ export const Mascot: React.FC<MascotProps> = ({
     <svg
       viewBox="0 0 200 200"
       role="img"
-      aria-label="Upi, maskot Up Speaking"
+      aria-label="Maskot Up Speaking"
       className="block h-auto w-full"
     >
       {/* Bayangan */}

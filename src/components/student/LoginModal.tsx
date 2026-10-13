@@ -77,7 +77,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       onClose();
       router.push("/test");
     } catch {
-      setError("Ada kendala saat memeriksa datamu. Coba lagi ya, atau tanya Kak Tutor.");
+      setError("Ada kendala saat memeriksa datamu. Coba lagi ya, atau hubungi admin Up Speaking.");
     } finally {
       setIsLoading(false);
     }
@@ -104,8 +104,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       onClose={onClose}
       variant="kid"
       topSlot={<Mascot mood="wave" size={110} />}
-      title="Halo! Siapa namamu?"
-      description="Isi nama dan nomor HP yang didaftarkan di Up Speaking, lalu kita mulai!"
+      title="Masuk ke Tes Penempatan"
+      description="Masukkan nama dan nomor HP yang terdaftar untuk memulai tes penempatan."
     >
       <form onSubmit={handleSubmit} className="space-y-5 pt-2" noValidate>
         {error && (

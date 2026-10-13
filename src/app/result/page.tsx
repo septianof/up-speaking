@@ -127,14 +127,14 @@ export default function ResultPage() {
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
-              <span>Pengumuman Level Resmi Kelasmu</span>
+              <span>Hasil Penempatan Kelas</span>
             </div>
 
             <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
               Selamat, {session.fullName}! 🎉
             </h1>
             <p className="text-xs sm:text-sm text-text-muted mb-5 max-w-md mx-auto">
-              Berdasarkan hasil evaluasi Kak Tutor, kamu ditempatkan pada level:
+              Berdasarkan evaluasi hasil tes, hasil penempatan kelasmu adalah:
             </p>
 
             {/* Official Level Card */}
@@ -195,14 +195,14 @@ export default function ResultPage() {
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
-              <span>Hore! Lembar Jawaban Berhasil Terkirim</span>
+              <span>Lembar Jawaban Berhasil Dikumpulkan</span>
             </div>
 
             <h1 className="font-display text-xl sm:text-3xl font-black text-text-primary mb-1">
               Terima Kasih, {session.fullName}! ⭐
             </h1>
             <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto mb-4 sm:mb-5 leading-relaxed">
-              Jawabanmu tersimpan aman dan sedang ditinjau oleh Kak Tutor Up Speaking.
+              Jawaban tes penempatanmu sudah tersimpan aman di sistem.
             </p>
 
             {/* Details Box */}
@@ -225,9 +225,9 @@ export default function ResultPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Tahap Selanjutnya</span>
+                <span className="text-text-muted">Status</span>
                 <span className="font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full text-[11px] sm:text-xs">
-                  Menunggu Evaluasi Kak Tutor
+                  Menunggu Penilaian Hasil Tes
                 </span>
               </div>
             </div>

@@ -404,11 +404,11 @@ export default function TestPage() {
               onSelectQuestion={handleNavigate}
             />
 
-            {/* Kartu Motivasi Samping */}
+            {/* Kartu Petunjuk Samping */}
             <div className="p-4 rounded-[24px] bg-sun-50 border-2 border-sun-200 text-xs text-amber-900 shadow-2xs flex items-center gap-3">
               <Smile className="w-8 h-8 text-amber-600 shrink-0" />
               <div>
-                <p className="font-bold text-sm text-amber-950 font-display">Semangat ya!</p>
+                <p className="font-bold text-sm text-amber-950 font-display">Petunjuk Pengerjaan</p>
                 <p className="text-amber-800 leading-relaxed mt-0.5">
                   Kamu bisa langsung melompati atau meninjau ulang soal dengan klik nomor di atas.
                 </p>
