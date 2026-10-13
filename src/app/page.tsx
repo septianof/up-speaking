@@ -371,10 +371,10 @@ export default function Home() {
               size="xl"
               variant="kid"
               onClick={() => setIsModalOpen(true)}
-              className="px-9 text-base shadow-[0_5px_0_0_#B91C1C]"
+              className="px-7 sm:px-9 text-sm sm:text-base shadow-[0_5px_0_0_#B91C1C] max-w-xs w-full sm:w-auto"
             >
-              <span>Mulai Tes Penempatan Sekarang</span>
-              <ArrowRight className="w-5 h-5 ml-1" />
+              <span>Mulai Tes Sekarang</span>
+              <ArrowRight className="w-5 h-5 ml-1 shrink-0" />
             </Button>
           </div>
         </section>

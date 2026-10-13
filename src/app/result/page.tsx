@@ -93,15 +93,15 @@ export default function ResultPage() {
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
-      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100 py-3.5 px-6 sm:px-10 sticky top-0 z-20 shadow-xs">
+      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100 py-3 px-4 sm:px-8 sticky top-0 z-20 shadow-xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Image
             src="/images/logo.png"
             alt="Up Speaking Logo"
-            width={120}
-            height={38}
+            width={110}
+            height={34}
             priority
-            className="h-8.5 w-auto object-contain"
+            className="h-8 w-auto object-contain"
           />
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-bold text-primary-700 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">

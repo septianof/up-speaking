@@ -291,6 +291,29 @@ export default function TestPage() {
         </div>
       </header>
 
+      {/* PROGRES BAR — Sticky di bawah header agar selalu terlihat */}
+      <div className="sticky top-[57px] z-20 w-full bg-surface-white/95 backdrop-blur-sm border-b border-primary-100 shadow-2xs">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-2.5 flex items-center gap-3">
+          {/* Label ringkas */}
+          <span className="flex items-center gap-1 text-xs font-bold text-primary-700 shrink-0 whitespace-nowrap">
+            <Sparkles className="w-3.5 h-3.5 text-sun-500" />
+            <span className="hidden sm:inline">Progres</span>
+          </span>
+          {/* Progress Bar */}
+          <div className="flex-1 h-3 bg-sky-soft rounded-full overflow-hidden border border-primary-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-sun-400 via-primary-500 to-mint-500 transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          {/* Angka ringkas */}
+          <span className="text-xs font-bold text-text-muted shrink-0 whitespace-nowrap">
+            <strong className="text-mint-600">{answeredIndices.length}</strong>/{totalQuestions}
+            <span className="hidden sm:inline"> ({progressPercent}%)</span>
+          </span>
+        </div>
+      </div>
+
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-5">
         {/* Mobile Student Info Sub-bar */}
@@ -308,26 +331,6 @@ export default function TestPage() {
           </span>
         </div>
 
-        {/* PROGRES BAR VISUAL RAMAH ANAK */}
-        <div className="w-full bg-surface-white rounded-2xl p-4 border border-primary-100 shadow-2xs flex flex-col gap-2">
-          <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-            <span className="flex items-center gap-1.5 text-primary-700">
-              <Sparkles className="w-4 h-4 text-sun-500" />
-              <span>Progres Pengerjaan</span>
-            </span>
-            <span className="text-text-muted">
-              <strong className="text-mint-600 font-black">{answeredIndices.length}</strong> dari {totalQuestions} Soal Terjawab ({progressPercent}%)
-            </span>
-          </div>
-
-          <div className="w-full h-3.5 bg-sky-soft rounded-full overflow-hidden p-0.5 border border-primary-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-sun-400 via-primary-500 to-mint-500 transition-all duration-300 shadow-2xs"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Question Stepper (8 cols) */}
           <div className="lg:col-span-8 flex flex-col gap-5">
@@ -338,13 +341,13 @@ export default function TestPage() {
             />
 
             {/* Navigation Stepper Action Bar */}
-            <div className="flex items-center justify-between gap-2.5 bg-surface-white p-3.5 sm:p-4 rounded-[24px] border-2 border-primary-100 shadow-kid-card">
+            <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-[24px] border-2 border-primary-100 shadow-kid-card overflow-hidden">
               <Button
                 variant="kidSoft"
                 size="md"
                 disabled={currentIndex === 0}
                 onClick={() => handleNavigate(currentIndex - 1)}
-                className="gap-1.5 px-3 sm:px-5 shrink-0 h-12 text-xs sm:text-sm"
+                className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
                 aria-label="Soal sebelumnya"
               >
                 <ChevronLeft className="w-4 h-4 shrink-0" />
@@ -355,13 +358,13 @@ export default function TestPage() {
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center justify-center gap-2 px-4 sm:px-5 h-12 rounded-full bg-sky-soft hover:bg-primary-100 border-2 border-primary-200 transition-all text-xs sm:text-sm font-bold text-primary-800 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-3 sm:px-5 h-11 rounded-full bg-sky-soft hover:bg-primary-100 border-2 border-primary-200 transition-all text-xs sm:text-sm font-bold text-primary-800 active:scale-95 min-w-0 shrink whitespace-nowrap shadow-2xs cursor-pointer"
                 title="Buka palet nomor soal"
                 aria-label="Buka palet nomor soal"
               >
                 <LayoutGrid className="w-4 h-4 text-primary-600 shrink-0" />
                 <span>
-                  Soal {currentIndex + 1} / {totalQuestions}
+                  {currentIndex + 1} / {totalQuestions}
                 </span>
                 <span className="text-[10px] text-primary-500">▼</span>
               </button>
@@ -371,7 +374,7 @@ export default function TestPage() {
                   variant="kidBlue"
                   size="md"
                   onClick={() => handleNavigate(currentIndex + 1)}
-                  className="gap-1.5 px-3 sm:px-5 shrink-0 h-12 text-xs sm:text-sm"
+                  className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
                   aria-label="Soal selanjutnya"
                 >
                   <span className="hidden sm:inline">Selanjutnya</span>
@@ -382,11 +385,11 @@ export default function TestPage() {
                   variant="kid"
                   size="md"
                   onClick={handleOpenSubmit}
-                  className="gap-1.5 px-4 sm:px-6 shrink-0 h-12 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C]"
+                  className="gap-1.5 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C] min-w-0"
                   aria-label="Kumpulkan tes"
                 >
                   <span>Kumpulkan</span>
-                  <Send className="w-4 h-4 shrink-0 ml-0.5" />
+                  <Send className="w-3.5 h-3.5 shrink-0" />
                 </Button>
               )}
             </div>
