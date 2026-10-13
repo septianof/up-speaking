@@ -3,7 +3,7 @@
 import React from "react";
 import { Modal, Button } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
-import { CheckCircle, AlertTriangle, Sparkles } from "lucide-react";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 
 export interface SubmitConfirmModalProps {
   isOpen: boolean;
@@ -66,13 +66,6 @@ export const SubmitConfirmModal: React.FC<SubmitConfirmModalProps> = ({
             </div>
           </div>
         )}
-
-        <div className="text-xs sm:text-sm text-text-muted bg-sky-soft p-3.5 rounded-2xl border border-primary-100 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary-500 shrink-0" />
-          <p className="leading-tight">
-            Setelah dikumpulkan, Kak Tutor akan mengevaluasi hasilmu.
-          </p>
-        </div>
 
         {/* Action Buttons: Simetris 50:50 */}
         <div className="grid grid-cols-2 gap-3 pt-2">

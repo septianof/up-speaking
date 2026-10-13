@@ -17,8 +17,6 @@ import {
   ArrowRight,
   HelpCircle,
   ChevronDown,
-  MessageCircle,
-  Heart,
 } from "lucide-react";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -34,6 +32,33 @@ const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
+const TikTokIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.48 6.3 6.3 0 0 0 1.86-4.47V8.71a8.21 8.21 0 0 0 4.91 1.64v-3.5a4.79 4.79 0 0 1-1-.16Z" />
+  </svg>
+);
+
+const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const WhatsAppIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
   </svg>
 );
 
@@ -368,39 +393,63 @@ export default function Home() {
         </section>
       </main>
 
-      {/* FOOTER HANGAT */}
+      {/* FOOTER BERSIH & MINIMALIS */}
       <footer className="w-full border-t border-primary-100/80 py-8 px-6 bg-surface-white text-center">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/images/logo.png"
-              alt="Up Speaking Logo"
-              width={110}
-              height={34}
-              className="h-8 w-auto object-contain opacity-90"
-            />
-          </div>
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-3.5">
+          <Image
+            src="/images/logo.png"
+            alt="Up Speaking Logo"
+            width={110}
+            height={34}
+            className="h-8 w-auto object-contain opacity-90"
+          />
 
           <p className="text-xs text-text-secondary max-w-md">
-            Pusat Pelatihan & Pembelajaran Bahasa Inggris Ramah Anak & Remaja — Up Speaking Learning Centre.
+            Pusat Pelatihan & Pembelajaran Bahasa Inggris — Up Speaking Learning Centre.
           </p>
 
-          {/* Kontak Lembaga Placeholder */}
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-text-muted">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-700">
-              <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
-              <span>Instagram: {SITE_CONFIG.instagram.handle}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-              <span>WhatsApp: {SITE_CONFIG.whatsapp.display}</span>
-            </span>
+          {/* Deretan Tombol Ikon Sosial Media Minimalis */}
+          <div className="flex items-center justify-center gap-2.5 pt-1">
+            <a
+              href={SITE_CONFIG.socials.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram Up Speaking"
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-pink-50 text-slate-500 hover:text-pink-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+            >
+              <InstagramIcon className="w-4 h-4" />
+            </a>
+            <a
+              href={SITE_CONFIG.socials.tiktok}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok Up Speaking"
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-slate-900 text-slate-500 hover:text-white flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+            >
+              <TikTokIcon className="w-4 h-4" />
+            </a>
+            <a
+              href={SITE_CONFIG.socials.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook Up Speaking"
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-blue-50 text-slate-500 hover:text-blue-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+            >
+              <FacebookIcon className="w-4 h-4" />
+            </a>
+            <a
+              href={SITE_CONFIG.socials.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Up Speaking"
+              className="w-9 h-9 rounded-full bg-sky-soft hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 flex items-center justify-center transition-all border border-primary-100 shadow-2xs hover:scale-110 active:scale-95 cursor-pointer"
+            >
+              <WhatsAppIcon className="w-4 h-4" />
+            </a>
           </div>
 
-          <p className="text-[11px] text-text-muted pt-2 border-t border-slate-100 w-full flex items-center justify-center gap-1">
-            <span>&copy; {new Date().getFullYear()} {SITE_CONFIG.name}. Dibuat dengan</span>
-            <Heart className="w-3 h-3 text-accent-500 fill-accent-500 inline" />
-            <span>untuk masa depan anak bangsa.</span>
+          <p className="text-[11px] text-text-muted pt-2 border-t border-slate-100 w-full">
+            &copy; {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
           </p>
         </div>
       </footer>

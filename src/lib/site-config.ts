@@ -1,15 +1,12 @@
 /**
- * Konfigurasi publik lembaga.
- * TODO: Ganti nilai placeholder di bawah dengan data resmi Up Speaking.
+ * Konfigurasi publik lembaga Up Speaking.
  */
 export const SITE_CONFIG = {
   name: "Up Speaking Learning Centre",
-  instagram: {
-    handle: "@username_instagram", // TODO: ganti dengan username Instagram resmi
-    url: "", // TODO: isi URL profil, contoh https://instagram.com/namaakun
-  },
-  whatsapp: {
-    display: "08xx-xxxx-xxxx", // TODO: ganti dengan nomor WhatsApp resmi
-    url: "", // TODO: isi tautan, contoh https://wa.me/628xxxxxxxxxx
+  socials: {
+    instagram: "https://www.instagram.com/upspeaking",
+    tiktok: "https://www.tiktok.com/@upspeaking",
+    facebook: "https://www.facebook.com/upspeaking",
+    whatsapp: "https://wa.me/6281234567890",
   },
 } as const;

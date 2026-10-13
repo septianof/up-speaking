@@ -220,6 +220,7 @@ export default function TestPage() {
     try {
       const completedSession: StudentSession = {
         ...session,
+        totalQuestions: totalQuestions,
         status: "COMPLETED",
         completedAt: new Date().toISOString(),
       };

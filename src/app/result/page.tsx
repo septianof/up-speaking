@@ -89,6 +89,11 @@ export default function ResultPage() {
     return `${mins} menit ${secs} detik`;
   };
 
+  const totalQuestionsDisplay =
+    session.totalQuestions === 25 && Object.keys(session.answers || {}).length <= 10
+      ? 10
+      : session.totalQuestions || 10;
+
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
@@ -202,7 +207,7 @@ export default function ResultPage() {
               Terima Kasih, {session.fullName}! ⭐
             </h1>
             <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto mb-4 sm:mb-5 leading-relaxed">
-              Jawaban tes penempatanmu sudah tersimpan aman di sistem.
+              Lembar jawabanmu telah berhasil dikumpulkan dan akan segera dinilai.
             </p>
 
             {/* Details Box */}
@@ -220,7 +225,7 @@ export default function ResultPage() {
               <div className="flex items-center justify-between pb-1.5 border-b border-primary-100/60">
                 <span className="text-text-muted">Total Soal Terisi</span>
                 <span className="font-bold text-text-primary">
-                  {Object.keys(session.answers || {}).length} dari {session.totalQuestions || 10} Soal
+                  {Object.keys(session.answers || {}).length} dari {totalQuestionsDisplay} Soal
                 </span>
               </div>
 

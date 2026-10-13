@@ -66,7 +66,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         targetLevel: "ELEMENTARY", // Mock default
         status: "IN_PROGRESS",
         currentQuestionIndex: 0,
-        totalQuestions: 25,
+        totalQuestions: 10,
         answers: {},
         elapsedSeconds: 0,
         deviceToken: "dev_" + Math.random().toString(36).substring(2, 9),
