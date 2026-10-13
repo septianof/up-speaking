@@ -17,6 +17,9 @@ import {
   ArrowRight,
   HelpCircle,
   ChevronDown,
+  Menu,
+  X,
+  ChevronRight,
 } from "lucide-react";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -68,6 +71,25 @@ export default function Home() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [activeSession, setActiveSession] = useState<ReturnType<typeof getActiveSession>>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Tutup menu drawer mobile saat tombol Escape ditekan
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const navLinks = [
+    { label: "Beranda", href: "#hero" },
+    { label: "Alur Tes", href: "#alur" },
+    { label: "Ketentuan", href: "#ketentuan" },
+    { label: "FAQ", href: "#faq" },
+  ];
 
   // Auto-Redirect check for active ongoing test session (FR-005, SCR-001)
   useEffect(() => {
@@ -121,36 +143,115 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">
       {/* Top Navbar */}
-      <header className="w-full bg-surface-white/90 backdrop-blur-md border-b border-primary-100/60 py-3.5 px-6 sm:px-10 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="w-full bg-surface-white/95 backdrop-blur-md border-b border-primary-100/60 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-6xl mx-auto flex items-center justify-between py-3 px-4 sm:px-8 gap-3">
+          {/* Logo Brand */}
+          <a
+            href="#hero"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-3 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg"
+          >
             <Image
               src="/images/logo.png"
               alt="Up Speaking Logo"
               width={130}
               height={40}
               priority
-              className="h-9 w-auto object-contain"
+              className="h-8 sm:h-9 w-auto object-contain"
             />
-          </div>
+          </a>
 
-          {/* Quick Action Button */}
-          <Button
-            size="md"
-            variant="kid"
-            onClick={() => setIsModalOpen(true)}
-            className="text-xs sm:text-sm px-4 sm:px-6 h-10 shadow-[0_3px_0_0_#B91C1C]"
-          >
-            <span>Mulai Tes</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
+          {/* Navigasi Desktop di Bagian Tengah */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+            {navLinks.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-all duration-150 cursor-pointer"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          {/* Aksi Kanan: Tombol CTA & Hamburger Mobile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Button
+              size="md"
+              variant="kid"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsModalOpen(true);
+              }}
+              className="text-xs sm:text-sm px-3.5 sm:px-5 h-9 sm:h-10 shadow-[0_3px_0_0_#B91C1C]"
+            >
+              <span>Mulai Tes</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
+            </Button>
+
+            {/* Tombol Hamburger Mobile */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Tutup menu" : "Buka menu navigasi"}
+              className="md:hidden w-9 h-9 rounded-xl bg-sky-soft hover:bg-primary-50 text-text-primary border border-primary-100 flex items-center justify-center transition-colors active:scale-95 cursor-pointer"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5 text-primary-600" />
+              ) : (
+                <Menu className="w-5 h-5 text-text-secondary" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Laci Navigasi Dropdown Mobile */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-primary-100/70 bg-surface-white px-5 py-4 shadow-lg animate-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col gap-1 pb-3">
+              {navLinks.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors"
+                >
+                  <span>{item.label}</span>
+                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                </a>
+              ))}
+            </nav>
+
+            <div className="pt-2 border-t border-slate-100">
+              <Button
+                variant="kid"
+                size="md"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsModalOpen(true);
+                }}
+                className="w-full text-sm h-10 justify-center shadow-[0_3px_0_0_#B91C1C]"
+              >
+                <span>Mulai Tes Sekarang</span>
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
+
+      {/* Backdrop Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-20 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <main className="flex-1 w-full flex flex-col items-center">
         {/* HERO SECTION */}
-        <section className="w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+        <section id="hero" className="w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 flex flex-col-reverse md:flex-row items-center justify-between gap-10 scroll-mt-24">
           {/* Teks Hero */}
           <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
             {/* Badge */}
@@ -197,7 +298,7 @@ export default function Home() {
         </section>
 
         {/* SECTION: 3 LANGKAH PELAKSANAAN TES */}
-        <section className="w-full bg-surface-white py-14 px-6 border-y border-primary-100/60">
+        <section id="alur" className="w-full bg-surface-white py-14 px-6 border-y border-primary-100/60 scroll-mt-20">
           <div className="max-w-5xl mx-auto">
             <div className="text-center max-w-xl mx-auto mb-10">
               <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
@@ -252,7 +353,7 @@ export default function Home() {
         </section>
 
         {/* SECTION: KETENTUAN PENGERJAAN TES */}
-        <section className="w-full max-w-5xl mx-auto px-6 py-14 sm:py-18">
+        <section id="ketentuan" className="w-full max-w-5xl mx-auto px-6 py-14 sm:py-18 scroll-mt-20">
           <div className="text-center max-w-xl mx-auto mb-10">
             <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
               Ketentuan Pengerjaan Tes
@@ -326,7 +427,7 @@ export default function Home() {
         </section>
 
         {/* SECTION: FAQ (PERTANYAAN UMUM) */}
-        <section className="w-full bg-surface-white py-14 px-6 border-t border-primary-100/60">
+        <section id="faq" className="w-full bg-surface-white py-14 px-6 border-t border-primary-100/60 scroll-mt-20">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-xs font-bold mb-2">

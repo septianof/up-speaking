@@ -8,6 +8,7 @@
 
 html,
 body {
+  scroll-behavior: smooth;
   color: #0F172A;
   background-color: #F8FAFC;
   font-family: var(--font-plus-jakarta);
