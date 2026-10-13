@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Modal, Button } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
 import { saveSession } from "@/lib/session";
-import { StudentSession } from "@/types/student";
 import { AlertCircle, User, Phone } from "lucide-react";
 
 export interface LoginModalProps {
@@ -55,25 +54,107 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Simulation / Mock Verification for Frontend Phase (will connect to /api/student/verify in Phase 5)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Simulasi network delay singkat (akan diganti fetch API di Phase 5)
+      await new Promise((resolve) => setTimeout(resolve, 700));
 
-      const mockSession: StudentSession = {
-        sessionId: "sess_" + Date.now(),
-        studentId: "std_" + Date.now(),
-        fullName: trimmedName,
-        phone: cleanPhone,
-        targetLevel: "ELEMENTARY", // Mock default
-        status: "IN_PROGRESS",
+      // ──── 1. Cari siswa di database lokal berdasarkan nomor HP ────
+      const { getMockStudents } = await import("@/lib/mock-data");
+      const students = getMockStudents();
+
+      // Cocokkan berdasarkan nomor HP (normalisasi: strip spasi/strip)
+      const found = students.find((s) => s.phone.replace(/[-\s]/g, "") === cleanPhone);
+
+      // ──── 2. Nomor belum terdaftar ────
+      if (!found) {
+        setError(
+          "Nomor HP ini belum terdaftar dalam sistem. Pastikan nomor yang kamu masukkan sudah benar, atau hubungi Up Speaking untuk mendaftarkan dirimu."
+        );
+        return;
+      }
+
+      // ──── 3. Nama tidak cocok (case-insensitive) ────
+      const nameMatch = found.fullName.trim().toLowerCase() === trimmedName.toLowerCase();
+      if (!nameMatch) {
+        setError(
+          "Nama yang kamu masukkan tidak sesuai dengan data yang terdaftar. Pastikan nama lengkapmu sudah benar."
+        );
+        return;
+      }
+
+      // ──── 4. Status FINALIZED atau COMPLETED → langsung ke halaman result ────
+      if (found.status === "FINALIZED" || found.status === "COMPLETED") {
+        // Bangun sesi dari data StudentRecord agar result page bisa membacanya
+        const resultSession = {
+          sessionId: `sess_${found.id}`,
+          studentId: found.id,
+          fullName: found.fullName,
+          phone: found.phone,
+          targetLevel: found.targetLevel,
+          status: found.status,
+          currentQuestionIndex: 0,
+          totalQuestions: found.totalQuestions ?? 10,
+          answers: {},
+          elapsedSeconds: found.elapsedSeconds ?? 0,
+          deviceToken: "readonly",
+          startedAt: found.startedAt ?? new Date().toISOString(),
+          completedAt: found.completedAt,
+          finalLevel: found.finalLevel,
+        };
+        saveSession(resultSession);
+        onClose();
+        router.push("/result");
+        return;
+      }
+
+      // ──── 5. Status NOT_STARTED / RESET → buat sesi baru lalu tes ────
+      if (found.status === "NOT_STARTED" || found.status === "RESET") {
+        const newSession = {
+          sessionId: `sess_${found.id}_${Date.now()}`,
+          studentId: found.id,
+          fullName: found.fullName,
+          phone: found.phone,
+          targetLevel: found.targetLevel,
+          status: "IN_PROGRESS" as const,
+          currentQuestionIndex: 0,
+          totalQuestions: 10,
+          answers: {} as Record<string, string>,
+          elapsedSeconds: 0,
+          deviceToken: "dev_" + Math.random().toString(36).substring(2, 9),
+          startedAt: new Date().toISOString(),
+        };
+
+        // Perbarui status siswa di database lokal menjadi IN_PROGRESS
+        const { getMockStudents: getStudents, saveMockStudents } = await import("@/lib/mock-data");
+        const all = getStudents();
+        const updated = all.map((s) =>
+          s.id === found.id
+            ? { ...s, status: "IN_PROGRESS" as const, startedAt: newSession.startedAt }
+            : s
+        );
+        saveMockStudents(updated);
+
+        saveSession(newSession);
+        onClose();
+        router.push("/test");
+        return;
+      }
+
+      // ──── 6. Status IN_PROGRESS → lanjutkan sesi yang ada ────
+      const resumeSession = {
+        sessionId: `sess_${found.id}`,
+        studentId: found.id,
+        fullName: found.fullName,
+        phone: found.phone,
+        targetLevel: found.targetLevel,
+        status: "IN_PROGRESS" as const,
         currentQuestionIndex: 0,
-        totalQuestions: 10,
-        answers: {},
-        elapsedSeconds: 0,
+        totalQuestions: found.totalQuestions ?? 10,
+        answers: {} as Record<string, string>,
+        elapsedSeconds: found.elapsedSeconds ?? 0,
         deviceToken: "dev_" + Math.random().toString(36).substring(2, 9),
-        startedAt: new Date().toISOString(),
+        startedAt: found.startedAt ?? new Date().toISOString(),
       };
-
-      saveSession(mockSession);
+      saveSession(resumeSession);
       onClose();
       router.push("/test");
     } catch {

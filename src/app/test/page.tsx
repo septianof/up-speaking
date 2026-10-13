@@ -11,6 +11,8 @@ import { OfflineBanner } from "@/components/student/OfflineBanner";
 import { SubmitConfirmModal } from "@/components/student/SubmitConfirmModal";
 import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession, saveSession } from "@/lib/session";
+import { getMockQuestions } from "@/lib/mock-questions";
+import { getMockStudents, saveMockStudents } from "@/lib/mock-data";
 import { StudentSession, QuestionItem } from "@/types/student";
 import {
   ChevronLeft,
@@ -23,123 +25,10 @@ import {
   Smile,
 } from "lucide-react";
 
-// Mock questions dataset for UI test sheet (10 items standard demo)
-const MOCK_QUESTIONS: QuestionItem[] = [
-  {
-    id: "q1",
-    targetLevel: "ELEMENTARY",
-    questionText: "What is the correct English word for 'Kucing'?",
-    options: [
-      { id: "opt_1_a", optionText: "Cat" },
-      { id: "opt_1_b", optionText: "Dog" },
-      { id: "opt_1_c", optionText: "Bird" },
-      { id: "opt_1_d", optionText: "Rabbit" },
-    ],
-  },
-  {
-    id: "q2",
-    targetLevel: "ELEMENTARY",
-    questionText: "Choose the correct greeting in the morning:",
-    options: [
-      { id: "opt_2_a", optionText: "Good night" },
-      { id: "opt_2_b", optionText: "Good morning" },
-      { id: "opt_2_c", optionText: "Good afternoon" },
-      { id: "opt_2_d", optionText: "Goodbye" },
-    ],
-  },
-  {
-    id: "q3",
-    targetLevel: "ELEMENTARY",
-    questionText: "She ___ to school every Monday.",
-    options: [
-      { id: "opt_3_a", optionText: "go" },
-      { id: "opt_3_b", optionText: "goes" },
-      { id: "opt_3_c", optionText: "going" },
-      { id: "opt_3_d", optionText: "gone" },
-    ],
-  },
-  {
-    id: "q4",
-    targetLevel: "ELEMENTARY",
-    questionText: "Which one is a color in English?",
-    options: [
-      { id: "opt_4_a", optionText: "Apple" },
-      { id: "opt_4_b", optionText: "Table" },
-      { id: "opt_4_c", optionText: "Yellow" },
-      { id: "opt_4_d", optionText: "Happy" },
-    ],
-  },
-  {
-    id: "q5",
-    targetLevel: "ELEMENTARY",
-    questionText: "They ___ playing football in the yard.",
-    options: [
-      { id: "opt_5_a", optionText: "is" },
-      { id: "opt_5_b", optionText: "am" },
-      { id: "opt_5_c", optionText: "are" },
-      { id: "opt_5_d", optionText: "be" },
-    ],
-  },
-  {
-    id: "q6",
-    targetLevel: "ELEMENTARY",
-    questionText: "What is the opposite of 'Big'?",
-    options: [
-      { id: "opt_6_a", optionText: "Tall" },
-      { id: "opt_6_b", optionText: "Small" },
-      { id: "opt_6_c", optionText: "Heavy" },
-      { id: "opt_6_d", optionText: "Fast" },
-    ],
-  },
-  {
-    id: "q7",
-    targetLevel: "ELEMENTARY",
-    questionText: "I have two ___. I use them to see.",
-    options: [
-      { id: "opt_7_a", optionText: "ears" },
-      { id: "opt_7_b", optionText: "hands" },
-      { id: "opt_7_c", optionText: "eyes" },
-      { id: "opt_7_d", optionText: "legs" },
-    ],
-  },
-  {
-    id: "q8",
-    targetLevel: "ELEMENTARY",
-    questionText: "How do you say 'Terima kasih' in English?",
-    options: [
-      { id: "opt_8_a", optionText: "You're welcome" },
-      { id: "opt_8_b", optionText: "Please" },
-      { id: "opt_8_c", optionText: "Sorry" },
-      { id: "opt_8_d", optionText: "Thank you" },
-    ],
-  },
-  {
-    id: "q9",
-    targetLevel: "ELEMENTARY",
-    questionText: "There are seven days in a ___.",
-    options: [
-      { id: "opt_9_a", optionText: "month" },
-      { id: "opt_9_b", optionText: "week" },
-      { id: "opt_9_c", optionText: "year" },
-      { id: "opt_9_d", optionText: "day" },
-    ],
-  },
-  {
-    id: "q10",
-    targetLevel: "ELEMENTARY",
-    questionText: "Can you speak English? Yes, I ___.",
-    options: [
-      { id: "opt_10_a", optionText: "can" },
-      { id: "opt_10_b", optionText: "do" },
-      { id: "opt_10_c", optionText: "am" },
-      { id: "opt_10_d", optionText: "have" },
-    ],
-  },
-];
-
 export default function TestPage() {
   const router = useRouter();
   const [session, setSession] = useState<StudentSession | null>(null);
+  const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -154,7 +43,15 @@ export default function TestPage() {
       return;
     }
 
+    // Muat soal dari database lokal, filter berdasarkan jenjang siswa, lalu acak urutan
+    const allQuestions = getMockQuestions();
+    const levelQuestions = allQuestions.filter((q) => q.targetLevel === active.targetLevel);
+
+    // Acak soal (Fisher-Yates shuffle) — deterministik per sesi (siswa selalu dapat urutan acak yang berbeda)
+    const shuffled = [...levelQuestions].sort(() => Math.random() - 0.5);
+
     setSession(active);
+    setQuestions(shuffled);
     setCurrentIndex(active.currentQuestionIndex || 0);
     setAnswers(active.answers || {});
     setIsLoading(false);
@@ -162,8 +59,8 @@ export default function TestPage() {
 
   // Handle option selection with toggle deselect
   const handleSelectOption = (optionId: string) => {
-    if (!session) return;
-    const questionId = MOCK_QUESTIONS[currentIndex].id;
+    if (!session || questions.length === 0) return;
+    const questionId = questions[currentIndex].id;
 
     const newAnswers = { ...answers };
     if (newAnswers[questionId] === optionId) {
@@ -185,7 +82,7 @@ export default function TestPage() {
 
   // Navigate between questions
   const handleNavigate = (newIndex: number) => {
-    if (newIndex < 0 || newIndex >= MOCK_QUESTIONS.length) return;
+    if (newIndex < 0 || newIndex >= questions.length) return;
     setCurrentIndex(newIndex);
     setIsDrawerOpen(false);
 
@@ -212,19 +109,42 @@ export default function TestPage() {
     setIsSubmitModalOpen(true);
   };
 
-  // Final confirm submit
+  // Final confirm submit — sync ke mock-data agar tutor dapat melihat lembar evaluasi
   const handleConfirmSubmit = async () => {
     if (!session) return;
     setIsSubmitting(true);
 
     try {
+      const totalQ = questions.length || 10;
+      const answeredCount = Object.keys(answers).length;
+
       const completedSession: StudentSession = {
         ...session,
-        totalQuestions: totalQuestions,
+        totalQuestions: totalQ,
         status: "COMPLETED",
         completedAt: new Date().toISOString(),
       };
+
+      // Simpan sesi ke browser storage
       saveSession(completedSession);
+
+      // Sync ke database lokal siswa agar muncul di panel evaluasi Tutor
+      const students = getMockStudents();
+      const updatedStudents = students.map((s) => {
+        if (s.id === session.studentId) {
+          return {
+            ...s,
+            status: "COMPLETED" as const,
+            completedAt: completedSession.completedAt,
+            totalQuestions: totalQ,
+            score: answeredCount, // sementara jumlah jawaban terisi sebagai score mock
+            elapsedSeconds: session.elapsedSeconds,
+          };
+        }
+        return s;
+      });
+      saveMockStudents(updatedStudents);
+
       setIsSubmitModalOpen(false);
       router.push("/result");
     } finally {
@@ -232,7 +152,7 @@ export default function TestPage() {
     }
   };
 
-  if (isLoading || !session) {
+  if (isLoading || !session || questions.length === 0) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6 bg-sky-soft font-kid">
         <div className="flex flex-col items-center gap-4 text-center">
@@ -246,9 +166,9 @@ export default function TestPage() {
     );
   }
 
-  const currentQuestion = MOCK_QUESTIONS[currentIndex];
-  const totalQuestions = MOCK_QUESTIONS.length;
-  const answeredIndices = MOCK_QUESTIONS.map((q, idx) =>
+  const currentQuestion = questions[currentIndex];
+  const totalQuestions = questions.length;
+  const answeredIndices = questions.map((q, idx) =>
     answers[q.id] ? idx : -1
   ).filter((idx) => idx !== -1);
   const progressPercent = Math.round((answeredIndices.length / totalQuestions) * 100);

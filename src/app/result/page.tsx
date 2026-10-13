@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Badge } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
-import { getActiveSession, clearSession } from "@/lib/session";
+import { getActiveSession, clearSession, saveSession } from "@/lib/session";
+import { getMockStudents } from "@/lib/mock-data";
 import { StudentSession } from "@/types/student";
 import {
   Clock,
@@ -27,6 +28,28 @@ export default function ResultPage() {
       router.push("/");
       return;
     }
+
+    // Refresh data dari mock-data — agar status FINALIZED + finalLevel dari Tutor langsung tampil
+    // tanpa perlu logout/login ulang oleh siswa
+    if (active.studentId) {
+      const students = getMockStudents();
+      const latestRecord = students.find((s) => s.id === active.studentId);
+      if (latestRecord) {
+        const refreshedSession: StudentSession = {
+          ...active,
+          status: latestRecord.status,
+          finalLevel: latestRecord.finalLevel ?? active.finalLevel,
+          completedAt: latestRecord.completedAt ?? active.completedAt,
+          elapsedSeconds: latestRecord.elapsedSeconds ?? active.elapsedSeconds,
+          totalQuestions: latestRecord.totalQuestions ?? active.totalQuestions,
+        };
+        saveSession(refreshedSession);
+        setSession(refreshedSession);
+        setIsLoading(false);
+        return;
+      }
+    }
+
     setSession(active);
     setIsLoading(false);
   }, [router]);
