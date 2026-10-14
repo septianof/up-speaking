@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
-import { Mail, Lock, AlertCircle, ArrowLeft, Shield, Eye, EyeOff, ChevronDown } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowLeft, Shield, Eye, EyeOff } from "lucide-react";
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -14,7 +14,6 @@ export default function StaffLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showHint, setShowHint] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,20 +60,9 @@ export default function StaffLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-bg flex flex-col justify-between">
-      {/* Top Bar */}
-      <header className="p-6 max-w-6xl w-full mx-auto flex items-center justify-between">
-        <a
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-text-muted hover:text-text-primary transition-colors py-1.5 px-3 rounded-btn hover:bg-surface-subtle"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Halaman Siswa</span>
-        </a>
-      </header>
-
+    <div className="min-h-screen bg-surface-bg flex flex-col justify-center py-10 px-4 sm:px-6">
       {/* Main Container */}
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex flex-col items-center justify-center">
         <div className="w-full max-w-md bg-surface-white rounded-3xl border border-surface-border p-8 shadow-float">
           {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-8">
@@ -167,79 +155,22 @@ export default function StaffLoginPage() {
               </Button>
             </div>
           </form>
+        </div>
 
-          {/* Quick Credential Hint for Testing */}
-          <div className="mt-5 pt-4 border-t border-surface-border">
-            <button
-              type="button"
-              onClick={() => setShowHint(!showHint)}
-              className="flex items-center justify-between w-full text-xs text-text-muted hover:text-text-primary transition-colors"
-            >
-              <span className="font-medium">Akun demo tersedia</span>
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${showHint ? "rotate-180" : ""}`} />
-            </button>
-            {showHint && (
-              <div className="mt-3 space-y-2 text-xs text-text-secondary bg-surface-subtle p-3 rounded-xl border border-surface-border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="font-bold text-text-primary">Tutor High School:</span>
-                    <div className="font-mono text-primary-700 text-[11px]">rian.highschool@upspeaking.com</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("rian.highschool@upspeaking.com");
-                      setPassword("123456");
-                    }}
-                    className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded hover:bg-primary-100 border border-primary-200"
-                  >
-                    Gunakan
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
-                  <div>
-                    <span className="font-bold text-text-primary">Tutor Elementary:</span>
-                    <div className="font-mono text-indigo-700 text-[11px]">dewi.elementary@upspeaking.com</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("dewi.elementary@upspeaking.com");
-                      setPassword("123456");
-                    }}
-                    className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 border border-indigo-200"
-                  >
-                    Gunakan
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between pt-1.5 border-t border-surface-border/60">
-                  <div>
-                    <span className="font-bold text-text-primary">Admin Lembaga:</span>
-                    <div className="font-mono text-slate-700 text-[11px]">admin@upspeaking.com</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("admin@upspeaking.com");
-                      setPassword("123456");
-                    }}
-                    className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 border border-slate-300"
-                  >
-                    Gunakan
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Navigasi Balik ke Siswa & Footer di Bawah Card */}
+        <div className="mt-6 flex flex-col items-center gap-2.5 text-center">
+          <a
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-primary-600 transition-colors py-1 px-3 rounded-full hover:bg-surface-white/60"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali ke Halaman Siswa</span>
+          </a>
+          <footer className="text-xs text-text-muted">
+            &copy; {new Date().getFullYear()} Up Speaking Learning Centre
+          </footer>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="p-6 text-center text-xs text-text-muted">
-        &copy; {new Date().getFullYear()} Up Speaking Learning Centre
-      </footer>
     </div>
   );
 }
