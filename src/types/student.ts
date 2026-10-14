@@ -15,6 +15,7 @@ export interface QuestionItem {
   targetLevel: TargetLevel;
   options: QuestionOption[];
   correctOptionId?: string;
+  displayOrder?: number;
 }
 
 export interface StudentSession {
@@ -33,4 +34,6 @@ export interface StudentSession {
   completedAt?: string;
   finalLevel?: FinalLevel;
   notes?: string;
+  scorePercentage?: number;
+  questions?: QuestionItem[];
 }

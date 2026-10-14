@@ -6,7 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TargetLevel } from "@/types/student";
-import { addMockTutor, updateMockTutor, TutorAccount } from "@/lib/mock-tutors";
+import { TutorAccount } from "@/lib/mock-tutors";
 
 interface TutorRegisterModalProps {
   isOpen: boolean;
@@ -72,38 +72,41 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      let saved: TutorAccount | null = null;
+    try {
+      const res = await fetch("/api/admin/tutors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password: tempPassword,
+          role: targetLevel === "ELEMENTARY" ? "TUTOR_ELEMENTARY" : "TUTOR_HIGH_SCHOOL",
+        }),
+      });
 
-      if (isEditing && initialTutor) {
-        saved = updateMockTutor(initialTutor.id, {
-          fullName,
-          email,
-          targetLevel,
-        });
-        setSuccessMessage(`Data tutor ${fullName} berhasil diperbarui!`);
-      } else {
-        saved = addMockTutor({
-          fullName,
-          email,
-          targetLevel,
-        });
-        setSuccessMessage(`Akun tutor untuk ${fullName} berhasil dibuat!`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ email: data.error || "Gagal membuat akun tutor." });
+        return;
       }
 
-      setIsSubmitting(false);
-
+      setSuccessMessage(`Akun tutor untuk ${data.tutor.fullName} berhasil dibuat!`);
       setTimeout(() => {
         setSuccessMessage(null);
-        if (saved) onSuccess?.(saved);
+        if (data.tutor) onSuccess?.(data.tutor);
         onClose();
       }, 1000);
-    }, 400);
+    } catch {
+      setErrors({ email: "Terjadi kendala jaringan saat mendaftarkan tutor." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -54,52 +54,41 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Simulasi network delay singkat (akan diganti fetch API di Phase 5)
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      // 1. Verifikasi data siswa via API
+      const verifyRes = await fetch("/api/student/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: trimmedName,
+          phoneNumber: cleanPhone,
+        }),
+      });
 
-      // ──── 1. Cari siswa di database lokal berdasarkan nomor HP ────
-      const { getMockStudents } = await import("@/lib/mock-data");
-      const students = getMockStudents();
+      const verifyData = await verifyRes.json();
 
-      // Cocokkan berdasarkan nomor HP (normalisasi: strip spasi/strip)
-      const found = students.find((s) => s.phone.replace(/[-\s]/g, "") === cleanPhone);
-
-      // ──── 2. Nomor belum terdaftar ────
-      if (!found) {
+      if (!verifyRes.ok) {
         setError(
-          "Nomor HP ini belum terdaftar dalam sistem. Pastikan nomor yang kamu masukkan sudah benar, atau hubungi Up Speaking untuk mendaftarkan dirimu."
+          verifyData.error ||
+            "Data siswa tidak ditemukan. Pastikan nama lengkap dan nomor HP sesuai dengan pendaftaran di Up Speaking."
         );
         return;
       }
 
-      // ──── 3. Nama tidak cocok (case-insensitive) ────
-      const nameMatch = found.fullName.trim().toLowerCase() === trimmedName.toLowerCase();
-      if (!nameMatch) {
-        setError(
-          "Nama yang kamu masukkan tidak sesuai dengan data yang terdaftar. Pastikan nama lengkapmu sudah benar."
-        );
-        return;
-      }
-
-      // ──── 4. Status FINALIZED atau COMPLETED → langsung ke halaman result ────
-      if (found.status === "FINALIZED" || found.status === "COMPLETED") {
-        // Bangun sesi dari data StudentRecord agar result page bisa membacanya
+      // 2. Jika status tes sudah COMPLETED atau FINALIZED, arahkan ke /result
+      if (verifyData.status === "FINALIZED" || verifyData.status === "COMPLETED") {
         const resultSession = {
-          sessionId: `sess_${found.id}`,
-          studentId: found.id,
-          fullName: found.fullName,
-          phone: found.phone,
-          targetLevel: found.targetLevel,
-          status: found.status,
+          sessionId: verifyData.sessionId || `sess_${verifyData.studentId}`,
+          studentId: verifyData.studentId,
+          fullName: verifyData.fullName,
+          phone: verifyData.phoneNumber,
+          targetLevel: verifyData.targetLevel,
+          status: verifyData.status,
           currentQuestionIndex: 0,
-          totalQuestions: found.totalQuestions ?? 10,
+          totalQuestions: 10,
           answers: {},
-          elapsedSeconds: found.elapsedSeconds ?? 0,
+          elapsedSeconds: 0,
           deviceToken: "readonly",
-          startedAt: found.startedAt ?? new Date().toISOString(),
-          completedAt: found.completedAt,
-          finalLevel: found.finalLevel,
-          notes: found.notes,
+          startedAt: new Date().toISOString(),
         };
         saveSession(resultSession);
         onClose();
@@ -107,59 +96,68 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         return;
       }
 
-      // ──── 5. Status NOT_STARTED / RESET → buat sesi baru lalu tes ────
-      if (found.status === "NOT_STARTED" || found.status === "RESET") {
-        const newSession = {
-          sessionId: `sess_${found.id}_${Date.now()}`,
-          studentId: found.id,
-          fullName: found.fullName,
-          phone: found.phone,
-          targetLevel: found.targetLevel,
-          status: "IN_PROGRESS" as const,
-          currentQuestionIndex: 0,
-          totalQuestions: 10,
-          answers: {} as Record<string, string>,
-          elapsedSeconds: 0,
-          deviceToken: "dev_" + Math.random().toString(36).substring(2, 9),
-          startedAt: new Date().toISOString(),
-        };
+      // 3. Status NOT_STARTED, RESET, atau IN_PROGRESS -> Mulai / lanjutkan tes
+      let deviceToken = localStorage.getItem("up_speaking_device_token");
+      if (!deviceToken) {
+        deviceToken =
+          "dev_" +
+          (typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : Math.random().toString(36).substring(2, 10));
+        localStorage.setItem("up_speaking_device_token", deviceToken);
+      }
 
-        // Perbarui status siswa di database lokal menjadi IN_PROGRESS
-        const { getMockStudents: getStudents, saveMockStudents } = await import("@/lib/mock-data");
-        const all = getStudents();
-        const updated = all.map((s) =>
-          s.id === found.id
-            ? { ...s, status: "IN_PROGRESS" as const, startedAt: newSession.startedAt }
-            : s
+      const startRes = await fetch("/api/student/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: verifyData.studentId,
+          deviceToken,
+        }),
+      });
+
+      const startData = await startRes.json();
+
+      if (!startRes.ok) {
+        setError(
+          startData.error ||
+            "Gagal menyiapkan lembar ujian. Silakan coba lagi atau hubungi admin."
         );
-        saveMockStudents(updated);
-
-        saveSession(newSession);
-        onClose();
-        router.push("/test");
         return;
       }
 
-      // ──── 6. Status IN_PROGRESS → lanjutkan sesi yang ada ────
-      const resumeSession = {
-        sessionId: `sess_${found.id}`,
-        studentId: found.id,
-        fullName: found.fullName,
-        phone: found.phone,
-        targetLevel: found.targetLevel,
+      // Ekstrak jawaban yang mungkin sudah tersimpan sebelumnya (jika melanjutkan sesi)
+      const existingAnswers: Record<string, string> = {};
+      const questionsList = startData.session?.questions || [];
+      questionsList.forEach((q: { id: string; selectedOptionId?: string | null }) => {
+        if (q.selectedOptionId) {
+          existingAnswers[q.id] = q.selectedOptionId;
+        }
+      });
+
+      const studentSession = {
+        sessionId: startData.session.id,
+        studentId: verifyData.studentId,
+        fullName: verifyData.fullName,
+        phone: verifyData.phoneNumber,
+        targetLevel: verifyData.targetLevel,
         status: "IN_PROGRESS" as const,
         currentQuestionIndex: 0,
-        totalQuestions: found.totalQuestions ?? 10,
-        answers: {} as Record<string, string>,
-        elapsedSeconds: found.elapsedSeconds ?? 0,
-        deviceToken: "dev_" + Math.random().toString(36).substring(2, 9),
-        startedAt: found.startedAt ?? new Date().toISOString(),
+        totalQuestions: questionsList.length,
+        answers: existingAnswers,
+        elapsedSeconds: startData.session.elapsedSeconds || 0,
+        deviceToken,
+        startedAt: startData.session.startedAt,
+        questions: questionsList,
       };
-      saveSession(resumeSession);
+
+      saveSession(studentSession);
       onClose();
       router.push("/test");
     } catch {
-      setError("Ada kendala saat memeriksa datamu. Coba lagi ya, atau hubungi admin Up Speaking.");
+      setError(
+        "Ada kendala saat memeriksa datamu. Coba lagi ya, atau hubungi admin Up Speaking."
+      );
     } finally {
       setIsLoading(false);
     }

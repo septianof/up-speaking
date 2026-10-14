@@ -16,12 +16,22 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { StudentRegisterModal } from "@/components/staff/StudentRegisterModal";
 import { ResetSessionModal } from "@/components/staff/ResetSessionModal";
-import {
-  getMockStudents,
-  deleteMockStudent,
-  StudentRecord,
-} from "@/lib/mock-data";
-import { TargetLevel, SessionStatus } from "@/types/student";
+import { StudentRecord } from "@/lib/mock-data";
+import { TargetLevel, SessionStatus, FinalLevel } from "@/types/student";
+
+interface ApiStudent {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  targetLevel: TargetLevel;
+  sessionStatus: SessionStatus;
+  scorePercentage?: number;
+  assignedLevel?: FinalLevel;
+  elapsedSeconds?: number;
+  createdAt: string;
+  sessionId?: string;
+  resetCount?: number;
+}
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<StudentRecord[]>([]);
@@ -34,9 +44,35 @@ export default function AdminStudentsPage() {
   const [deleteTargetStudent, setDeleteTargetStudent] = useState<StudentRecord | null>(null);
   const [resetTargetStudent, setResetTargetStudent] = useState<StudentRecord | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   // Load students
-  const loadData = () => {
-    setStudents(getMockStudents());
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/admin/students");
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = ((data.students || []) as ApiStudent[]).map((s: ApiStudent) => ({
+          id: s.id,
+          fullName: s.fullName,
+          phone: s.phoneNumber,
+          targetLevel: s.targetLevel,
+          status: s.sessionStatus,
+          score: s.scorePercentage,
+          finalLevel: s.assignedLevel,
+          elapsedSeconds: s.elapsedSeconds,
+          createdAt: s.createdAt,
+          sessionId: s.sessionId,
+          resetCount: s.resetCount,
+        }));
+        setStudents(mapped);
+      }
+    } catch (err) {
+      console.error("Error loading students:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -60,11 +96,22 @@ export default function AdminStudentsPage() {
     });
   }, [students, searchQuery, selectedLevel, selectedStatus]);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTargetStudent) return;
-    deleteMockStudent(deleteTargetStudent.id);
-    setDeleteTargetStudent(null);
-    loadData();
+    try {
+      const res = await fetch(`/api/admin/students?id=${deleteTargetStudent.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDeleteTargetStudent(null);
+        loadData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal menghapus data siswa.");
+      }
+    } catch {
+      alert("Terjadi kendala jaringan saat menghapus siswa.");
+    }
   };
 
   const getStatusBadge = (status: SessionStatus) => {
@@ -226,7 +273,13 @@ export default function AdminStudentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                    <p className="font-medium">Memuat data siswa...</p>
+                  </td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-text-muted">
                     <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />

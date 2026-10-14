@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 const tutorQuestionSchema = z.object({
   questionText: z.string().min(5, 'Teks pertanyaan minimal 5 karakter'),
   targetLevel: z.enum(['ELEMENTARY', 'HIGH_SCHOOL']),

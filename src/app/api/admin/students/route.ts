@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 const createStudentSchema = z.object({
   fullName: z
     .string()
@@ -174,6 +176,45 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     console.error('Unexpected error in admin students POST:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Parameter ID siswa diperlukan' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createAdminClient()
+    const { error: deleteError } = await supabase
+      .from('students')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) {
+      console.error('Error deleting student:', deleteError)
+      return NextResponse.json(
+        { error: 'Gagal menghapus data siswa' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Data siswa berhasil dihapus',
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin students DELETE:', err)
     return NextResponse.json(
       { error: 'Terjadi kesalahan internal server' },
       { status: 500 }

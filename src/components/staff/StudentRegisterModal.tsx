@@ -6,7 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TargetLevel } from "@/types/student";
-import { addMockStudent, updateMockStudent, StudentRecord } from "@/lib/mock-data";
+import { StudentRecord } from "@/lib/mock-data";
 
 interface StudentRegisterModalProps {
   isOpen: boolean;
@@ -78,38 +78,40 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      let saved: StudentRecord | null = null;
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          phoneNumber: phone.trim(),
+          targetLevel,
+        }),
+      });
 
-      if (isEditing && initialStudent) {
-        saved = updateMockStudent(initialStudent.id, {
-          fullName,
-          phone,
-          targetLevel,
-        });
-        setSuccessMessage(`Data siswa ${fullName} berhasil diperbarui!`);
-      } else {
-        saved = addMockStudent({
-          fullName,
-          phone,
-          targetLevel,
-        });
-        setSuccessMessage(`Siswa ${saved.fullName} berhasil didaftarkan!`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ phone: data.error || "Gagal mendaftarkan siswa." });
+        return;
       }
 
-      setIsSubmitting(false);
-
+      setSuccessMessage(`Siswa ${data.student.fullName} berhasil didaftarkan!`);
       setTimeout(() => {
         setSuccessMessage(null);
-        if (saved) onSuccess?.(saved);
+        if (data.student) onSuccess?.(data.student);
         onClose();
       }, 1000);
-    }, 400);
+    } catch {
+      setErrors({ fullName: "Terjadi kendala jaringan saat mendaftarkan siswa." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Award,
@@ -11,42 +11,43 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
-import { getMockStudents, StudentRecord } from "@/lib/mock-data";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
 import { TargetLevel } from "@/types/student";
+import { StudentRecord } from "@/lib/mock-data";
 
 export default function TutorDashboardPage() {
   const staff = getActiveStaff();
   const tutorLevel: TargetLevel = staff?.targetLevel || "ELEMENTARY";
 
-  const [students, setStudents] = useState<StudentRecord[]>([]);
+  const [metrics, setMetrics] = useState({
+    total: 0,
+    needEvaluation: 0,
+    finalized: 0,
+    inProgress: 0,
+  });
+  const [pendingStudents, setPendingStudents] = useState<StudentRecord[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = () => {
-    setStudents(getMockStudents());
-  };
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/tutor/dashboard?level=${tutorLevel}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMetrics(data.metrics);
+        setPendingStudents(data.pendingStudents || []);
+      }
+    } catch (err) {
+      console.error("Error loading tutor dashboard:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tutorLevel]);
 
   useEffect(() => {
     loadData();
-  }, []);
-
-  // Metrik jenjang yang diampu tutor
-  const metrics = useMemo(() => {
-    const levelStudents = students.filter((s) => s.targetLevel === tutorLevel);
-    const total = levelStudents.length;
-    const needEvaluation = levelStudents.filter((s) => s.status === "COMPLETED").length;
-    const finalized = levelStudents.filter((s) => s.status === "FINALIZED").length;
-    const inProgress = levelStudents.filter((s) => s.status === "IN_PROGRESS").length;
-
-    return { total, needEvaluation, finalized, inProgress };
-  }, [students, tutorLevel]);
-
-  // Siswa menunggu evaluasi terbaru
-  const pendingStudents = useMemo(() => {
-    return students
-      .filter((s) => s.targetLevel === tutorLevel && s.status === "COMPLETED")
-      .slice(0, 5);
-  }, [students, tutorLevel]);
+  }, [loadData]);
 
   return (
     <div className="space-y-8">
@@ -169,7 +170,13 @@ export default function TutorDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {pendingStudents.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-text-muted">
+                    <p className="font-medium text-xs">Memuat antrean evaluasi...</p>
+                  </td>
+                </tr>
+              ) : pendingStudents.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-text-muted">
                     <CheckCircle2 className="h-6 w-6 mx-auto mb-1 text-emerald-500 opacity-60" />

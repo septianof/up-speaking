@@ -84,9 +84,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
   const navItems = isAdmin ? adminNav : tutorNav;
 
-  const handleLogout = () => {
-    clearStaffSession();
-    router.push("/staff/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Error logging out:", e);
+    } finally {
+      clearStaffSession();
+      router.push("/staff/login");
+    }
   };
 
   return (

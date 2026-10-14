@@ -4,16 +4,15 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui";
+import { Button, Modal } from "@/components/ui";
 import { QuestionCard } from "@/components/student/QuestionCard";
 import { QuestionPalette } from "@/components/student/QuestionPalette";
 import { ElapsedTimer } from "@/components/student/ElapsedTimer";
 import { OfflineBanner } from "@/components/student/OfflineBanner";
 import { SubmitConfirmModal } from "@/components/student/SubmitConfirmModal";
 import { Mascot } from "@/components/student/Mascot";
-import { getActiveSession, saveSession } from "@/lib/session";
-import { getMockQuestions } from "@/lib/mock-questions";
-import { getMockStudents, saveMockStudents } from "@/lib/mock-data";
+import { getActiveSession, saveSession, clearSession } from "@/lib/session";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { StudentSession, QuestionItem } from "@/types/student";
 import {
   ChevronLeft,
@@ -24,6 +23,7 @@ import {
   X,
   Sparkles,
   Smile,
+  AlertCircle,
 } from "lucide-react";
 
 // Slide variants for QuestionCard transitions
@@ -44,6 +44,29 @@ export default function TestPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [direction, setDirection] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDeviceConflictModalOpen, setIsDeviceConflictModalOpen] = useState(false);
+
+  // Hook offline sync & autosave
+  const {
+    isOnline,
+    isSyncing,
+    hasPendingSync,
+    deviceConflict,
+    syncAnswer,
+    flushPendingSync,
+  } = useOfflineSync({
+    sessionId: session?.sessionId,
+    deviceToken: session?.deviceToken,
+    getElapsedSeconds: () => session?.elapsedSeconds || 0,
+    onDeviceConflict: () => setIsDeviceConflictModalOpen(true),
+  });
+
+  useEffect(() => {
+    if (deviceConflict) {
+      setIsDeviceConflictModalOpen(true);
+    }
+  }, [deviceConflict]);
 
   useEffect(() => {
     const active = getActiveSession();
@@ -52,30 +75,57 @@ export default function TestPage() {
       return;
     }
 
-    // Muat soal dari database lokal, filter berdasarkan jenjang siswa, lalu acak urutan
-    const allQuestions = getMockQuestions();
-    const levelQuestions = allQuestions.filter((q) => q.targetLevel === active.targetLevel);
-
-    // Acak soal (Fisher-Yates shuffle) — deterministik per sesi (siswa selalu dapat urutan acak yang berbeda)
-    const shuffled = [...levelQuestions].sort(() => Math.random() - 0.5);
-
     setSession(active);
-    setQuestions(shuffled);
     setCurrentIndex(active.currentQuestionIndex || 0);
     setAnswers(active.answers || {});
-    setIsLoading(false);
+
+    // Jika session sudah memiliki butir soal acak dari /api/student/start
+    if (active.questions && active.questions.length > 0) {
+      setQuestions(active.questions);
+      setIsLoading(false);
+    } else {
+      // Fallback reload dari endpoint start
+      fetch("/api/student/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: active.studentId,
+          deviceToken: active.deviceToken,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.session?.questions) {
+            setQuestions(data.session.questions);
+            const updated: StudentSession = {
+              ...active,
+              questions: data.session.questions,
+              elapsedSeconds: data.session.elapsedSeconds || active.elapsedSeconds,
+            };
+            setSession(updated);
+            saveSession(updated);
+          } else {
+            router.push("/");
+          }
+        })
+        .catch(() => router.push("/"))
+        .finally(() => setIsLoading(false));
+    }
   }, [router]);
 
   // Handle option selection with toggle deselect
   const handleSelectOption = (optionId: string) => {
-    if (!session || questions.length === 0) return;
+    if (!session || questions.length === 0 || deviceConflict) return;
     const questionId = questions[currentIndex].id;
 
     const newAnswers = { ...answers };
+    let newSelected: string | null = null;
     if (newAnswers[questionId] === optionId) {
       delete newAnswers[questionId];
+      newSelected = null;
     } else {
       newAnswers[questionId] = optionId;
+      newSelected = optionId;
     }
 
     setAnswers(newAnswers);
@@ -87,6 +137,9 @@ export default function TestPage() {
     };
     setSession(updatedSession);
     saveSession(updatedSession);
+
+    // Kirim sinkronisasi ke antrean lokal dan autosave server
+    syncAnswer(questionId, newSelected);
   };
 
   // Navigate between questions
@@ -109,62 +162,77 @@ export default function TestPage() {
   // Timer Tick Update
   const handleTimerTick = (seconds: number) => {
     if (session) {
-      const updated = { ...session, elapsedSeconds: seconds };
+      const updated: StudentSession = { ...session, elapsedSeconds: seconds };
+      setSession(updated);
       saveSession(updated);
     }
   };
 
   // Open confirmation modal
   const handleOpenSubmit = () => {
+    setSubmitError(null);
     setIsSubmitModalOpen(true);
   };
 
-  // Final confirm submit — sync ke mock-data agar tutor dapat melihat lembar evaluasi
+  // Final confirm submit
   const handleConfirmSubmit = async () => {
     if (!session) return;
+
+    if (!isOnline) {
+      setSubmitError(
+        "Kamu sedang dalam mode offline. Sambungkan kembali internetmu untuk mengumpulkan ujian."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
-      const totalQ = questions.length || 10;
-      
-      // Hitung skor objektif sesungguhnya berdasarkan kunci jawaban
-      let correctScore = 0;
-      questions.forEach((q) => {
-        if (answers[q.id] && answers[q.id] === q.correctOptionId) {
-          correctScore++;
-        }
+      // Pastikan antrean sync terkirim habis
+      await flushPendingSync(answers);
+
+      const finalResponses = questions.map((q) => ({
+        questionId: q.id,
+        selectedOptionId: answers[q.id] || null,
+      }));
+
+      const res = await fetch("/api/student/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: session.sessionId,
+          deviceToken: session.deviceToken,
+          elapsedSeconds: session.elapsedSeconds || 0,
+          finalResponses,
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.deviceConflict) {
+          setIsSubmitModalOpen(false);
+          setIsDeviceConflictModalOpen(true);
+          return;
+        }
+        setSubmitError(data.error || "Gagal mengumpulkan lembar jawaban.");
+        return;
+      }
 
       const completedSession: StudentSession = {
         ...session,
-        totalQuestions: totalQ,
+        totalQuestions: questions.length,
         status: "COMPLETED",
         completedAt: new Date().toISOString(),
+        scorePercentage: data.scorePercentage,
       };
 
-      // Simpan sesi ke browser storage
       saveSession(completedSession);
-
-      // Sync ke database lokal siswa agar muncul di panel evaluasi Tutor
-      const students = getMockStudents();
-      const updatedStudents = students.map((s) => {
-        if (s.id === session.studentId) {
-          return {
-            ...s,
-            status: "COMPLETED" as const,
-            completedAt: completedSession.completedAt,
-            totalQuestions: totalQ,
-            score: correctScore,
-            answers: { ...answers },
-            elapsedSeconds: session.elapsedSeconds,
-          };
-        }
-        return s;
-      });
-      saveMockStudents(updatedStudents);
-
       setIsSubmitModalOpen(false);
       router.push("/result");
+    } catch {
+      setSubmitError("Terjadi kendala jaringan saat mengumpulkan ujian. Coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -186,9 +254,9 @@ export default function TestPage() {
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
-  const answeredIndices = questions.map((q, idx) =>
-    answers[q.id] ? idx : -1
-  ).filter((idx) => idx !== -1);
+  const answeredIndices = questions
+    .map((q, idx) => (answers[q.id] ? idx : -1))
+    .filter((idx) => idx !== -1);
   const progressPercent = Math.round((answeredIndices.length / totalQuestions) * 100);
 
   return (
@@ -226,7 +294,11 @@ export default function TestPage() {
 
           {/* Connection Status & Elapsed Timer */}
           <div className="flex items-center gap-2.5">
-            <OfflineBanner />
+            <OfflineBanner
+              isOnline={isOnline}
+              isSyncing={isSyncing}
+              hasPendingSync={hasPendingSync}
+            />
             <ElapsedTimer
               initialSeconds={session.elapsedSeconds || 0}
               onTick={handleTimerTick}
@@ -235,15 +307,13 @@ export default function TestPage() {
         </div>
       </motion.header>
 
-      {/* PROGRES BAR — Sticky di bawah header agar selalu terlihat */}
+      {/* PROGRES BAR */}
       <div className="sticky top-[57px] z-20 w-full bg-surface-white/95 backdrop-blur-sm border-b border-primary-100 shadow-2xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-2.5 flex items-center gap-3">
-          {/* Label ringkas */}
           <span className="flex items-center gap-1 text-xs font-bold text-primary-700 shrink-0 whitespace-nowrap">
             <Sparkles className="w-3.5 h-3.5 text-sun-500" />
             <span className="hidden sm:inline">Progres</span>
           </span>
-          {/* Progress Bar */}
           <div className="flex-1 h-3 bg-sky-soft rounded-full overflow-hidden border border-primary-100">
             <motion.div
               animate={{ width: progressPercent + "%" }}
@@ -252,7 +322,6 @@ export default function TestPage() {
               className="rounded-full bg-gradient-to-r from-sun-400 via-primary-500 to-mint-500"
             />
           </div>
-          {/* Angka ringkas */}
           <span className="text-xs font-bold text-text-muted shrink-0 whitespace-nowrap">
             <strong className="text-mint-600">{answeredIndices.length}</strong>/{totalQuestions}
             <span className="hidden sm:inline"> ({progressPercent}%)</span>
@@ -314,7 +383,7 @@ export default function TestPage() {
                 </Button>
               </motion.div>
 
-              {/* Ergonomic Middle Palette Trigger Button */}
+              {/* Middle Palette Trigger Button */}
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
@@ -392,17 +461,58 @@ export default function TestPage() {
         isLoading={isSubmitting}
       />
 
+      {/* Submit Error Toast / Alert (if any) */}
+      {submitError && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-800 text-sm font-bold shadow-lg flex items-start gap-3 animate-bounce">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" />
+          <div className="flex-1">
+            <p>{submitError}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSubmitError(null)}
+            className="text-rose-500 hover:text-rose-800 font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Device Conflict Modal */}
+      {isDeviceConflictModalOpen && (
+        <Modal
+          isOpen={true}
+          onClose={() => {}}
+          variant="kid"
+          topSlot={<Mascot mood="think" size={100} />}
+          title="Sesi Diambil Alih"
+          description="Sesi tes ini telah dilanjutkan pada perangkat atau browser lain. Pengerjaan di perangkat ini telah dihentikan untuk menjaga keamanan data ujianmu."
+        >
+          <div className="pt-3">
+            <Button
+              type="button"
+              variant="kid"
+              size="lg"
+              className="w-full text-sm"
+              onClick={() => {
+                clearSession();
+                router.push("/");
+              }}
+            >
+              Kembali ke Beranda
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       {/* Mobile Bottom-Sheet Drawer for Question Palette */}
       <AnimatePresence>
         {isDrawerOpen && (
           <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
-            {/* Backdrop — kept separate, not animated via motion */}
             <div
               onClick={() => setIsDrawerOpen(false)}
               className="fixed inset-0 bg-primary-950/40 backdrop-blur-xs transition-opacity"
             />
-
-            {/* Drawer Sheet */}
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}

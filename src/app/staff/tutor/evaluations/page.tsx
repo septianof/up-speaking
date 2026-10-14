@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Award,
   Search,
@@ -10,9 +10,24 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
-import { getMockStudents, StudentRecord } from "@/lib/mock-data";
+import { StudentRecord } from "@/lib/mock-data";
 import { getActiveStaff } from "@/lib/staff-session";
-import { TargetLevel } from "@/types/student";
+import { TargetLevel, SessionStatus, FinalLevel } from "@/types/student";
+
+interface ApiEvaluationItem {
+  sessionId: string;
+  studentId: string;
+  fullName: string;
+  phoneNumber: string;
+  targetLevel: TargetLevel;
+  sessionStatus: SessionStatus;
+  scorePercentage: number | null;
+  elapsedSeconds: number;
+  assignedLevel?: FinalLevel | null;
+  submittedAt?: string | null;
+  tutorNotes?: string | null;
+  createdAt: string;
+}
 
 export default function TutorEvaluationsPage() {
   const staff = getActiveStaff();
@@ -24,13 +39,41 @@ export default function TutorEvaluationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
 
-  const loadData = () => {
-    setStudents(getMockStudents());
-  };
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/tutor/evaluations?level=${tutorAssignedLevel}`);
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = ((data.evaluations || []) as ApiEvaluationItem[]).map((e: ApiEvaluationItem) => ({
+          id: e.studentId,
+          sessionId: e.sessionId,
+          fullName: e.fullName,
+          phone: e.phoneNumber,
+          targetLevel: e.targetLevel,
+          status: e.sessionStatus,
+          score: Math.round(((e.scorePercentage || 0) / 100) * 10),
+          totalQuestions: 10,
+          elapsedSeconds: e.elapsedSeconds,
+          finalLevel: e.assignedLevel || undefined,
+          submittedAt: e.submittedAt || undefined,
+          notes: e.tutorNotes || undefined,
+          createdAt: e.createdAt || new Date().toISOString(),
+        }));
+        setStudents(mapped);
+      }
+    } catch (err) {
+      console.error("Error loading tutor evaluations:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tutorAssignedLevel]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Filter siswa: sesuai jenjang yang diampu tutor dan tab aktif
   const filteredStudents = useMemo(() => {
@@ -163,7 +206,13 @@ export default function TutorEvaluationsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                    <p className="font-medium">Memuat antrean evaluasi...</p>
+                  </td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
                     <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />

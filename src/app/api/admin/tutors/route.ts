@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 const createTutorSchema = z.object({
   fullName: z
     .string()
@@ -159,6 +161,42 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     console.error('Unexpected error in admin tutors POST:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Parameter ID tutor diperlukan' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createAdminClient()
+    const { error: authError } = await supabase.auth.admin.deleteUser(id)
+
+    if (authError) {
+      console.error('Error deleting auth user for tutor:', authError)
+      return NextResponse.json(
+        { error: 'Gagal menghapus akun pengajar' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Akun pengajar berhasil dihapus',
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin tutors DELETE:', err)
     return NextResponse.json(
       { error: 'Terjadi kesalahan internal server' },
       { status: 500 }

@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui";
 import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession, clearSession, saveSession } from "@/lib/session";
-import { getMockStudents } from "@/lib/mock-data";
 import { StudentSession } from "@/types/student";
 import {
   Clock,
@@ -20,6 +19,37 @@ export default function ResultPage() {
   const router = useRouter();
   const [session, setSession] = useState<StudentSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchLiveResult = async (active: StudentSession) => {
+    try {
+      setIsRefreshing(true);
+      const url = active.sessionId
+        ? `/api/student/result?sessionId=${active.sessionId}`
+        : `/api/student/result?studentId=${active.studentId}`;
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const refreshedSession: StudentSession = {
+          ...active,
+          status: data.status,
+          scorePercentage: data.scorePercentage ?? active.scorePercentage,
+          elapsedSeconds: data.elapsedSeconds ?? active.elapsedSeconds,
+          completedAt: data.submittedAt ?? active.completedAt,
+          finalLevel: data.evaluation?.assignedLevel ?? active.finalLevel,
+          notes: data.evaluation?.tutorNotes ?? active.notes,
+        };
+        saveSession(refreshedSession);
+        setSession(refreshedSession);
+      }
+    } catch (err) {
+      console.error("Error fetching live student result:", err);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     const active = getActiveSession();
@@ -28,30 +58,8 @@ export default function ResultPage() {
       return;
     }
 
-    // Refresh data dari mock-data — agar status FINALIZED + finalLevel dari Tutor langsung tampil
-    // tanpa perlu logout/login ulang oleh siswa
-    if (active.studentId) {
-      const students = getMockStudents();
-      const latestRecord = students.find((s) => s.id === active.studentId);
-      if (latestRecord) {
-        const refreshedSession: StudentSession = {
-          ...active,
-          status: latestRecord.status,
-          finalLevel: latestRecord.finalLevel ?? active.finalLevel,
-          completedAt: latestRecord.completedAt ?? active.completedAt,
-          elapsedSeconds: latestRecord.elapsedSeconds ?? active.elapsedSeconds,
-          totalQuestions: latestRecord.totalQuestions ?? active.totalQuestions,
-          notes: latestRecord.notes ?? active.notes,
-        };
-        saveSession(refreshedSession);
-        setSession(refreshedSession);
-        setIsLoading(false);
-        return;
-      }
-    }
-
     setSession(active);
-    setIsLoading(false);
+    fetchLiveResult(active);
   }, [router]);
 
   const handleFinishAndExit = () => {
@@ -314,11 +322,12 @@ export default function ResultPage() {
 
               <button
                 type="button"
-                onClick={() => window.location.reload()}
-                className="text-xs font-bold text-primary-600 hover:text-primary-800 flex items-center justify-center gap-1.5 py-1 transition-colors cursor-pointer"
+                disabled={isRefreshing}
+                onClick={() => session && fetchLiveResult(session)}
+                className="text-xs font-bold text-primary-600 hover:text-primary-800 disabled:opacity-50 flex items-center justify-center gap-1.5 py-1 transition-colors cursor-pointer"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Cek Ulang Status Hasil</span>
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                <span>{isRefreshing ? "Memeriksa..." : "Cek Ulang Status Hasil"}</span>
               </button>
             </motion.div>
           </motion.div>

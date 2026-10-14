@@ -1,72 +1,87 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  Download,
-  Printer,
-  Search,
-} from "lucide-react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Download, Printer, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { getMockStudents, StudentRecord } from "@/lib/mock-data";
-import { exportStudentsToCsv, printPdfDocument } from "@/lib/export-utils";
+import { exportReportsToExcel, ReportItem } from "@/lib/export/excel-generator";
+import { exportReportsToPdf } from "@/lib/export/pdf-generator";
 import { TargetLevel } from "@/types/student";
 
 export default function AdminReportsPage() {
-  const [students, setStudents] = useState<StudentRecord[]>([]);
+  const [reports, setReports] = useState<ReportItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
   const [selectedFinalLevel, setSelectedFinalLevel] = useState<string>("ALL");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/admin/reports?level=${selectedLevel}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReports(data.reports || []);
+      }
+    } catch (err) {
+      console.error("Error loading admin reports:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedLevel]);
 
   useEffect(() => {
-    setStudents(getMockStudents());
-  }, []);
+    loadData();
+  }, [loadData]);
 
-  const filteredStudents = useMemo(() => {
-    return students.filter((std) => {
+  const filteredReports = useMemo(() => {
+    return reports.filter((r) => {
       const matchSearch =
-        std.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        std.phone.includes(searchQuery);
-
-      const matchLevel =
-        selectedLevel === "ALL" || std.targetLevel === selectedLevel;
+        r.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.phoneNumber.includes(searchQuery);
 
       const matchFinalLevel =
         selectedFinalLevel === "ALL" ||
-        (selectedFinalLevel === "NONE" && !std.finalLevel) ||
-        std.finalLevel === selectedFinalLevel;
+        (selectedFinalLevel === "NONE" && !r.assignedLevel) ||
+        r.assignedLevel === selectedFinalLevel;
 
-      return matchSearch && matchLevel && matchFinalLevel;
+      return matchSearch && matchFinalLevel;
     });
-  }, [students, searchQuery, selectedLevel, selectedFinalLevel]);
+  }, [reports, searchQuery, selectedFinalLevel]);
 
   // Statistik Ringkas
   const stats = useMemo(() => {
-    const evaluated = filteredStudents.filter((s) => s.finalLevel);
+    const evaluated = filteredReports.filter((s) => s.assignedLevel);
     const avgScore = evaluated.length
       ? Math.round(
-          evaluated.reduce((acc, curr) => acc + (curr.score || 0), 0) /
-            evaluated.length *
-            10
+          evaluated.reduce((acc, curr) => acc + (curr.scorePercentage || 0), 0) /
+            evaluated.length
         )
       : 0;
 
     return {
-      total: filteredStudents.length,
+      total: filteredReports.length,
       evaluatedCount: evaluated.length,
       avgPercent: avgScore,
     };
-  }, [filteredStudents]);
+  }, [filteredReports]);
 
   const handleExportExcel = () => {
-    exportStudentsToCsv(
-      filteredStudents,
-      `Rekap_Hasil_Tes_Penempatan_UpSpeaking_${new Date().toISOString().slice(0, 10)}`
-    );
+    exportReportsToExcel(filteredReports, {
+      title: "Laporan Rekapitulasi Hasil Tes Penempatan Siswa",
+      filename: `Rekap_Hasil_Tes_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
+    });
   };
 
-  const getLevelBadge = (level: TargetLevel) => {
+  const handleExportPdf = () => {
+    exportReportsToPdf(filteredReports, {
+      title: "Laporan Rekapitulasi Hasil Tes Penempatan Siswa",
+      filename: `Rekap_Hasil_Tes_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
+    });
+  };
+
+  const getLevelBadge = (level: TargetLevel | string) => {
     if (level === "ELEMENTARY") {
       return (
         <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
@@ -100,11 +115,11 @@ export default function AdminReportsPage() {
             type="button"
             variant="outline"
             size="md"
-            onClick={printPdfDocument}
+            onClick={handleExportPdf}
             className="gap-2"
           >
             <Printer className="h-4 w-4" />
-            Export PDF
+            Export PDF (.pdf)
           </Button>
 
           <Button
@@ -115,7 +130,7 @@ export default function AdminReportsPage() {
             className="gap-2"
           >
             <Download className="h-4 w-4" />
-            Export Excel (.csv)
+            Export Excel (.xlsx)
           </Button>
         </div>
       </div>
@@ -133,7 +148,7 @@ export default function AdminReportsPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
-          <p className="text-xs text-text-muted mb-0.5">Rata-rata Skor</p>
+          <p className="text-xs text-text-muted mb-0.5">Rata-rata Skor Terfinalisasi</p>
           <p className="text-2xl font-black text-primary-600">{stats.avgPercent}%</p>
         </div>
       </div>
@@ -192,60 +207,67 @@ export default function AdminReportsPage() {
                 <th className="py-3.5 px-4">Jenjang</th>
                 <th className="py-3.5 px-4 text-center">Skor Objektif</th>
                 <th className="py-3.5 px-4 text-center">Level Final Resmi</th>
+                <th className="py-3.5 px-4 text-center">Tutor Penilai</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                    <p className="font-medium">Memuat data laporan...</p>
+                  </td>
+                </tr>
+              ) : filteredReports.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
                     <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
                   </td>
                 </tr>
               ) : (
-                filteredStudents.map((std, idx) => {
-                  const scorePercent = std.totalQuestions
-                    ? Math.round(((std.score || 0) / std.totalQuestions) * 100)
-                    : 0;
-
+                filteredReports.map((r, idx) => {
                   return (
-                    <tr key={std.id} className="hover:bg-surface-subtle/40 transition-colors">
+                    <tr key={r.studentId} className="hover:bg-surface-subtle/40 transition-colors">
                       <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
                         {idx + 1}
                       </td>
                       <td className="py-3.5 px-4 font-bold text-text-primary">
-                        {std.fullName}
+                        {r.fullName}
                       </td>
                       <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
-                        {std.phone}
+                        {r.phoneNumber}
                       </td>
                       <td className="py-3.5 px-4">
-                        {getLevelBadge(std.targetLevel)}
+                        {getLevelBadge(r.targetLevel)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         <span className="font-bold text-primary-600">
-                          {std.score !== undefined ? `${std.score}/${std.totalQuestions || 10}` : "-"}
+                          {r.scorePercentage !== null && r.scorePercentage !== undefined
+                            ? `${Math.round(r.scorePercentage)}%`
+                            : "-"}
                         </span>
-                        {std.score !== undefined && (
-                          <span className="text-xs text-text-muted ml-1">({scorePercent}%)</span>
-                        )}
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        {std.finalLevel ? (
+                        {r.assignedLevel ? (
                           <Badge
                             variant={
-                              std.finalLevel === "ADVANCED"
+                              r.assignedLevel === "ADVANCED"
                                 ? "success"
-                                : std.finalLevel === "INTERMEDIATE"
+                                : r.assignedLevel === "INTERMEDIATE"
                                 ? "primary"
                                 : "warning"
                             }
                             size="sm"
                           >
-                            {std.finalLevel}
+                            {r.assignedLevel}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-text-muted italic">Belum Dinilai</span>
+                          <span className="text-xs text-text-muted italic">
+                            {r.sessionStatus === "COMPLETED" ? "Menunggu Penilaian" : "Belum Dinilai"}
+                          </span>
                         )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center text-xs text-text-muted">
+                        {r.tutorName || "-"}
                       </td>
                     </tr>
                   );

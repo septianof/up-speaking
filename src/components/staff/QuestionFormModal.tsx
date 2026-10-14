@@ -6,7 +6,6 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TargetLevel, QuestionItem } from "@/types/student";
-import { addMockQuestion, updateMockQuestion } from "@/lib/mock-questions";
 
 interface QuestionFormModalProps {
   isOpen: boolean;
@@ -118,50 +117,56 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const formattedOptions = options.map((opt, idx) => ({
-        id: opt.tempId.startsWith("opt-") && opt.tempId.length > 8
-          ? opt.tempId
-          : `opt-${idx + 1}-${Date.now().toString().slice(-4)}`,
+    try {
+      const payloadOptions = options.map((opt) => ({
         optionText: opt.text.trim(),
+        isCorrect: opt.tempId === correctTempId,
       }));
 
-      // Cari kunci jawaban
-      const correctIdx = options.findIndex((o) => o.tempId === correctTempId);
-      const correctOptionId =
-        correctIdx >= 0 ? formattedOptions[correctIdx].id : formattedOptions[0].id;
+      const url =
+        isEditing && initialQuestion
+          ? `/api/admin/questions/${initialQuestion.id}`
+          : "/api/admin/questions";
+      const method = isEditing && initialQuestion ? "PUT" : "POST";
 
-      if (isEditing && initialQuestion) {
-        updateMockQuestion(initialQuestion.id, {
-          questionText,
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionText: questionText.trim(),
           targetLevel,
-          options: formattedOptions,
-          correctOptionId,
-        });
-        setSuccessMessage("Perubahan butir soal berhasil disimpan!");
-      } else {
-        addMockQuestion({
-          questionText,
-          targetLevel,
-          options: formattedOptions,
-          correctOptionId,
-        });
-        setSuccessMessage("Butir soal baru berhasil disimpan ke Bank Soal!");
+          options: payloadOptions,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.error || "Gagal menyimpan butir soal.");
+        return;
       }
 
-      setIsSubmitting(false);
+      setSuccessMessage(
+        isEditing
+          ? "Perubahan butir soal berhasil disimpan!"
+          : "Butir soal baru berhasil disimpan ke Bank Soal!"
+      );
 
       setTimeout(() => {
         setSuccessMessage(null);
         onSuccess?.();
         onClose();
       }, 1000);
-    }, 400);
+    } catch {
+      setErrorMsg("Terjadi kendala jaringan saat menyimpan soal.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

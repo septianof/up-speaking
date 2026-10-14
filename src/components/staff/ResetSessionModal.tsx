@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { AlertTriangle, RotateCcw, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { resetMockStudentSession, StudentRecord } from "@/lib/mock-data";
+import { StudentRecord } from "@/lib/mock-data";
 
 interface ResetSessionModalProps {
   student: StudentRecord | null;
@@ -33,26 +33,42 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
 
   if (!student) return null;
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setIsSubmitting(true);
     const finalReason =
       selectedReason === "Lainnya (alasan khusus)" && customReason.trim()
         ? customReason.trim()
         : selectedReason;
 
-    setTimeout(() => {
-      const updated = resetMockStudentSession(student.id, finalReason);
-      setIsSubmitting(false);
-      setSuccessMessage(`Sesi tes untuk ${student.fullName} berhasil di-reset!`);
+    try {
+      const res = await fetch(`/api/admin/students/${student.id}/reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: finalReason }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Gagal melakukan reset sesi.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setSuccessMessage(data.message || `Sesi tes untuk ${student.fullName} berhasil di-reset!`);
 
       setTimeout(() => {
         setSuccessMessage(null);
         setSelectedReason(COMMON_REASONS[0]);
         setCustomReason("");
-        if (updated) onSuccess?.(updated);
+        onSuccess?.(student);
         onClose();
       }, 1200);
-    }, 400);
+    } catch {
+      alert("Terjadi kendala jaringan saat melakukan reset sesi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

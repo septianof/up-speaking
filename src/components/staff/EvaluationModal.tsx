@@ -5,7 +5,7 @@ import { CheckCircle2, ChevronDown, FileText, Check, X } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { StudentRecord, finalizeMockStudentEvaluation } from "@/lib/mock-data";
+import { StudentRecord } from "@/lib/mock-data";
 import { getMockQuestions } from "@/lib/mock-questions";
 import { FinalLevel } from "@/types/student";
 
@@ -14,6 +14,23 @@ interface EvaluationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (updated: StudentRecord) => void;
+}
+
+interface LiveAnswerOption {
+  id: string;
+  optionText: string;
+  isCorrect: boolean;
+}
+
+interface LiveAnswerDetail {
+  questionId: string;
+  questionText: string;
+  selectedOptionId: string | null;
+  selectedOptionText: string;
+  correctOptionId: string;
+  correctOptionText: string;
+  isCorrect: boolean;
+  options: LiveAnswerOption[];
 }
 
 const LEVEL_META: Record<FinalLevel, { name: string; range: string }> = {
@@ -38,15 +55,42 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   const totalQuestions = student?.totalQuestions || 10;
   const scorePercent = Math.round((score / totalQuestions) * 100);
 
+  const [liveAnswers, setLiveAnswers] = useState<LiveAnswerDetail[] | null>(null);
+
   useEffect(() => {
     if (student) {
       setSelectedFinalLevel(student.finalLevel || "BEGINNER");
       setShowAnswerSheet(false);
+      setLiveAnswers(null);
+
+      if (student.sessionId) {
+        fetch(`/api/tutor/evaluations/${student.sessionId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.answers && data.answers.length > 0) {
+              setLiveAnswers(data.answers);
+            }
+          })
+          .catch((err) => console.error("Error fetching live student answers:", err));
+      }
     }
   }, [student]);
 
   // Siapkan data butir soal dan jawaban siswa
   const answerSheet = useMemo(() => {
+    if (liveAnswers && liveAnswers.length > 0) {
+      return liveAnswers.map((item) => ({
+        question: {
+          id: item.questionId,
+          questionText: item.questionText,
+          options: item.options || [],
+          correctOptionId: item.correctOptionId,
+        },
+        selectedOptionId: item.selectedOptionId,
+        isCorrect: item.isCorrect,
+      }));
+    }
+
     if (!student) return [];
     const allQuestions = getMockQuestions();
     const filtered = allQuestions.filter((q) => q.targetLevel === student.targetLevel);
@@ -55,7 +99,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
     return questions.map((q, idx) => {
       let selectedOptionId = student.answers ? student.answers[q.id] : undefined;
 
-      // Fallback untuk data mock awal yang belum memiliki map answers eksplisit
       if (selectedOptionId === undefined) {
         if (idx < score) {
           selectedOptionId = q.correctOptionId || q.options[0]?.id;
@@ -72,21 +115,34 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
         isCorrect,
       };
     });
-  }, [student, score]);
+  }, [student, score, liveAnswers]);
 
   const correctCount = answerSheet.filter((item) => item.isCorrect).length;
   const wrongCount = answerSheet.length - correctCount;
 
   if (!student) return null;
 
-  const handleFinalize = (e: React.FormEvent) => {
+  const handleFinalize = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!student) return;
+
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const updated = finalizeMockStudentEvaluation(student.id, {
-        finalLevel: selectedFinalLevel,
-      });
+    try {
+      if (student.sessionId) {
+        const res = await fetch(`/api/tutor/evaluations/${student.sessionId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assignedLevel: selectedFinalLevel }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || "Gagal menyimpan evaluasi tutor.");
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
       setIsSubmitting(false);
       setSuccessMessage(
@@ -95,10 +151,13 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
 
       setTimeout(() => {
         setSuccessMessage(null);
-        if (updated) onSuccess?.(updated);
+        if (student) onSuccess?.({ ...student, finalLevel: selectedFinalLevel, status: "FINALIZED" });
         onClose();
       }, 1200);
-    }, 400);
+    } catch {
+      alert("Terjadi kendala jaringan saat memfinalisasi evaluasi.");
+      setIsSubmitting(false);
+    }
   };
 
   return (

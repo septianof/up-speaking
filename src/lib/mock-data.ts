@@ -18,6 +18,7 @@ export interface StudentRecord {
   resetCount?: number;
   lastResetAt?: string;
   resetReason?: string;
+  sessionId?: string;
 }
 
 export const INITIAL_STUDENTS: StudentRecord[] = [

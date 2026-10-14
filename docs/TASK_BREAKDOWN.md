@@ -52,14 +52,14 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-008`** | Admin Kelola Tutor (`SCR-014`) & Bank Soal (`SCR-009`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, kelola tutor SCR-014 & bank soal dinamis 2-5 opsi SCR-009 |
 | **`TASK-009`** | Dashboard Tutor (`SCR-010`), Evaluasi Level (`SCR-011`), Bank Soal (`SCR-013`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, dashboard tutor SCR-010, evaluasi SCR-011, bank soal SCR-013, & modal penilaian CMP-007 |
 | **`TASK-010`** | Halaman Hasil & Laporan (`SCR-008` & `SCR-012`) | Fase 3 | `Done` | 2026-10-11 | next build sukses, laporan admin & tutor dengan ekspor Excel & PDF |
-| **`TASK-011`** | Skrip DDL Basis Data (`schema.sql`) & Seed Admin (`seed.sql`) | Fase 4 | `Pending` | - | - |
-| **`TASK-012`** | Modul Algoritma Fisher-Yates Shuffle & Unit Test | Fase 4 | `Pending` | - | - |
-| **`TASK-013`** | Endpoint API Siswa (Verify, Start, Sync, Submit, Result) | Fase 4 | `Pending` | - | - |
-| **`TASK-014`** | Autentikasi Staf SSR, Middleware RBAC, & API Admin | Fase 4 | `Pending` | - | - |
-| **`TASK-015`** | API Tutor (Evaluasi & Finalisasi Level Siswa) | Fase 4 | `Pending` | - | - |
-| **`TASK-016`** | Integrasi Alur Siswa & Hook `useOfflineSync` | Fase 5 | `Pending` | - | - |
-| **`TASK-017`** | Integrasi Dashboard Staf (Admin & Tutor) | Fase 5 | `Pending` | - | - |
-| **`TASK-018`** | Fitur Generator Ekspor Excel & PDF | Fase 5 | `Pending` | - | - |
+| **`TASK-011`** | Skrip DDL Basis Data (`schema.sql`) & Seed Admin (`seed.sql`) | Fase 4 | `Done` | 2026-10-14 | Skrip DDL tabel & seeder sukses dieksekusi di Supabase |
+| **`TASK-012`** | Modul Algoritma Fisher-Yates Shuffle & Unit Test | Fase 4 | `Done` | 2026-10-14 | Klien Supabase & algoritma Fisher-Yates murni O(n) terverifikasi |
+| **`TASK-013`** | Endpoint API Siswa (Verify, Start, Sync, Submit, Result) | Fase 4 | `Done` | 2026-10-14 | Route handlers verify, start, sync, submit, result terpasang |
+| **`TASK-014`** | Autentikasi Staf SSR, Middleware RBAC, & API Admin | Fase 4 | `Done` | 2026-10-14 | Middleware RBAC & Route handlers admin terpasang |
+| **`TASK-015`** | API Tutor (Evaluasi & Finalisasi Level Siswa) | Fase 4 | `Done` | 2026-10-14 | Route handlers tutor dashboard, evaluations, questions terpasang |
+| **`TASK-016`** | Integrasi Alur Siswa & Hook `useOfflineSync` | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring siswa, hook useOfflineSync & useElapsedTimer |
+| **`TASK-017`** | Integrasi Dashboard Staf (Admin & Tutor) | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring dashboard Admin & Tutor terhubung API real |
+| **`TASK-018`** | Fitur Generator Ekspor Excel & PDF | Fase 5 | `Done` | 2026-10-14 | Modul export ExcelJS & jsPDF autotable terpasang & teruji build |
 | **`TASK-019`** | Unit Testing Fisher-Yates & Black Box Testing | Fase 6 | `Pending` | - | - |
 | **`TASK-020`** | Konfigurasi Produksi & Deployment Vercel | Fase 6 | `Pending` | - | - |
 
@@ -275,7 +275,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Siswa dapat login dengan Nama + HP asli; paket soal Fisher-Yates termuat nyata dari database; saat koneksi dimatikan (mode offline di browser devtools), siswa tetap dapat memilih jawaban; saat online kembali, jawaban otomatis tersinkronisasi ke database; submit mengunci tes dan menampilkan hasil di `/result`.
 - **Verification:** Uji alur pengerjaan penuh dengan mematikan koneksi internet di browser devtools (Network Offline) lalu mengaktifkannya kembali sebelum submit.
 - **Risk / Notes:** Pastikan debounced sync berdurasi 500ms agar tidak membebani server saat siswa berpindah-pindah opsi dengan cepat.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-017`: Integrasi Dashboard Staf (Admin & Tutor Wiring)
 - **Goal / Scope:** Menghubungkan antarmuka Admin (Fase 3) ke API Admin, dan antarmuka Tutor ke API Tutor. Menggantikan seluruh mock data dengan pemanggilan API nyata (Dashboard metrik, pendaftaran siswa, pembuatan akun tutor, manajemen bank soal, reset sesi, dan modal evaluasi siswa).
@@ -286,7 +286,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Admin dapat mendaftarkan siswa nyata; Admin dapat membuat akun tutor nyata dan tutor tersebut langsung bisa login; Tutor dapat meninjau lembar jawaban siswa dan menetapkan level final; data tabel terbarui secara reaktif.
 - **Verification:** Uji skenario lengkap dari pendaftaran siswa oleh Admin $\rightarrow$ siswa mengerjakan tes $\rightarrow$ Tutor menilai dan menetapkan level $\rightarrow$ status berubah menjadi Finalized.
 - **Risk / Notes:** Tambahkan notifikasi toast keberhasilan (misal: "Siswa berhasil didaftarkan").
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-018`: Generator Ekspor Laporan Excel (.xlsx) & PDF (.pdf)
 - **Goal / Scope:** Mengimplementasikan modul ekspor dokumen `lib/export/excel-generator.ts` (menggunakan ExcelJS) dan `lib/export/pdf-generator.ts` (menggunakan jsPDF + AutoTable) yang menghasilkan berkas rekapitulasi data pengerjaan siswa yang rapi, berlogo Up Speaking, dan langsung dapat diunduh oleh Admin dan Tutor.
@@ -297,7 +297,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Mengklik tombol "Export Excel" langsung mengunduh berkas `.xlsx` dengan format kolom dan header rapi; mengklik tombol "Export PDF" langsung mengunduh berkas `.pdf` berformat tabel formal siap cetak.
 - **Verification:** Unduh berkas hasil ekspor dan buka di Microsoft Excel / PDF Reader; periksa kelengkapan data siswa dan format penulisan.
 - **Risk / Notes:** Pastikan penataan kolom pada PDF tidak terpotong saat dicetak pada kertas ukuran A4.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 ---
 

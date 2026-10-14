@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   UserPlus,
@@ -11,40 +11,54 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
-import { getMockStudents, StudentRecord } from "@/lib/mock-data";
 import { StudentRegisterModal } from "@/components/staff/StudentRegisterModal";
-import { SessionStatus } from "@/types/student";
+import { TargetLevel, SessionStatus } from "@/types/student";
+
+interface RecentStudentItem {
+  id: string;
+  fullName: string;
+  phone: string;
+  targetLevel: TargetLevel;
+  status: SessionStatus;
+  createdAt: string;
+}
 
 export default function AdminDashboardPage() {
   const staff = getActiveStaff();
-  const [students, setStudents] = useState<StudentRecord[]>([]);
+  const [metrics, setMetrics] = useState({
+    total: 0,
+    notStarted: 0,
+    inProgress: 0,
+    finished: 0,
+  });
+  const [recentStudents, setRecentStudents] = useState<RecentStudentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
-  const loadData = () => {
-    setStudents(getMockStudents());
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/admin/dashboard");
+      if (res.ok) {
+        const data = await res.json();
+        setMetrics({
+          total: data.metrics.total,
+          notStarted: data.metrics.notStarted,
+          inProgress: data.metrics.inProgress,
+          finished: (data.metrics.completed || 0) + (data.metrics.finalized || 0),
+        });
+        setRecentStudents(data.recentStudents || []);
+      }
+    } catch (err) {
+      console.error("Error loading admin dashboard:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, []);
-
-  // Metrik ringkasan
-  const metrics = useMemo(() => {
-    const total = students.length;
-    const notStarted = students.filter((s) => s.status === "NOT_STARTED").length;
-    const inProgress = students.filter((s) => s.status === "IN_PROGRESS").length;
-    const finished = students.filter(
-      (s) => s.status === "COMPLETED" || s.status === "FINALIZED"
-    ).length;
-
-    return { total, notStarted, inProgress, finished };
-  }, [students]);
-
-  const recentStudents = useMemo(() => {
-    return [...students]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
-  }, [students]);
 
   const getStatusBadge = (status: SessionStatus) => {
     switch (status) {
@@ -208,24 +222,38 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {recentStudents.map((std) => (
-                <tr key={std.id} className="hover:bg-surface-subtle/30 transition-colors">
-                  <td className="py-3 px-4 font-semibold text-text-primary">
-                    {std.fullName}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-text-secondary">
-                    {std.phone}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-xs font-medium text-text-muted">
-                      {std.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    {getStatusBadge(std.status)}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="py-6 text-center text-text-muted">
+                    Memuat aktivitas terbaru...
                   </td>
                 </tr>
-              ))}
+              ) : recentStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-6 text-center text-text-muted">
+                    Belum ada data aktivitas siswa.
+                  </td>
+                </tr>
+              ) : (
+                recentStudents.map((std) => (
+                  <tr key={std.id} className="hover:bg-surface-subtle/30 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-text-primary">
+                      {std.fullName}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-text-secondary">
+                      {std.phone}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-xs font-medium text-text-muted">
+                        {std.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {getStatusBadge(std.status)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

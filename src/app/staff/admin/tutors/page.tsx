@@ -13,12 +13,17 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { TutorRegisterModal } from "@/components/staff/TutorRegisterModal";
-import {
-  getMockTutors,
-  softDeleteMockTutor,
-  TutorAccount,
-} from "@/lib/mock-tutors";
+import { TutorAccount } from "@/lib/mock-tutors";
 import { TargetLevel } from "@/types/student";
+
+interface ApiTutor {
+  id: string;
+  fullName: string;
+  email: string;
+  targetLevel: TargetLevel;
+  evaluationCount?: number;
+  createdAt: string;
+}
 
 export default function AdminTutorsPage() {
   const [tutors, setTutors] = useState<TutorAccount[]>([]);
@@ -28,9 +33,31 @@ export default function AdminTutorsPage() {
   const [editTargetTutor, setEditTargetTutor] = useState<TutorAccount | null>(null);
   const [deleteTargetTutor, setDeleteTargetTutor] = useState<TutorAccount | null>(null);
 
-  const loadData = () => {
-    // getMockTutors() secara default hanya mengambil tutor aktif (non-deleted)
-    setTutors(getMockTutors());
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/admin/tutors");
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = ((data.tutors || []) as ApiTutor[]).map((t: ApiTutor) => ({
+          id: t.id,
+          fullName: t.fullName,
+          email: t.email,
+          targetLevel: t.targetLevel,
+          evaluationCount: t.evaluationCount || 0,
+          createdAt: t.createdAt,
+          isActive: true,
+          isDeleted: false,
+        }));
+        setTutors(mapped);
+      }
+    } catch (err) {
+      console.error("Error loading tutors:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -50,12 +77,22 @@ export default function AdminTutorsPage() {
     });
   }, [tutors, searchQuery, selectedLevel]);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTargetTutor) return;
-    // Soft Delete: tandai isDeleted: true
-    softDeleteMockTutor(deleteTargetTutor.id);
-    setDeleteTargetTutor(null);
-    loadData();
+    try {
+      const res = await fetch(`/api/admin/tutors?id=${deleteTargetTutor.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDeleteTargetTutor(null);
+        loadData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal menghapus akun pengajar.");
+      }
+    } catch {
+      alert("Terjadi kendala jaringan saat menghapus akun pengajar.");
+    }
   };
 
   const getLevelBadge = (level: TargetLevel) => {
@@ -157,7 +194,13 @@ export default function AdminTutorsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
-              {filteredTutors.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                    <p className="font-medium">Memuat data akun tutor...</p>
+                  </td>
+                </tr>
+              ) : filteredTutors.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
                     <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />

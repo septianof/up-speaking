@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const finalizeEvaluationSchema = z.object({
   assignedLevel: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),
   tutorId: z.string().uuid().optional(),

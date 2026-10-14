@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
-import { StaffUser } from "@/types/staff";
-import { getAllMockTutors } from "@/lib/mock-tutors";
 import { Mail, Lock, AlertCircle, ArrowLeft, Shield, Eye, EyeOff, ChevronDown } from "lucide-react";
 
 export default function StaffLoginPage() {
@@ -32,83 +30,31 @@ export default function StaffLoginPage() {
     setIsLoading(true);
 
     try {
-      // Mock Auth Simulation (will connect to Supabase Auth SSR in Phase 4 / Phase 5)
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password,
+        }),
+      });
 
-      // 1. Cek apakah cocok dengan akun di Mock Tutors
-      const allTutors = getAllMockTutors();
-      const matchedTutor = allTutors.find(
-        (t) => t.email.toLowerCase() === cleanEmail
-      );
+      const data = await res.json();
 
-      if (matchedTutor) {
-        if (matchedTutor.isDeleted || !matchedTutor.isActive) {
-          setError("Akun tutor ini telah dihapus oleh Administrator.");
-          return;
-        }
-
-        const tutorUser: StaffUser = {
-          id: matchedTutor.id,
-          email: matchedTutor.email,
-          fullName: matchedTutor.fullName,
-          role: "TUTOR",
-          targetLevel: matchedTutor.targetLevel,
-        };
-        saveStaffSession(tutorUser);
-        router.push("/staff/tutor/dashboard");
+      if (!res.ok) {
+        setError(data.error || "Email atau kata sandi tidak sesuai.");
         return;
       }
 
-      // 2. Admin demo credential
-      if (cleanEmail === "admin@upspeaking.com" || cleanEmail.includes("admin")) {
-        const adminUser: StaffUser = {
-          id: "usr_admin_01",
-          email: cleanEmail,
-          fullName: "Administrator Lembaga",
-          role: "ADMIN",
-        };
-        saveStaffSession(adminUser);
+      saveStaffSession(data.user);
+
+      if (data.user.role === "ADMIN") {
         router.push("/staff/admin/dashboard");
-        return;
-      }
-
-      // 3. Tutor demo credential umum (High School atau Elementary)
-      const isHighSchool =
-        cleanEmail.includes("high") ||
-        cleanEmail.includes("sma") ||
-        cleanEmail.includes("hs");
-
-      const isTutorGeneral =
-        cleanEmail.includes("tutor") ||
-        cleanEmail.includes("guru") ||
-        cleanEmail.includes("pengajar");
-
-      if (isHighSchool || isTutorGeneral) {
-        const tutorUser: StaffUser = {
-          id: isHighSchool ? "usr_tutor_hs" : "usr_tutor_elem",
-          email: cleanEmail,
-          fullName: isHighSchool
-            ? "Sarah Amalia, S.Pd (Tutor High School)"
-            : "Dimas Arya, S.Pd (Tutor Elementary)",
-          role: "TUTOR",
-          targetLevel: isHighSchool ? "HIGH_SCHOOL" : "ELEMENTARY",
-        };
-        saveStaffSession(tutorUser);
+      } else {
         router.push("/staff/tutor/dashboard");
-        return;
       }
-
-      // 4. Default fallback mock login as Admin if general email
-      const defaultUser: StaffUser = {
-        id: "usr_staff_01",
-        email: cleanEmail,
-        fullName: "Staf Up Speaking",
-        role: "ADMIN",
-      };
-      saveStaffSession(defaultUser);
-      router.push("/staff/admin/dashboard");
     } catch {
-      setError("Kredensial login tidak valid. Silakan periksa email dan password Anda.");
+      setError("Terjadi kendala jaringan saat proses autentikasi. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }

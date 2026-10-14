@@ -13,11 +13,20 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { QuestionFormModal } from "@/components/staff/QuestionFormModal";
-import {
-  getMockQuestions,
-  deleteMockQuestion,
-} from "@/lib/mock-questions";
 import { QuestionItem, TargetLevel } from "@/types/student";
+
+interface ApiOption {
+  id: string;
+  optionText: string;
+}
+
+interface ApiQuestion {
+  id: string;
+  questionText: string;
+  targetLevel: TargetLevel;
+  options: ApiOption[];
+  correctOptionId: string;
+}
 
 export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -28,8 +37,31 @@ export default function AdminQuestionsPage() {
   const [editTarget, setEditTarget] = useState<QuestionItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<QuestionItem | null>(null);
 
-  const loadData = () => {
-    setQuestions(getMockQuestions());
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/admin/questions");
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = ((data.questions || []) as ApiQuestion[]).map((q: ApiQuestion) => ({
+          id: q.id,
+          questionText: q.questionText,
+          targetLevel: q.targetLevel,
+          options: (q.options || []).map((o: ApiOption) => ({
+            id: o.id,
+            optionText: o.optionText,
+          })),
+          correctOptionId: q.correctOptionId,
+        }));
+        setQuestions(mapped);
+      }
+    } catch (err) {
+      console.error("Error loading questions:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -47,11 +79,22 @@ export default function AdminQuestionsPage() {
     });
   }, [questions, searchQuery, selectedLevel]);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    deleteMockQuestion(deleteTarget.id);
-    setDeleteTarget(null);
-    loadData();
+    try {
+      const res = await fetch(`/api/admin/questions/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDeleteTarget(null);
+        loadData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal menghapus butir soal.");
+      }
+    } catch {
+      alert("Terjadi kendala jaringan saat menghapus soal.");
+    }
   };
 
   const getLevelBadge = (level: TargetLevel) => {
@@ -139,7 +182,11 @@ export default function AdminQuestionsPage() {
 
       {/* Question Cards List */}
       <div className="space-y-3.5">
-        {filteredQuestions.length === 0 ? (
+        {isLoading ? (
+          <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
+            <p className="font-medium">Memuat bank soal...</p>
+          </div>
+        ) : filteredQuestions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
             <p className="font-medium">Tidak ada butir soal yang sesuai.</p>
           </div>
