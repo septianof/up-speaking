@@ -5,8 +5,6 @@ import {
   GraduationCap,
   UserPlus,
   Search,
-  Mail,
-  Calendar,
   Pencil,
   Trash2,
   AlertTriangle,
@@ -63,16 +61,14 @@ export default function AdminTutorsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-md border border-primary-100">
-          <GraduationCap className="h-3.5 w-3.5" />
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
           Elementary (SD)
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-        <GraduationCap className="h-3.5 w-3.5" />
-        High School (SMP/SMA)
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+        High School
       </span>
     );
   };
@@ -95,8 +91,7 @@ export default function AdminTutorsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <GraduationCap className="h-7 w-7 text-indigo-600" />
+          <h1 className="text-2xl font-black text-text-primary">
             Kelola Akun Tutor
           </h1>
           <p className="text-sm text-text-muted mt-1">
@@ -112,7 +107,7 @@ export default function AdminTutorsPage() {
             setEditTargetTutor(null);
             setIsRegisterOpen(true);
           }}
-          className="shrink-0 gap-2 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-400"
+          className="shrink-0 gap-2"
         >
           <UserPlus className="h-4 w-4" />
           Tambah Akun Tutor
@@ -120,7 +115,7 @@ export default function AdminTutorsPage() {
       </div>
 
       {/* Filter and Search */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border">
+      <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2 relative">
             <Input
@@ -178,18 +173,14 @@ export default function AdminTutorsPage() {
                     <td className="py-3.5 px-4 font-bold text-text-primary">
                       {tut.fullName}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-text-secondary flex items-center gap-1.5 pt-4">
-                      <Mail className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                    <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
                       {tut.email}
                     </td>
                     <td className="py-3.5 px-4">
                       {getLevelBadge(tut.targetLevel)}
                     </td>
                     <td className="py-3.5 px-4 text-xs text-text-muted">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(tut.createdAt)}
-                      </span>
+                      {formatDate(tut.createdAt)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center gap-1.5">

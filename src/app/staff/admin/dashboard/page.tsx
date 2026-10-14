@@ -3,16 +3,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
-  Users,
-  Clock,
-  PlayCircle,
-  CheckCircle2,
   UserPlus,
   GraduationCap,
   HelpCircle,
   FileSpreadsheet,
   ArrowRight,
-  TrendingUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
@@ -88,75 +83,49 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 4 Kartu Metrik Ringkasan */}
-      <div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Siswa */}
-          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Total Peserta</p>
-              <p className="text-2xl sm:text-3xl font-black text-text-primary mt-1">{metrics.total}</p>
-              <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-primary-500" />
-                Siswa terdaftar di sistem
-              </p>
-            </div>
-            <div className="h-12 w-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-              <Users className="h-6 w-6" />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Siswa */}
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Total Peserta</p>
+          <p className="text-2xl sm:text-3xl font-black text-text-primary">{metrics.total}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Siswa terdaftar di sistem</p>
+        </div>
 
-          {/* Belum Mulai */}
-          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">Belum Mulai</p>
-              <p className="text-2xl sm:text-3xl font-black text-slate-700 mt-1">{metrics.notStarted}</p>
-              <p className="text-[11px] text-text-muted mt-1">Menunggu masuk ke tes</p>
-            </div>
-            <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-              <Clock className="h-6 w-6" />
-            </div>
-          </div>
+        {/* Belum Mulai */}
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Belum Mulai</p>
+          <p className="text-2xl sm:text-3xl font-black text-text-primary">{metrics.notStarted}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Menunggu masuk ke tes</p>
+        </div>
 
-          {/* Sedang Mengerjakan */}
-          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Sedang Tes</p>
-              <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{metrics.inProgress}</p>
-              <p className="text-[11px] text-amber-600/80 mt-1">Sesi aktif berjalan</p>
-            </div>
-            <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-              <PlayCircle className="h-6 w-6" />
-            </div>
-          </div>
+        {/* Sedang Mengerjakan */}
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Sedang Tes</p>
+          <p className="text-2xl sm:text-3xl font-black text-amber-600">{metrics.inProgress}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Sesi aktif berjalan</p>
+        </div>
 
-          {/* Selesai / Dinilai */}
-          <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Selesai</p>
-              <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">{metrics.finished}</p>
-              <p className="text-[11px] text-emerald-600/80 mt-1">Terkumpul / Dinilai</p>
-            </div>
-            <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="h-6 w-6" />
-            </div>
-          </div>
+        {/* Selesai / Dinilai */}
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Selesai</p>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-600">{metrics.finished}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Terkumpul / Dinilai</p>
         </div>
       </div>
 
       {/* Baris Tombol Aksi Cepat (Quick Actions) */}
-      <div className="space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Daftarkan Siswa Baru */}
           <button
             type="button"
             onClick={() => setIsRegisterOpen(true)}
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-primary-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
+            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-primary-200 hover:shadow-card transition-all text-left group"
           >
-            <div className="h-11 w-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white transition-colors shrink-0">
-              <UserPlus className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 group-hover:bg-primary-500 group-hover:text-white transition-colors">
+              <UserPlus className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-primary-600 transition-colors">
+              <p className="text-sm font-bold text-text-primary">
                 Daftarkan Siswa
               </p>
               <p className="text-xs text-text-muted">Tambah peserta tes baru</p>
@@ -166,13 +135,13 @@ export default function AdminDashboardPage() {
           {/* Tambah Akun Tutor */}
           <Link
             href="/staff/admin/tutors"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-indigo-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
+            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-slate-300 hover:shadow-card transition-all text-left group"
           >
-            <div className="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
-              <GraduationCap className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-xl bg-surface-subtle text-text-muted flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+              <GraduationCap className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-indigo-600 transition-colors">
+              <p className="text-sm font-bold text-text-primary">
                 Tambah Akun Tutor
               </p>
               <p className="text-xs text-text-muted">Daftarkan akun pengajar</p>
@@ -182,13 +151,13 @@ export default function AdminDashboardPage() {
           {/* Tambah Butir Soal */}
           <Link
             href="/staff/admin/questions"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-amber-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
+            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-slate-300 hover:shadow-card transition-all text-left group"
           >
-            <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors shrink-0">
-              <HelpCircle className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-xl bg-surface-subtle text-text-muted flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+              <HelpCircle className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-amber-600 transition-colors">
+              <p className="text-sm font-bold text-text-primary">
                 Kelola Bank Soal
               </p>
               <p className="text-xs text-text-muted">Tambah butir soal dinamis</p>
@@ -198,20 +167,19 @@ export default function AdminDashboardPage() {
           {/* Rekap & Ekspor Laporan */}
           <Link
             href="/staff/admin/reports"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-emerald-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
+            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-slate-300 hover:shadow-card transition-all text-left group"
           >
-            <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
-              <FileSpreadsheet className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-xl bg-surface-subtle text-text-muted flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+              <FileSpreadsheet className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-emerald-600 transition-colors">
+              <p className="text-sm font-bold text-text-primary">
                 Buka Laporan
               </p>
               <p className="text-xs text-text-muted">Ekspor Excel & PDF</p>
             </div>
           </Link>
         </div>
-      </div>
 
       {/* Tabel Aktivitas Siswa Terbaru */}
       <div className="rounded-2xl bg-surface-white shadow-card border border-surface-border overflow-hidden">

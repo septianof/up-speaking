@@ -6,7 +6,6 @@ import {
   UserPlus,
   Search,
   RotateCcw,
-  GraduationCap,
   Pencil,
   Trash2,
   AlertTriangle,
@@ -93,16 +92,14 @@ export default function AdminStudentsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-md border border-primary-100">
-          <GraduationCap className="h-3.5 w-3.5" />
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
           Elementary (SD)
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-        <GraduationCap className="h-3.5 w-3.5" />
-        High School (SMP/SMA)
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+        High School
       </span>
     );
   };
@@ -127,9 +124,8 @@ export default function AdminStudentsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <Users className="h-7 w-7 text-primary-500" />
-            Kelola Siswa & Sesi Tes
+          <h1 className="text-2xl font-black text-text-primary">
+            Kelola Siswa &amp; Sesi Tes
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Daftarkan peserta baru, koreksi data siswa, hapus pendaftaran, dan kelola soft reset sesi pengerjaan siswa.
@@ -152,7 +148,7 @@ export default function AdminStudentsPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-3">
+      <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* Search Input */}
           <div className="md:col-span-2 relative">

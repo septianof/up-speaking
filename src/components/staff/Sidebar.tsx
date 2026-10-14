@@ -200,9 +200,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-accent-600 hover:bg-accent-50 hover:text-accent-700 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors"
           >
-            <LogOut className="w-4 h-4 text-accent-500" />
+            <LogOut className="w-4 h-4" />
             <span>Keluar Akun</span>
           </button>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Phone, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -144,18 +144,15 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Nama lengkap <span className="text-accent-500">*</span>
             </label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Contoh: Muhammad Rizky"
-                value={fullName}
-                onChange={handleNameChange}
-                error={errors.fullName}
-                className="pl-10 text-sm"
-                autoFocus
-              />
-              <User className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
-            </div>
+            <Input
+              type="text"
+              placeholder="Contoh: Muhammad Rizky"
+              value={fullName}
+              onChange={handleNameChange}
+              error={errors.fullName}
+              className="text-sm"
+              autoFocus
+            />
           </div>
 
           {/* Input Nomor HP */}
@@ -163,18 +160,15 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Nomor WhatsApp / HP <span className="text-accent-500">*</span>
             </label>
-            <div className="relative">
-              <Input
-                type="tel"
-                placeholder="08xxxxxxxxxx"
-                value={phone}
-                onChange={handlePhoneChange}
-                error={errors.phone}
-                className="pl-10 text-sm"
-                maxLength={14}
-              />
-              <Phone className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
-            </div>
+            <Input
+              type="tel"
+              placeholder="08xxxxxxxxxx"
+              value={phone}
+              onChange={handlePhoneChange}
+              error={errors.phone}
+              className="text-sm"
+              maxLength={14}
+            />
           </div>
 
           {/* Pilihan Jenjang */}

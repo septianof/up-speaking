@@ -71,9 +71,8 @@ export default function TutorEvaluationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <Award className="h-7 w-7 text-emerald-600" />
-            Penilaian & Evaluasi Siswa
+          <h1 className="text-2xl font-black text-text-primary">
+            Penilaian &amp; Evaluasi Siswa
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Peninjauan hasil lembar tes objektif dan penetapan hasil penempatan level resmi.
@@ -88,7 +87,7 @@ export default function TutorEvaluationsPage() {
       </div>
 
       {/* Filter Tabs and Search Bar */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-4">
+      <div className="space-y-4">
         {/* Tabs */}
         <div className="flex items-center gap-2 border-b border-surface-border pb-3">
           <button
@@ -118,7 +117,7 @@ export default function TutorEvaluationsPage() {
             onClick={() => setActiveTab("FINALIZED")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === "FINALIZED"
-                ? "bg-emerald-600 text-white shadow-sm"
+                ? "bg-primary-500 text-white shadow-sm"
                 : "bg-surface-subtle text-text-muted hover:text-text-primary"
             }`}
           >
@@ -128,7 +127,7 @@ export default function TutorEvaluationsPage() {
               className={`px-2 py-0.5 rounded-full text-xs font-black ${
                 activeTab === "FINALIZED"
                   ? "bg-white/20 text-white"
-                  : "bg-emerald-100 text-emerald-800"
+                  : "bg-surface-subtle text-text-muted"
               }`}
             >
               {finalizedCount}

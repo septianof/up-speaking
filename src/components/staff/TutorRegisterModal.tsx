@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Mail, Lock, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -140,21 +140,18 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Nama lengkap <span className="text-accent-500">*</span>
             </label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Contoh: Sarah Angelina, M.Pd."
-                value={fullName}
-                onChange={(e) => {
-                  setFullName(e.target.value);
-                  if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
-                }}
-                error={errors.fullName}
-                className="pl-10 text-sm"
-                autoFocus
-              />
-              <User className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
-            </div>
+            <Input
+              type="text"
+              placeholder="Contoh: Sarah Angelina, M.Pd."
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
+              }}
+              error={errors.fullName}
+              className="text-sm"
+              autoFocus
+            />
           </div>
 
           {/* Email Tutor */}
@@ -162,20 +159,17 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Email <span className="text-accent-500">*</span>
             </label>
-            <div className="relative">
-              <Input
-                type="email"
-                placeholder="sarah.tutor@upspeaking.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
-                }}
-                error={errors.email}
-                className="pl-10 text-sm"
-              />
-              <Mail className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
-            </div>
+            <Input
+              type="email"
+              placeholder="sarah.tutor@upspeaking.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+              }}
+              error={errors.email}
+              className="text-sm"
+            />
           </div>
 
           {/* Password Sementara */}
@@ -188,20 +182,17 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
                 </>
               )}
             </label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder={isEditing ? "Kosongkan jika tidak ingin mengubah password" : "TutorUp2026!"}
-                value={tempPassword}
-                onChange={(e) => {
-                  setTempPassword(e.target.value);
-                  if (errors.tempPassword) setErrors((prev) => ({ ...prev, tempPassword: undefined }));
-                }}
-                error={errors.tempPassword}
-                className="pl-10 text-sm font-mono"
-              />
-              <Lock className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
-            </div>
+            <Input
+              type="text"
+              placeholder={isEditing ? "Kosongkan jika tidak ingin mengubah password" : "TutorUp2026!"}
+              value={tempPassword}
+              onChange={(e) => {
+                setTempPassword(e.target.value);
+                if (errors.tempPassword) setErrors((prev) => ({ ...prev, tempPassword: undefined }));
+              }}
+              error={errors.tempPassword}
+              className="text-sm font-mono"
+            />
           </div>
 
           {/* Jenjang Pengampu */}
