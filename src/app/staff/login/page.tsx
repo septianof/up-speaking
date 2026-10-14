@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { saveStaffSession } from "@/lib/staff-session";
-import { Mail, Lock, AlertCircle, ArrowLeft, Shield, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function StaffLoginPage() {
   const router = useRouter();
