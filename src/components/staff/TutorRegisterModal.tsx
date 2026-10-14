@@ -122,7 +122,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
       description={
         isEditing
           ? "Perbarui informasi akun dan jenjang pengampu pengajar."
-          : "Daftarkan akun staf pengajar untuk evaluasi tes penempatan."
+          : "Daftarkan akun staf pengajar untuk evaluasi placement test."
       }
       maxWidth="md"
     >

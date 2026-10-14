@@ -136,7 +136,7 @@ export default function Home() {
       a: "Tentu saja boleh! Kamu bebas kembali ke nomor sebelumnya dan mengganti pilihan jawaban kapan saja sebelum menekan tombol 'Kumpulkan'.",
     },
     {
-      q: "Kapan hasil tes penempatan dapat diketahui?",
+      q: "Kapan hasil placement test dapat diketahui?",
       a: "Setelah kamu mengumpulkan jawaban, lembar tes akan dinilai langsung oleh tim pengajar Up Speaking untuk menentukan hasil penempatan kelas yang paling tepat.",
     },
   ];
@@ -289,7 +289,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-800 mb-5 border border-sun-300 shadow-xs"
             >
               <Sparkles className="w-4 h-4 text-amber-600 animate-spin" style={{ animationDuration: "6s" }} />
-              <span>Tes Penempatan Bahasa Inggris 🌟</span>
+              <span>Placement Test Bahasa Inggris 🌟</span>
             </motion.div>
 
             {/* Judul Utama + Deskripsi + Tombol CTA */}
@@ -300,7 +300,7 @@ export default function Home() {
             >
               {/* Judul Utama */}
               <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary tracking-tight leading-tight mb-4">
-                Tes Penempatan <br className="hidden sm:inline" />
+                Placement Test <br className="hidden sm:inline" />
                 <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2">
                   Bahasa Inggris
                 </span>
@@ -308,7 +308,7 @@ export default function Home() {
 
               {/* Deskripsi */}
               <p className="text-base sm:text-lg text-text-secondary max-w-xl mb-7 leading-relaxed">
-                Kerjakan tes penempatan secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
+                Kerjakan placement test secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
               </p>
 
               {/* Tombol CTA */}
@@ -599,7 +599,7 @@ export default function Home() {
           >
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
             <h2 className="font-display text-2xl sm:text-3xl font-black mb-3">
-              Siap Memulai Tes Penempatan?
+              Siap Memulai Placement Test?
             </h2>
             <p className="text-sm sm:text-base text-primary-100 max-w-lg mx-auto mb-6">
               Pastikan kamu sudah siap dan kerjakan soal secara mandiri semampumu!

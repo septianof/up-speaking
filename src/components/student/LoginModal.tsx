@@ -184,8 +184,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       onClose={onClose}
       variant="kid"
       topSlot={<Mascot mood="wave" size={110} />}
-      title="Masuk ke Tes Penempatan"
-      description="Masukkan nama dan nomor HP yang terdaftar untuk memulai tes penempatan."
+      title="Masuk ke Placement Test"
+      description="Masukkan nama dan nomor HP yang terdaftar untuk memulai placement test."
     >
       <form onSubmit={handleSubmit} className="space-y-5 pt-2" noValidate>
         {error && (

@@ -72,16 +72,16 @@ export default function TutorReportsPage() {
   const handleExportExcel = () => {
     const levelLabel = tutorLevel === "ELEMENTARY" ? "Elementary" : "HighSchool";
     exportReportsToExcel(filteredReports, {
-      title: `Laporan Hasil Penempatan Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
-      filename: `Rekap_Penempatan_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
+      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
+      filename: `Rekap_Placement_Test_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
     });
   };
 
   const handleExportPdf = () => {
     const levelLabel = tutorLevel === "ELEMENTARY" ? "Elementary" : "HighSchool";
     exportReportsToPdf(filteredReports, {
-      title: `Laporan Hasil Penempatan Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
-      filename: `Rekap_Penempatan_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
+      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
+      filename: `Rekap_Placement_Test_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
     });
   };
 
@@ -91,7 +91,7 @@ export default function TutorReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Laporan Hasil Penempatan {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+            Laporan Hasil Placement Test {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Rekapitulasi penetapan level kelas siswa khusus untuk jenjang binaan Anda.
@@ -199,7 +199,7 @@ export default function TutorReportsPage() {
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
                     <p className="font-semibold text-text-primary text-sm mb-1">Belum ada data pengerjaan siswa pada jenjang ini.</p>
-                    <p className="text-xs text-text-muted">Rekapitulasi nilai dan status penempatan akan terisi setelah siswa mengikuti tes.</p>
+                    <p className="text-xs text-text-muted">Rekapitulasi nilai dan status placement test akan terisi setelah siswa mengikuti tes.</p>
                   </td>
                 </tr>
               ) : filteredReports.length === 0 ? (

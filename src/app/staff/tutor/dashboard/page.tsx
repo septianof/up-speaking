@@ -138,7 +138,7 @@ export default function TutorDashboardPage() {
             <p className="text-sm font-bold text-text-primary">
               Laporan &amp; Rekap
             </p>
-            <p className="text-xs text-text-muted">Ekspor hasil penempatan</p>
+            <p className="text-xs text-text-muted">Ekspor hasil placement test</p>
           </div>
         </Link>
       </div>

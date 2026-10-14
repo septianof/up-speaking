@@ -553,7 +553,7 @@ export default function TestPage() {
         transition={{ duration: 0.4, delay: 0.3 }}
         className="w-full border-t border-primary-100 py-4 px-6 text-center text-xs text-text-muted bg-surface-white font-kid"
       >
-        <p>Up Speaking Learning Centre &bull; Lembar Tes Penempatan Siswa</p>
+        <p>Up Speaking Learning Centre &bull; Lembar Placement Test Siswa</p>
       </motion.footer>
     </div>
   );

@@ -121,7 +121,7 @@ export default function AdminQuestionsPage() {
             Bank Soal Ujian
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Kelola paket butir soal penempatan dengan format pilihan dinamis (2 hingga 5 opsi pilihan).
+            Kelola paket butir soal placement test dengan format pilihan dinamis (2 hingga 5 opsi pilihan).
           </p>
         </div>
 

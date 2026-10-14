@@ -118,7 +118,7 @@ export default function TutorEvaluationsPage() {
             Penilaian &amp; Evaluasi Siswa
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Peninjauan hasil lembar tes objektif dan penetapan hasil penempatan level resmi.
+            Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
           </p>
         </div>
 

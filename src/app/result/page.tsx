@@ -166,7 +166,7 @@ export default function ResultPage() {
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 text-mint-800 text-[11px] sm:text-xs font-bold border border-mint-200 mb-2 sm:mb-3 shadow-2xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-mint-600" />
-              <span>Hasil Penempatan Kelas</span>
+              <span>Hasil Placement Test</span>
             </motion.div>
 
             <motion.h1
@@ -298,7 +298,7 @@ export default function ResultPage() {
                   transition={{ repeat: Infinity, duration: 2 }}
                   className="font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full text-[11px] sm:text-xs"
                 >
-                  Menunggu Penilaian Hasil Tes
+                  Menunggu Penilaian Placement Test
                 </motion.span>
               </div>
             </motion.div>

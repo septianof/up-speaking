@@ -127,7 +127,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
       description={
         isEditing
           ? "Perbarui informasi kontak dan jenjang siswa."
-          : "Lengkapi data siswa untuk memulai tes penempatan."
+          : "Lengkapi data siswa untuk mengikuti placement test."
       }
       maxWidth="md"
     >

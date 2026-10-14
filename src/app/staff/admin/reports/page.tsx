@@ -69,15 +69,15 @@ export default function AdminReportsPage() {
 
   const handleExportExcel = () => {
     exportReportsToExcel(filteredReports, {
-      title: "Laporan Rekapitulasi Hasil Tes Penempatan Siswa",
-      filename: `Rekap_Hasil_Tes_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
+      title: "Laporan Rekapitulasi Hasil Placement Test Siswa",
+      filename: `Rekap_Hasil_Placement_Test_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
     });
   };
 
   const handleExportPdf = () => {
     exportReportsToPdf(filteredReports, {
-      title: "Laporan Rekapitulasi Hasil Tes Penempatan Siswa",
-      filename: `Rekap_Hasil_Tes_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
+      title: "Laporan Rekapitulasi Hasil Placement Test Siswa",
+      filename: `Rekap_Hasil_Placement_Test_UpSpeaking_${new Date().toISOString().slice(0, 10)}`,
     });
   };
 
@@ -105,7 +105,7 @@ export default function AdminReportsPage() {
             Hasil &amp; Laporan Keseluruhan
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Rekapitulasi resmi hasil penempatan seluruh jenjang, statistik capaian skor, dan ekspor dokumen.
+            Rekapitulasi resmi hasil placement test seluruh jenjang, statistik capaian skor, dan ekspor dokumen.
           </p>
         </div>
 

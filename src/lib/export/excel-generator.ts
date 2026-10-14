@@ -33,7 +33,7 @@ export async function exportReportsToExcel(
   workbook.creator = "Up Speaking Learning Centre";
   workbook.created = new Date();
 
-  const worksheet = workbook.addWorksheet("Hasil Tes Penempatan", {
+  const worksheet = workbook.addWorksheet("Hasil Placement Test", {
     views: [{ showGridLines: true }],
   });
 
@@ -47,7 +47,7 @@ export async function exportReportsToExcel(
 
   worksheet.mergeCells("A2:I2");
   const subTitleCell = worksheet.getCell("A2");
-  subTitleCell.value = options.title || "Laporan Rekapitulasi Hasil Tes Penempatan Siswa (Placement Test)";
+  subTitleCell.value = options.title || "Laporan Rekapitulasi Hasil Placement Test Siswa";
   subTitleCell.font = { name: "Arial", size: 11, italic: true, color: { argb: "FF475569" } };
   subTitleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(2).height = 20;

@@ -169,8 +169,8 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
           onClose();
         }
       }}
-      title="Evaluasi Hasil Tes Siswa"
-      description="Tinjau hasil lembar tes dan tetapkan penempatan level resmi siswa."
+      title="Evaluasi Placement Test Siswa"
+      description="Tinjau hasil lembar jawaban dan tetapkan level resmi siswa."
       maxWidth="xl"
     >
       {successMessage ? (

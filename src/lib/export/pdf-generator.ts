@@ -34,7 +34,7 @@ export function exportReportsToPdf(
   doc.setFontSize(10);
   doc.setTextColor(71, 85, 105); // Slate 600
   doc.text(
-    options.title || "Laporan Rekapitulasi Hasil Tes Penempatan Siswa (Placement Test)",
+    options.title || "Laporan Rekapitulasi Hasil Placement Test Siswa",
     40,
     58
   );
