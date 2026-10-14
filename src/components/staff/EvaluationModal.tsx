@@ -38,16 +38,12 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   const totalQuestions = student?.totalQuestions || 10;
   const scorePercent = Math.round((score / totalQuestions) * 100);
 
-  // Rekomendasi level berdasarkan persentase skor
-  const recommendedLevel: FinalLevel =
-    scorePercent >= 80 ? "ADVANCED" : scorePercent >= 60 ? "INTERMEDIATE" : "BEGINNER";
-
   useEffect(() => {
     if (student) {
-      setSelectedFinalLevel(student.finalLevel || recommendedLevel);
+      setSelectedFinalLevel(student.finalLevel || "BEGINNER");
       setShowAnswerSheet(false);
     }
-  }, [student, recommendedLevel]);
+  }, [student]);
 
   // Siapkan data butir soal dan jawaban siswa
   const answerSheet = useMemo(() => {
@@ -272,40 +268,25 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
 
           {/* Penetapan Level Final Siswa */}
           <div className="space-y-2 pt-1">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-              <label className="text-sm font-semibold text-text-primary">
-                Tetapkan Level Final Siswa <span className="text-accent-500">*</span>
-              </label>
-              <div className="text-xs text-text-secondary flex items-center gap-1.5">
-                <span>Rekomendasi sistem:</span>
-                <span className="font-bold text-primary-700 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-100">
-                  {LEVEL_META[recommendedLevel].name}
-                </span>
-                <span className="text-[11px] text-text-muted">({scorePercent}%)</span>
-              </div>
-            </div>
+            <label className="block text-sm font-semibold text-text-primary mb-2">
+              Tetapkan Level Final Siswa <span className="text-accent-500">*</span>
+            </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {(["BEGINNER", "INTERMEDIATE", "ADVANCED"] as FinalLevel[]).map((lvl) => {
                 const isSelected = selectedFinalLevel === lvl;
-                const isRecommended = lvl === recommendedLevel;
 
                 return (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setSelectedFinalLevel(lvl)}
-                    className={`relative p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-xl border text-left transition-all ${
                       isSelected
                         ? "border-primary-500 bg-primary-50/70 shadow-xs ring-2 ring-primary-500/20"
                         : "border-surface-border bg-surface-white hover:border-slate-300"
                     }`}
                   >
-                    {isRecommended && (
-                      <span className="inline-block text-[10px] font-bold text-primary-700 bg-primary-100 px-2 py-0.5 rounded-full mb-1">
-                        Rekomendasi Sistem
-                      </span>
-                    )}
                     <div className="flex items-center justify-between">
                       <span
                         className={`text-sm font-bold ${
