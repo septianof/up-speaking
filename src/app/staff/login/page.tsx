@@ -74,15 +74,11 @@ export default function StaffLoginPage() {
               priority
               className="h-11 w-auto object-contain mb-4"
             />
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold mb-1.5">
-              <Shield className="w-3.5 h-3.5 text-slate-500" />
-              <span>Portal Akses Staf Lembaga</span>
-            </div>
             <h1 className="text-xl font-bold text-text-primary">
               Masuk ke Dashboard
             </h1>
             <p className="text-xs text-text-muted mt-1">
-              Khusus pengelola Admin dan tim Tutor Up Speaking
+              Khusus portal Admin dan Tutor Up Speaking
             </p>
           </div>
 
