@@ -34,6 +34,8 @@
    - Setiap halaman memiliki satu fokus utama, namun halaman Dashboard dilengkapi tombol aksi cepat (*Quick Actions*) untuk tugas operasional harian tanpa harus berpindah-pindah menu.
 4. **Resilient Feedback & Error Tolerance (Ketahanan Terhadap Gangguan):**
    - Sistem memberikan umpan balik yang menenangkan saat internet terputus, pesan validasi yang ramah saat salah input, serta konfirmasi modal sebelum tindakan penting (submit tes atau reset sesi).
+5. **Clean & Minimalist Staff Experience (Prinsip "Less is More"):**
+   - Seluruh antarmuka staf (Admin & Tutor) dirancang minimalis, bebas dari ikon dekoratif berlebihan, penataan header modal dengan divider subtle yang rapi, serta penggunaan palet warna fokus pada Brand Primary (`#3D98D6`) dan latar netral tanpa distraksi visual.
 
 ---
 
@@ -156,8 +158,8 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
    - Tutor login menggunakan akun yang telah dibuatkan oleh Admin $\rightarrow$ Masuk ke Tutor Dashboard (`SCR-010`) sesuai jenjangnya.
 2. **Langkah 2: Meninjau dan Menilai Siswa (`SCR-011`)**
    - Tutor membuka menu **Penilaian Siswa** $\rightarrow$ Memilih siswa pada tab **"Perlu Dinilai"**.
-   - Modal peninjauan menampilkan skor %, durasi, sorotan acuan lembaga (*Beginner 0-59%, Intermediate 60-79%, Advanced 80-100%*), dan rincian jawaban siswa.
-   - Tutor menetapkan level final resmi dan menyimpan keputusan $\rightarrow$ Status menjadi `Finalized`.
+   - Modal peninjauan menampilkan ringkasan profil siswa, skor objektif (%), peninjauan rincian butir soal melalui drawer lipat (*collapsible*), dan 3 card pilihan level final (*Beginner, Intermediate, Advanced*) dengan rentang acuan ringkas.
+   - Tutor menetapkan level final resmi secara mandiri dan menyimpan keputusan $\rightarrow$ Status menjadi `Finalized`.
 3. **Langkah 3: Ekspor Laporan Jenjang (`SCR-012`)**
    - Tutor mengunduh laporan rekapitulasi hasil jenjang binaannya ke format **Excel (.xlsx)** atau **PDF (.pdf)**.
 
@@ -172,7 +174,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 - `SCR-004`: Student Result & Summary (Konfirmasi Selesai & Kartu Level Resmi jika sudah final).
 
 ### 8.2 Layar Staf (Admin & Tutor UI)
-- Layout Dasar Staf: **Sidebar Navigasi di Sisi Kiri (`CMP-005`)**.
+- Layout Dasar Staf: **Sidebar Navigasi di Sisi Kiri (`CMP-005`)**, gaya visual minimalis, warna Brand Primary (`#3D98D6`).
 - **`SCR-006`: Admin Dashboard (Metrik & Aksi Cepat):**
   - Kartu Metrik: Total Siswa, Belum Mulai, Sedang Tes, Selesai.
   - Aksi Cepat: `+ Daftarkan Siswa`, `+ Tambah Akun Tutor`, `+ Tambah Butir Soal`, `Buka Laporan`.
@@ -185,7 +187,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 - **`SCR-008`: Admin Hasil & Laporan:** Rekap nilai & Tombol Export Excel / PDF.
 - **`SCR-009`: Admin Bank Soal:** CRUD soal dinamis (min 2, max 5 opsi) seluruh jenjang.
 - **`SCR-010`: Tutor Dashboard:** Metrik evaluasi jenjang binaan & Aksi Cepat.
-- **`SCR-011`: Tutor Penilaian Siswa:** Tabel review, modal evaluasi `CMP-007`, penetapan level resmi.
+- **`SCR-011`: Tutor Penilaian Siswa:** Tabel review, modal evaluasi ringkas `CMP-007` dengan peninjauan lembar jawaban siswa (*collapsible drawer*), penetapan level resmi mandiri tanpa input catatan berlebih.
 - **`SCR-012`: Tutor Laporan & Rekap:** Rekap nilai jenjang & Tombol Export Excel / PDF.
 - **`SCR-013`: Tutor Bank Soal:** CRUD soal khusus jenjang yang diampu tutor.
 
@@ -208,8 +210,8 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | **FR-011** | Opsi dinamis 2 s/d 5 pilihan per soal | Form modal dinamis (min 2, max 5) pada `SCR-009`/`013` & render di `SCR-003` |
 | **FR-012** | Semua soal aktif di bank soal diujikan | Pemuatan seluruh array soal aktif di `SCR-003` |
 | **FR-013** | Filter siswa Perlu Dinilai vs Selesai | Tab filter status pada `SCR-011` |
-| **FR-014** | Acuan panduan nilai lembaga di Tutor | Panel rekomendasi skor pada modal penilaian `SCR-011` |
-| **FR-015** | Penetapan level final resmi oleh Tutor | Form penetapan level final resmi pada modal `CMP-007` (`SCR-011`) |
+| **FR-014** | Acuan panduan nilai lembaga di Tutor | Tampilan rentang acuan pada card pilihan level modal penilaian `SCR-011` |
+| **FR-015** | Penetapan level final resmi oleh Tutor | Form penetapan level mandiri dengan peninjauan butir soal pada modal `CMP-007` (`SCR-011`) |
 | **FR-016** | Ekspor laporan ke Excel & PDF | Tombol ekspor pada `SCR-008` (Admin) & `SCR-012` (Tutor) |
 | **FR-017** | Admin mendaftarkan akun Tutor baru | Layar `SCR-014` (Admin Kelola Tutor) & Quick Action `SCR-006` |
 

@@ -95,7 +95,7 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 | **US-007** | Student | Tetap dapat membaca soal dan memilih jawaban saat internet tiba-tiba terputus | Pengerjaan tes saya tidak terganggu oleh fluktuasi sinyal | **Must Have** | Jawaban tersimpan di `localStorage` lokal; auto-sync ke server saat koneksi internet pulih |
 | **US-008** | Student | Mengirimkan (*submit*) lembar jawaban saat koneksi internet aktif | Jawaban dan durasi pengerjaan saya terkunci dengan aman untuk dinilai | **Must Have** | Konfirmasi submit; validasi koneksi internet; status tes berubah menjadi `COMPLETED` |
 | **US-009** | Tutor | Melihat daftar siswa pada jenjang yang saya ampu dengan filter status evaluasi | Saya dapat memprioritaskan siswa yang belum dinilai | **Must Have** | Filter memisahkan siswa `Perlu Dinilai` dan `Selesai Dinilai`; sesi berstatus `RESET` disembunyikan |
-| **US-010** | Tutor | Melihat skor otomatis, total durasi pengerjaan, detail jawaban, dan menginput keputusan level akhir | Penempatan level siswa akurat dan terverifikasi secara resmi | **Must Have** | Tampil panduan acuan skor lembaga ringkas; tutor dapat memilih level final dan menyimpan keputusan |
+| **US-010** | Tutor | Melihat skor otomatis, total durasi pengerjaan, detail jawaban siswa, dan menetapkan keputusan level akhir | Penempatan level siswa akurat dan terverifikasi secara resmi | **Must Have** | Tutor dapat membuka lembar rincian jawaban siswa, memilih level final dengan acuan skor ringkas, dan memfinalisasi keputusan |
 | **US-011** | Admin & Tutor | Mengelola bank soal dengan jumlah opsi dinamis per butir soal | Kebutuhan variasi format soal (2 hingga 5 pilihan) terpenuhi | **Must Have** | Form CRUD soal mendukung penambahan/penghapusan opsi dinamis dan penanda kunci jawaban |
 | **US-012** | Student | Melihat status hasil penempatan setelah difinalisasi | Saya mengetahui hasil penempatan level kelas saya | **Must Have** | Informasi level final ditampilkan pada halaman hasil siswa |
 | **US-013** | Admin | Mendaftarkan dan mengelola akun staf Tutor baru | Tutor dapat login secara mandiri tanpa pembuatan akun manual di database | **Must Have** | Akun tutor berhasil dibuat dengan role jenjang yang sesuai |
@@ -131,12 +131,13 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 - Seluruh butir soal yang berstatus aktif di bank soal otomatis menjadi paket soal ujian bagi jenjang terkait.
 
 ### F-05: Evaluation, Level Finalization, & Reporting
-- Auto-scoring instan setelah submit (persentase benar).
-- Tampilan acuan standar lembaga di dashboard Tutor:
-  - *Beginner:* 0% – 59% (referensi waktu lembaga: ~15 menit)
-  - *Intermediate:* 60% – 79% (referensi waktu lembaga: ~20 menit)
-  - *Advanced:* 80% – 100% (referensi waktu lembaga: ~25 menit)
-- Input keputusan final level siswa oleh Tutor beserta **Catatan Evaluasi Tutor (*Tutor Notes*)**.
+- Auto-scoring instan setelah submit (persentase benar dan perbandingan jumlah benar/salah).
+- **Peninjauan Lembar Jawaban Siswa:** Komponen drawer lipat (*collapsible*) pada modal evaluasi yang menampilkan seluruh butir soal, status Benar/Salah, opsi yang dipilih siswa, serta kunci jawaban resmi.
+- **Penetapan Level Mandiri oleh Tutor:** Form modal evaluasi ringkas dan minimalis dengan pilihan 3 level resmi:
+  - *Beginner:* Acuan rentang 0% – 59%
+  - *Intermediate:* Acuan rentang 60% – 79%
+  - *Advanced:* Acuan rentang 80% – 100%
+- Penetapan level final langsung dan bersih tanpa kolom catatan berlebih atau rekomendasi sistem otomatis.
 - Filter status peninjauan di dashboard Tutor (*Perlu Dinilai* vs *Selesai Dinilai*).
 - **Fitur Export Rekapitulasi ke Excel (.xlsx) dan PDF (.pdf)** untuk Admin dan Tutor.
 
@@ -159,8 +160,8 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 | **FR-011** | Form bank soal wajib mendukung jumlah opsi dinamis (minimal 2, maksimal 5 opsi) per butir soal. | US-011 |
 | **FR-012** | Seluruh butir soal yang berstatus aktif di bank soal jenjang terkait wajib diujikan seluruhnya kepada siswa. | US-004 |
 | **FR-013** | Dashboard Tutor wajib menyediakan filter data siswa berdasarkan status evaluasi (`Perlu Dinilai` dan `Selesai Dinilai`), serta mengabaikan sesi yang berstatus `RESET`. | US-009 |
-| **FR-014** | Sistem wajib menampilkan panduan rentang nilai lembaga di dashboard Tutor (0–59% Beginner, 60–79% Intermediate, 80–100% Advanced) dan total durasi pengerjaan. | US-010 |
-| **FR-015** | Tutor berwenang menetapkan level akhir siswa (`Beginner`, `Intermediate`, `Advanced`) berdasarkan tinjauan hasil tes dan panduan acuan skor lembaga. | US-010 |
+| **FR-014** | Sistem wajib menampilkan acuan rentang nilai lembaga pada card pilihan level di modal evaluasi Tutor (0–59% Beginner, 60–79% Intermediate, 80–100% Advanced) dan ringkasan skor tes objektif. | US-010 |
+| **FR-015** | Tutor berwenang menetapkan level akhir siswa (`Beginner`, `Intermediate`, `Advanced`) secara mandiri berdasarkan tinjauan profil skor dan lembar rincian jawaban siswa. | US-010 |
 | **FR-016** | Admin dan Tutor wajib dapat mengekspor rekapitulasi data hasil tes siswa ke format file **Excel (.xlsx)** dan **PDF (.pdf)**. | US-003 |
 | **FR-017** | Admin wajib dapat mendaftarkan akun staf Tutor baru (Nama Lengkap, Email, Password Sementara, Jenjang yang Diampu) langsung dari antarmuka web. | US-013 |
 

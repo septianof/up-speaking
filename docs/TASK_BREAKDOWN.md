@@ -166,15 +166,15 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Status:** `Done` (Verified 2026-10-11)
 
 #### `TASK-009`: Halaman Tutor Dashboard (`SCR-010`), Penilaian Siswa (`SCR-011`), & Bank Soal Tutor (`SCR-013`)
-- **Goal / Scope:** Membangun Tutor Dashboard (`SCR-010`) dengan metrik jenjang pengampu dan tombol aksi cepat. Membangun Halaman Penilaian Siswa (`SCR-011`) dengan filter tab "Perlu Dinilai" vs "Selesai Dinilai", dan Modal Peninjauan Siswa (`CMP-007`) yang menampilkan skor %, durasi, sorotan acuan lembaga (*Beginner 0-59%, Intermediate 60-79%, Advanced 80-100%*), rincian jawaban benar/salah, radio level final, dan textarea catatan kualitatif tutor. Menyediakan Halaman Bank Soal Tutor (`SCR-013`).
+- **Goal / Scope:** Membangun Tutor Dashboard (`SCR-010`) dengan metrik jenjang pengampu dan tombol aksi cepat. Membangun Halaman Penilaian Siswa (`SCR-011`) dengan filter tab "Perlu Dinilai" vs "Selesai Dinilai", dan Modal Peninjauan Siswa (`CMP-007`) yang menampilkan profil siswa, skor tes %, panel lipat rincian lembar jawaban siswa (soal, status benar/salah, jawaban siswa vs kunci), serta 3 card pilihan level final (*Beginner 0–59%, Intermediate 60–79%, Advanced 80–100%*). Menyediakan Halaman Bank Soal Tutor (`SCR-013`).
 - **Requirement Links:** PRD `FR-013`, `FR-014`, `FR-015`; UI/UX `SCR-010`, `SCR-011`, `SCR-013`, `CMP-007`, `FLOW-003`.
 - **Target Area:** `src/app/staff/tutor/dashboard/page.tsx`, `src/app/staff/tutor/evaluations/page.tsx`, `src/app/staff/tutor/questions/page.tsx`, `src/components/staff/EvaluationModal.tsx`.
 - **Dependencies:** `TASK-006`.
 - **Execution Phase:** Fase 3 (Task 9).
-- **Acceptance Criteria:** Tutor hanya melihat data sesuai jenjang binaannya; modal penilaian menyorot acuan level lembaga secara otomatis berdasarkan skor %; form menyimpan pilihan level final dan catatan evaluasi.
-- **Verification:** Uji buka modal penilaian siswa pada mock data; verifikasi sorotan kotak acuan level.
-- **Risk / Notes:** Teks catatan tutor bersifat opsional namun sangat dianjurkan.
-- **Status:** `Done` (Verified 2026-10-11)
+- **Acceptance Criteria:** Tutor hanya melihat data sesuai jenjang binaannya; modal evaluasi menampilkan lembar jawaban siswa yang dapat dibuka/tutup; form menyimpan penetapan level final mandiri secara ringkas dan bersih.
+- **Verification:** Uji buka modal penilaian siswa; uji buka/tutup lembar jawaban siswa; uji finalisasi level siswa.
+- **Risk / Notes:** Form modal evaluasi dijaga tetap ringkas dan minimalis (tanpa kolom catatan atau rekomendasi sistem otomatis).
+- **Status:** `Done` (Verified Polish 2026-10-14)
 
 #### `TASK-010`: Halaman Laporan & Komponen Ekspor (`SCR-008` & `SCR-012`)
 - **Goal / Scope:** Membangun Halaman Hasil & Laporan untuk Admin (`SCR-008`) dan Tutor (`SCR-012`) dengan filter jenjang/status serta Action Bar berisi tombol **`Export Excel (.xlsx)`** dan **`Export PDF (.pdf)`**.

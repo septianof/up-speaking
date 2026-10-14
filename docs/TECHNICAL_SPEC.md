@@ -302,8 +302,8 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/tutor/dashboard` | Staf TUTOR | Mengambil metrik evaluasi khusus jenjang yang diampu tutor. |
 | `GET` | `/api/tutor/evaluations` | Staf TUTOR | Mengambil daftar siswa jenjang binaan dengan filter `COMPLETED` dan `FINALIZED`. |
-| `GET` | `/api/tutor/evaluations/[sessionId]` | Staf TUTOR | Mengambil rincian jawaban siswa (soal, opsi dipilih, indikator benar/salah). |
-| `POST`| `/api/tutor/evaluations/[sessionId]` | Staf TUTOR | Menyimpan keputusan level final (`assignedLevel`) dan catatan evaluasi kualitatif. |
+| `GET` | `/api/tutor/evaluations/[sessionId]` | Staf TUTOR | Mengambil rincian lembar jawaban siswa (soal, opsi dipilih, kunci jawaban benar, status benar/salah). |
+| `POST`| `/api/tutor/evaluations/[sessionId]` | Staf TUTOR | Menyimpan keputusan level final (`assignedLevel`) resmi siswa.<br>**Body:** `{ assignedLevel }` |
 | `GET` | `/api/tutor/questions` | Staf TUTOR | Mengambil bank soal khusus jenjang yang diampu tutor. |
 | `POST`| `/api/tutor/questions` | Staf TUTOR | Menambah butir soal khusus jenjang pengampu. |
 
