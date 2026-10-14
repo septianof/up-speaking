@@ -121,11 +121,11 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
           onClose();
         }
       }}
-      title={isEditing ? "Edit Data Siswa" : "Daftarkan Siswa Baru"}
+      title={isEditing ? "Edit Data Siswa" : "Tambah Siswa Baru"}
       description={
         isEditing
-          ? "Perbarui data siswa yang sudah terdaftar."
-          : "Isi data siswa baru untuk mendaftarkannya ke sistem."
+          ? "Perbarui informasi kontak dan jenjang siswa."
+          : "Lengkapi data siswa untuk memulai tes penempatan."
       }
       maxWidth="md"
     >

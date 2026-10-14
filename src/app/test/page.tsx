@@ -126,7 +126,14 @@ export default function TestPage() {
 
     try {
       const totalQ = questions.length || 10;
-      const answeredCount = Object.keys(answers).length;
+      
+      // Hitung skor objektif sesungguhnya berdasarkan kunci jawaban
+      let correctScore = 0;
+      questions.forEach((q) => {
+        if (answers[q.id] && answers[q.id] === q.correctOptionId) {
+          correctScore++;
+        }
+      });
 
       const completedSession: StudentSession = {
         ...session,
@@ -147,7 +154,8 @@ export default function TestPage() {
             status: "COMPLETED" as const,
             completedAt: completedSession.completedAt,
             totalQuestions: totalQ,
-            score: answeredCount, // sementara jumlah jawaban terisi sebagai score mock
+            score: correctScore,
+            answers: { ...answers },
             elapsedSeconds: session.elapsedSeconds,
           };
         }

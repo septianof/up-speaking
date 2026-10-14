@@ -173,11 +173,11 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
           onClose();
         }
       }}
-      title={isEditing ? "Edit Butir Soal" : "Tambah Butir Soal Baru"}
+      title={isEditing ? "Edit Butir Soal" : "Tambah Butir Soal"}
       description={
         isEditing
-          ? "Ubah teks pertanyaan, opsi pilihan, atau kunci jawaban butir soal ini."
-          : "Buat butir soal pilihan ganda dinamis (2 hingga 5 pilihan) beserta penentuan kunci jawaban."
+          ? "Perbarui teks soal, opsi pilihan, atau kunci jawaban."
+          : "Tentukan teks soal, opsi pilihan, dan kunci jawaban benar."
       }
       maxWidth="lg"
     >

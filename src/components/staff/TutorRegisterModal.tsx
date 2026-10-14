@@ -115,11 +115,11 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
           onClose();
         }
       }}
-      title={isEditing ? "Edit Akun Tutor" : "Tambah Akun Tutor Baru"}
+      title={isEditing ? "Edit Akun Tutor" : "Tambah Akun Tutor"}
       description={
         isEditing
-          ? "Perbarui nama pengajar, email akun, atau alihkan jenjang penugasan pengajar."
-          : "Daftarkan akun staf pengajar untuk melakukan penilaian dan kurasi tes penempatan."
+          ? "Perbarui informasi akun dan jenjang pengampu pengajar."
+          : "Daftarkan akun staf pengajar untuk evaluasi tes penempatan."
       }
       maxWidth="md"
     >

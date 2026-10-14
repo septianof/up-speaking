@@ -11,6 +11,7 @@ export interface StudentRecord {
   completedAt?: string;
   score?: number;
   totalQuestions?: number;
+  answers?: Record<string, string>;
   elapsedSeconds?: number;
   finalLevel?: FinalLevel;
   notes?: string;
@@ -42,6 +43,18 @@ export const INITIAL_STUDENTS: StudentRecord[] = [
     completedAt: "2026-10-11T07:55:00Z",
     score: 8,
     totalQuestions: 10,
+    answers: {
+      "q-07": "opt-07-a",
+      "q-08": "opt-08-a",
+      "q-09": "opt-09-a",
+      "q-14": "opt-14-a",
+      "q-15": "opt-15-a",
+      "q-16": "opt-16-a",
+      "q-17": "opt-17-b",
+      "q-18": "opt-18-a",
+      "q-19": "opt-19-b",
+      "q-20": "opt-20-a",
+    },
     finalLevel: "INTERMEDIATE",
     notes: "Kemampuan grammar sangat baik, perlu pendalaman pada passive voice.",
   },
@@ -65,6 +78,18 @@ export const INITIAL_STUDENTS: StudentRecord[] = [
     completedAt: "2026-10-10T14:40:00Z",
     score: 10,
     totalQuestions: 10,
+    answers: {
+      "q-07": "opt-07-a",
+      "q-08": "opt-08-a",
+      "q-09": "opt-09-a",
+      "q-14": "opt-14-a",
+      "q-15": "opt-15-a",
+      "q-16": "opt-16-a",
+      "q-17": "opt-17-a",
+      "q-18": "opt-18-a",
+      "q-19": "opt-19-a",
+      "q-20": "opt-20-a",
+    },
     finalLevel: "ADVANCED",
     notes: "Penguasaan kosa kata dan struktur kalimat mendekati penutur asli.",
   },

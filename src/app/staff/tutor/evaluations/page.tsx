@@ -224,7 +224,7 @@ export default function TutorEvaluationsPage() {
                           onClick={() => setSelectedStudent(std)}
                           className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm ${
                             activeTab === "PENDING"
-                              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                              ? "bg-primary-500 text-white hover:bg-primary-600"
                               : "bg-surface-subtle text-text-primary border border-surface-border hover:bg-slate-200"
                           }`}
                         >

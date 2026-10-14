@@ -11,7 +11,7 @@ export interface ModalProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
   showCloseButton?: boolean;
   variant?: "default" | "kid";
   topSlot?: React.ReactNode;
@@ -49,6 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
     md: "max-w-md",
     lg: "max-w-lg",
     xl: "max-w-xl",
+    "2xl": "max-w-2xl",
   };
 
   const isKid = variant === "kid";
@@ -87,38 +88,51 @@ export const Modal: React.FC<ModalProps> = ({
             {topSlot && <div className="flex justify-center -mt-20 mb-1">{topSlot}</div>}
 
             {/* Header */}
-            <div className={cn("flex items-start justify-between mb-4", isKid && topSlot && "justify-center text-center")}>
-              <div>
-                {title && (
-                  <h3
-                    className={cn(
-                      "font-bold text-text-primary",
-                      isKid ? "font-display text-2xl" : "text-lg"
-                    )}
-                  >
-                    {title}
-                  </h3>
+            {(title || showCloseButton) && (
+              <div
+                className={cn(
+                  "flex items-start justify-between gap-3 mb-4",
+                  !isKid && "pb-3.5 border-b border-surface-border",
+                  isKid && topSlot && "justify-center text-center"
                 )}
-                {description && (
-                  <p className={cn("text-text-muted mt-1", isKid ? "text-base" : "text-sm")}>
-                    {description}
-                  </p>
+              >
+                <div className="flex-1 min-w-0 pr-1">
+                  {title && (
+                    <h3
+                      className={cn(
+                        "font-semibold text-text-primary tracking-tight leading-tight",
+                        isKid ? "font-display text-2xl font-bold" : "text-base sm:text-lg"
+                      )}
+                    >
+                      {title}
+                    </h3>
+                  )}
+                  {description && (
+                    <p
+                      className={cn(
+                        "text-text-muted mt-1 leading-normal",
+                        isKid ? "text-base" : "text-xs sm:text-sm"
+                      )}
+                    >
+                      {description}
+                    </p>
+                  )}
+                </div>
+                {showCloseButton && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={cn(
+                      "rounded-lg p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors shrink-0 -mr-1 -mt-1",
+                      isKid && "absolute top-4 right-4 bg-surface-subtle p-2 rounded-full"
+                    )}
+                    aria-label="Tutup modal"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 )}
               </div>
-              {showCloseButton && (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className={cn(
-                    "rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors ml-2",
-                    isKid && "absolute top-4 right-4 bg-surface-subtle p-2"
-                  )}
-                  aria-label="Tutup"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-            </div>
+            )}
 
             {/* Body */}
             <div>{children}</div>
