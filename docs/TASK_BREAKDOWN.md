@@ -59,8 +59,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-015`** | API Tutor (Evaluasi & Finalisasi Level Siswa) | Fase 4 | `Done` | 2026-10-14 | Route handlers tutor dashboard, evaluations, questions terpasang |
 | **`TASK-016`** | Integrasi Alur Siswa & Hook `useOfflineSync` | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring siswa, hook useOfflineSync & useElapsedTimer |
 | **`TASK-017`** | Integrasi Dashboard Staf (Admin & Tutor) | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring dashboard Admin & Tutor terhubung API real |
-| **`TASK-018`** | Fitur Generator Ekspor Excel & PDF | Fase 5 | `Done` | 2026-10-14 | Modul export ExcelJS & jsPDF autotable terpasang & teruji build |
-| **`TASK-019`** | Unit Testing Fisher-Yates & Black Box Testing | Fase 6 | `Pending` | - | - |
+| **`TASK-019`** | Unit Testing Fisher-Yates & Black Box Testing | Fase 6 | `Done` | 2026-10-14 | Vitest 6/6 test lulus (100% pass) & TEST_REPORT.md FR-001–017 lengkap |
 | **`TASK-020`** | Konfigurasi Produksi & Deployment Vercel | Fase 6 | `Pending` | - | - |
 
 ---
@@ -312,7 +311,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Seluruh unit test algoritma lulus 100%; seluruh skenario Black Box testing teruji memenuhi kriteria penerimaan tanpa cacat mayor (*no blocker bugs*).
 - **Verification:** Jalankan test runner (`npm test`) dan rekap hasil pengujian fungsional.
 - **Risk / Notes:** Pengujian harus mencakup edge case: siswa offline saat pengerjaan dan pergantian perangkat (device takeover).
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-020`: Konfigurasi Produksi & Deployment ke Vercel
 - **Goal / Scope:** Mempersiapkan konfigurasi build produksi, mendaftarkan Environment Variables di dashboard Vercel, menghubungkan repositori Git, dan melakukan deployment aplikasi ke domain produksi Vercel.
