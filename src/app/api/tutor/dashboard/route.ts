@@ -16,6 +16,7 @@ export async function GET(request: Request) {
       .select(`
         id,
         full_name,
+        phone_number,
         target_level,
         created_at,
         test_sessions (
@@ -68,6 +69,18 @@ export async function GET(request: Request) {
     }
 
     const recentSubmissions: RecentSubmission[] = []
+    const pendingStudentsList: Array<{
+      id: string
+      sessionId: string
+      fullName: string
+      phone: string
+      targetLevel: string
+      status: string
+      score: number
+      totalQuestions: number
+      elapsedSeconds: number
+      createdAt: string
+    }> = []
 
     students?.forEach((st) => {
       const sessions = (st.test_sessions as unknown as TutorSessionItem[]) || []
@@ -92,6 +105,23 @@ export async function GET(request: Request) {
           submittedAt: session.submitted_at || session.started_at,
           status: 'COMPLETED',
         })
+
+        const rawScore = Math.round(
+          ((Number(session.score_percentage) || 0) / 100) * 10
+        )
+
+        pendingStudentsList.push({
+          id: st.id,
+          sessionId: session.id,
+          fullName: st.full_name,
+          phone: st.phone_number,
+          targetLevel: st.target_level,
+          status: session.status,
+          score: rawScore,
+          totalQuestions: 10,
+          elapsedSeconds: session.elapsed_seconds,
+          createdAt: st.created_at,
+        })
       } else if (session.status === 'FINALIZED') {
         finalizedCount++
         totalScore += Number(session.score_percentage || 0)
@@ -111,11 +141,15 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       metrics: {
+        total: totalStudentsInLevel,
         totalStudentsInLevel,
+        needEvaluation: pendingEvaluationCount,
         pendingEvaluationCount,
+        finalized: finalizedCount,
         finalizedCount,
         averageScore,
       },
+      pendingStudents: pendingStudentsList.slice(0, 5),
       recentSubmissions: recentSubmissions.slice(0, 5),
     })
   } catch (err) {

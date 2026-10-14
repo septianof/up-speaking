@@ -105,6 +105,7 @@ export default function TutorReportsPage() {
             variant="outline"
             size="md"
             onClick={handleExportPdf}
+            disabled={filteredReports.length === 0 || isLoading}
             className="gap-2"
           >
             <Printer className="h-4 w-4" />
@@ -116,6 +117,7 @@ export default function TutorReportsPage() {
             variant="primary"
             size="md"
             onClick={handleExportExcel}
+            disabled={filteredReports.length === 0 || isLoading}
             className="gap-2"
           >
             <Download className="h-4 w-4" />
@@ -193,10 +195,27 @@ export default function TutorReportsPage() {
                     <p className="font-medium">Memuat data rekap jenjang...</p>
                   </td>
                 </tr>
+              ) : reports.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                    <p className="font-semibold text-text-primary text-sm mb-1">Belum ada data pengerjaan siswa pada jenjang ini.</p>
+                    <p className="text-xs text-text-muted">Rekapitulasi nilai dan status penempatan akan terisi setelah siswa mengikuti tes.</p>
+                  </td>
+                </tr>
               ) : filteredReports.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
-                    <p className="font-medium">Belum ada siswa terdaftar pada jenjang ini.</p>
+                    <p className="font-medium text-sm">Tidak ada data siswa yang cocok dengan filter pencarian.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedFinalLevel("ALL");
+                      }}
+                      className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+                    >
+                      Reset Filter Pencarian
+                    </button>
                   </td>
                 </tr>
               ) : (

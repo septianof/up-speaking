@@ -180,7 +180,11 @@ export default function TutorDashboardPage() {
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-text-muted">
                     <CheckCircle2 className="h-6 w-6 mx-auto mb-1 text-emerald-500 opacity-60" />
-                    <p className="font-medium text-xs">Semua lembar tes yang terkumpul pada jenjang Anda telah selesai dievaluasi!</p>
+                    <p className="font-medium text-xs">
+                      {metrics.total === 0
+                        ? "Belum ada data pengerjaan siswa pada jenjang ini."
+                        : "Semua lembar tes yang terkumpul pada jenjang Anda telah selesai dievaluasi!"}
+                    </p>
                   </td>
                 </tr>
               ) : (

@@ -42,10 +42,12 @@ export default function AdminDashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setMetrics({
-          total: data.metrics.total,
-          notStarted: data.metrics.notStarted,
-          inProgress: data.metrics.inProgress,
-          finished: (data.metrics.completed || 0) + (data.metrics.finalized || 0),
+          total: data.metrics.total ?? data.metrics.totalStudents ?? 0,
+          notStarted: data.metrics.notStarted ?? data.metrics.notStartedCount ?? 0,
+          inProgress: data.metrics.inProgress ?? data.metrics.inProgressCount ?? 0,
+          finished:
+            (data.metrics.completed ?? data.metrics.completedCount ?? 0) +
+            (data.metrics.finalized ?? data.metrics.finalizedCount ?? 0),
         });
         setRecentStudents(data.recentStudents || []);
       }
@@ -230,8 +232,8 @@ export default function AdminDashboardPage() {
                 </tr>
               ) : recentStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-6 text-center text-text-muted">
-                    Belum ada data aktivitas siswa.
+                  <td colSpan={4} className="py-8 text-center text-text-muted">
+                    <p className="font-medium text-xs">Belum ada data pendaftaran siswa di sistem.</p>
                   </td>
                 </tr>
               ) : (

@@ -13,6 +13,7 @@ export async function GET() {
       .select(`
         id,
         full_name,
+        phone_number,
         target_level,
         created_at,
         test_sessions (
@@ -114,6 +115,20 @@ export async function GET() {
       }
     })
 
+    const recentStudents = (students || []).slice(0, 5).map((st) => {
+      const sessions = (st.test_sessions as unknown as SessionItem[]) || []
+      const validSessions = sessions.filter((s) => s.status !== 'RESET')
+      const latestSession = validSessions[0]
+      return {
+        id: st.id,
+        fullName: st.full_name,
+        phone: st.phone_number,
+        targetLevel: st.target_level,
+        status: latestSession?.status || 'NOT_STARTED',
+        createdAt: st.created_at,
+      }
+    })
+
     // Urutkan aktivitas terbaru (maks 10)
     activities.sort(
       (a, b) =>
@@ -122,12 +137,18 @@ export async function GET() {
 
     return NextResponse.json({
       metrics: {
+        total: totalStudents,
         totalStudents,
-        inProgressCount,
-        completedCount,
-        finalizedCount,
+        notStarted: notStartedCount,
         notStartedCount,
+        inProgress: inProgressCount,
+        inProgressCount,
+        completed: completedCount,
+        completedCount,
+        finalized: finalizedCount,
+        finalizedCount,
       },
+      recentStudents,
       recentActivities: activities.slice(0, 10),
     })
   } catch (err) {

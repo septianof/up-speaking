@@ -186,9 +186,37 @@ export default function AdminQuestionsPage() {
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
             <p className="font-medium">Memuat bank soal...</p>
           </div>
+        ) : questions.length === 0 ? (
+          <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
+            <p className="font-semibold text-text-primary text-sm mb-1">Belum ada butir soal yang dibuat dalam bank soal.</p>
+            <p className="text-xs text-text-muted mb-4">Tambahkan butir soal baru dengan pilihan opsi jawaban.</p>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setEditTarget(null);
+                setIsFormOpen(true);
+              }}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Soal Baru
+            </Button>
+          </div>
         ) : filteredQuestions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
-            <p className="font-medium">Tidak ada butir soal yang sesuai.</p>
+            <p className="font-medium text-sm">Tidak ada butir soal yang cocok dengan filter pencarian.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedLevel("ALL");
+              }}
+              className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+            >
+              Reset Filter Pencarian
+            </button>
           </div>
         ) : (
           filteredQuestions.map((q, idx) => (

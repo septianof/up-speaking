@@ -200,11 +200,42 @@ export default function AdminTutorsPage() {
                     <p className="font-medium">Memuat data akun tutor...</p>
                   </td>
                 </tr>
+              ) : tutors.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-text-muted">
+                    <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p className="font-semibold text-text-primary text-sm mb-1">Belum ada akun tutor terdaftar.</p>
+                    <p className="text-xs text-text-muted mb-4">Daftarkan akun pengajar baru untuk jenjang Elementary atau High School.</p>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        setEditTargetTutor(null);
+                        setIsRegisterOpen(true);
+                      }}
+                      className="gap-2"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Tambah Akun Tutor
+                    </Button>
+                  </td>
+                </tr>
               ) : filteredTutors.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
                     <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">Tidak ada akun tutor yang ditemukan.</p>
+                    <p className="font-medium">Tidak ada akun tutor yang cocok dengan filter pencarian.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedLevel("ALL");
+                      }}
+                      className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+                    >
+                      Reset Filter Pencarian
+                    </button>
                   </td>
                 </tr>
               ) : (

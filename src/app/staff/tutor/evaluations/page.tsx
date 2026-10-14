@@ -216,11 +216,24 @@ export default function TutorEvaluationsPage() {
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
                     <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">
-                      {activeTab === "PENDING"
-                        ? "Tidak ada lembar tes siswa yang menunggu evaluasi saat ini."
-                        : "Belum ada siswa yang telah difinalisasi pada jenjang ini."}
-                    </p>
+                    {searchQuery.trim() ? (
+                      <div>
+                        <p className="font-medium text-sm">Tidak ada siswa yang cocok dengan filter pencarian.</p>
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+                        >
+                          Reset Pencarian
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="font-medium text-sm">
+                        {activeTab === "PENDING"
+                          ? "Belum ada lembar tes siswa yang menunggu evaluasi saat ini."
+                          : "Belum ada siswa yang telah difinalisasi pada jenjang ini."}
+                      </p>
+                    )}
                   </td>
                 </tr>
               ) : (

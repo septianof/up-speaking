@@ -155,9 +155,31 @@ export default function TutorQuestionsPage() {
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
             <p className="font-medium">Memuat butir soal jenjang Anda...</p>
           </div>
+        ) : questions.length === 0 ? (
+          <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
+            <p className="font-semibold text-text-primary text-sm mb-1">Belum ada butir soal aktif pada jenjang Anda.</p>
+            <p className="text-xs text-text-muted mb-4">Tambahkan butir soal baru khusus jenjang bimbingan Anda.</p>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setIsFormOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Soal {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+            </Button>
+          </div>
         ) : filteredQuestions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
-            <p className="font-medium">Tidak ada butir soal yang sesuai.</p>
+            <p className="font-medium text-sm">Tidak ada butir soal yang cocok dengan filter pencarian.</p>
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+            >
+              Reset Pencarian
+            </button>
           </div>
         ) : (
           filteredQuestions.map((q, idx) => (

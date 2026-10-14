@@ -116,6 +116,7 @@ export default function AdminReportsPage() {
             variant="outline"
             size="md"
             onClick={handleExportPdf}
+            disabled={filteredReports.length === 0 || isLoading}
             className="gap-2"
           >
             <Printer className="h-4 w-4" />
@@ -127,6 +128,7 @@ export default function AdminReportsPage() {
             variant="primary"
             size="md"
             onClick={handleExportExcel}
+            disabled={filteredReports.length === 0 || isLoading}
             className="gap-2"
           >
             <Download className="h-4 w-4" />
@@ -217,10 +219,28 @@ export default function AdminReportsPage() {
                     <p className="font-medium">Memuat data laporan...</p>
                   </td>
                 </tr>
+              ) : reports.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                    <p className="font-semibold text-text-primary text-sm mb-1">Belum ada data hasil pengerjaan tes siswa di sistem.</p>
+                    <p className="text-xs text-text-muted">Hasil evaluasi dan skor akan otomatis tampil di sini setelah siswa menyelesaikan tes.</p>
+                  </td>
+                </tr>
               ) : filteredReports.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-text-muted">
-                    <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
+                    <p className="font-medium">Tidak ada data laporan yang cocok dengan filter pencarian.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedLevel("ALL");
+                        setSelectedFinalLevel("ALL");
+                      }}
+                      className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+                    >
+                      Reset Filter Pencarian
+                    </button>
                   </td>
                 </tr>
               ) : (

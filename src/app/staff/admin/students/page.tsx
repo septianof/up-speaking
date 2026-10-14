@@ -279,11 +279,43 @@ export default function AdminStudentsPage() {
                     <p className="font-medium">Memuat data siswa...</p>
                   </td>
                 </tr>
+              ) : students.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                    <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p className="font-semibold text-text-primary text-sm mb-1">Belum ada data siswa terdaftar di sistem.</p>
+                    <p className="text-xs text-text-muted mb-4">Mulai dengan mendaftarkan peserta tes baru.</p>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        setEditTargetStudent(null);
+                        setIsRegisterOpen(true);
+                      }}
+                      className="gap-2"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Daftarkan Siswa Pertama
+                    </Button>
+                  </td>
+                </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-text-muted">
                     <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">Tidak ada data siswa yang cocok dengan kriteria pencarian.</p>
+                    <p className="font-medium">Tidak ada data siswa yang cocok dengan filter pencarian.</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedLevel("ALL");
+                        setSelectedStatus("ALL");
+                      }}
+                      className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
+                    >
+                      Reset Filter Pencarian
+                    </button>
                   </td>
                 </tr>
               ) : (
