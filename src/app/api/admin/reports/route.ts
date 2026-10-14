@@ -1,0 +1,137 @@
+import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const level = searchParams.get('level') || 'ALL'
+    const status = searchParams.get('status') || 'ALL'
+
+    const supabase = createAdminClient()
+
+    let query = supabase
+      .from('students')
+      .select(`
+        id,
+        full_name,
+        phone_number,
+        target_level,
+        created_at,
+        test_sessions (
+          id,
+          status,
+          score_percentage,
+          elapsed_seconds,
+          started_at,
+          submitted_at,
+          placement_evaluations (
+            assigned_level,
+            tutor_notes,
+            finalized_at,
+            profiles (
+              full_name
+            )
+          )
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    if (level !== 'ALL') {
+      query = query.eq('target_level', level)
+    }
+
+    const { data: students, error } = await query
+
+    if (error) {
+      console.error('Error fetching admin reports data:', error)
+      return NextResponse.json(
+        { error: 'Gagal mengambil data laporan' },
+        { status: 500 }
+      )
+    }
+
+    interface TutorProfile {
+      full_name: string
+    }
+
+    interface ReportEval {
+      assigned_level: string
+      tutor_notes: string | null
+      finalized_at: string
+      profiles?: TutorProfile
+    }
+
+    interface ReportSession {
+      id: string
+      status: string
+      score_percentage: number | null
+      elapsed_seconds: number
+      started_at: string
+      submitted_at: string | null
+      placement_evaluations?: ReportEval[]
+    }
+
+    interface ReportRow {
+      studentId: string
+      fullName: string
+      phoneNumber: string
+      targetLevel: string
+      registeredAt: string
+      sessionId: string | null
+      sessionStatus: string
+      scorePercentage: number | null
+      elapsedSeconds: number
+      submittedAt: string | null
+      assignedLevel: string | null
+      tutorNotes: string | null
+      tutorName: string | null
+      finalizedAt: string | null
+    }
+
+    const reportRows: ReportRow[] = []
+
+    students?.forEach((st) => {
+      // Saring sesi yang bukan RESET
+      const sessions = (st.test_sessions as unknown as ReportSession[]) || []
+      const validSessions = sessions.filter(
+        (s) => s.status !== 'RESET'
+      )
+      const session = validSessions[0]
+
+      const sessionStatus = session?.status || 'NOT_STARTED'
+      if (status !== 'ALL' && sessionStatus !== status) {
+        return
+      }
+
+      const evalData = session?.placement_evaluations?.[0]
+      const tutorProfile = evalData?.profiles
+
+      reportRows.push({
+        studentId: st.id,
+        fullName: st.full_name,
+        phoneNumber: st.phone_number,
+        targetLevel: st.target_level,
+        registeredAt: st.created_at,
+        sessionId: session?.id || null,
+        sessionStatus,
+        scorePercentage: session?.score_percentage ?? null,
+        elapsedSeconds: session?.elapsed_seconds ?? 0,
+        submittedAt: session?.submitted_at || null,
+        assignedLevel: evalData?.assigned_level || null,
+        tutorNotes: evalData?.tutor_notes || null,
+        tutorName: tutorProfile?.full_name || null,
+        finalizedAt: evalData?.finalized_at || null,
+      })
+    })
+
+    return NextResponse.json({
+      reports: reportRows,
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin reports GET:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}

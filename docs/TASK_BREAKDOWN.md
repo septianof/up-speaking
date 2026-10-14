@@ -200,7 +200,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Seluruh tabel berhasil dibuat di Supabase tanpa error; constraint unique dan foreign key berjalan sesuai kamus data; berkas tipe data TypeScript (`database.types.ts`) selaras dengan skema database.
 - **Verification:** Jalankan skrip di SQL Editor Supabase dan periksa struktur tabel di Table Editor.
 - **Risk / Notes:** Pastikan ekstensi `uuid-ossp` aktif di project Supabase.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-012`: Modul Klien Supabase & Algoritma Fisher-Yates Shuffle
 - **Goal / Scope:** Mengonfigurasi pustaka `@supabase/supabase-js` dan `@supabase/ssr` untuk client-side (`lib/supabase/client.ts`), server-side (`lib/supabase/server.ts`), dan privileged admin (`lib/supabase/admin.ts`). Mengimplementasikan Algoritma Fisher-Yates Shuffle murni $O(n)$ pada `lib/algorithms/fisher-yates.ts`.
@@ -211,7 +211,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Klien Supabase dapat melakukan query read/write ke database; fungsi `fisherYatesShuffle` menghasilkan permutasi acak seragam tanpa mengubah panjang array atau menghilangkan elemen.
 - **Verification:** Buat file skrip uji sederhana untuk memvalidasi permutasi array acak 100 kali iterasi.
 - **Risk / Notes:** Gunakan `SUPABASE_SERVICE_ROLE_KEY` hanya di file server-side/admin.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-013`: Endpoint API Siswa (Verify, Start, Sync, Submit, Result)
 - **Goal / Scope:** Membangun Route Handlers untuk alur siswa:
@@ -227,7 +227,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Siswa valid dapat memulai tes dengan susunan soal acak; jawaban tersimpan ke database; skor dihitung akurat saat submit; endpoint tidak membocorkan kunci jawaban `is_correct`.
 - **Verification:** Uji pemanggilan API menggunakan Postman atau HTTP client test script.
 - **Risk / Notes:** Pastikan validasi `device_token` berjalan untuk mencegah multi-device conflict.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-014`: Autentikasi Staf, Middleware RBAC, & API Admin
 - **Goal / Scope:** Membangun Next.js Middleware (`middleware.ts`) untuk proteksi rute staf berbasis session cookie Supabase Auth SSR. Membangun Route Handlers Admin:
@@ -244,7 +244,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Rute staf terproteksi cookie auth; role bukan Admin ditolak dari modul admin; pendaftaran tutor berhasil membuat user di Supabase Auth dan tabel `profiles`; soft reset berhasil membatalkan sesi lama dan membuat sesi baru.
 - **Verification:** Uji login sebagai Admin, buat akun tutor, dan uji reset sesi siswa.
 - **Risk / Notes:** Simpan cookie session secara aman dengan flag HttpOnly dan SameSite=Lax.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 #### `TASK-015`: API Tutor (Evaluasi & Finalisasi Level)
 - **Goal / Scope:** Membangun Route Handlers khusus Tutor:
@@ -260,7 +260,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Tutor hanya dapat melihat dan menilai siswa sesuai jenjangnya; rincian jawaban menandai kunci benar/salah dengan akurat; form menyimpan keputusan level dan status tes berubah menjadi `FINALIZED`.
 - **Verification:** Uji login sebagai Tutor Elementary, verifikasi bahwa siswa High School tidak muncul di daftar.
 - **Risk / Notes:** Pastikan query SQL menyertakan filter `target_level` sesuai profil tutor login.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 ---
 

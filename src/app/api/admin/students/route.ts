@@ -1,0 +1,182 @@
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+const createStudentSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, 'Nama lengkap minimal 2 karakter')
+    .max(150, 'Nama terlalu panjang'),
+  phoneNumber: z
+    .string()
+    .min(8, 'Nomor HP minimal 8 digit')
+    .max(20, 'Nomor HP maksimal 20 digit')
+    .regex(/^08[0-9]+$/, 'Nomor HP harus diawali 08 dan berupa angka'),
+  targetLevel: z.enum(['ELEMENTARY', 'HIGH_SCHOOL']),
+})
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search') || ''
+    const level = searchParams.get('level') || 'ALL'
+
+    const supabase = createAdminClient()
+
+    let query = supabase
+      .from('students')
+      .select(`
+        id,
+        full_name,
+        phone_number,
+        target_level,
+        created_at,
+        test_sessions (
+          id,
+          status,
+          score_percentage,
+          elapsed_seconds,
+          started_at,
+          submitted_at,
+          placement_evaluations (
+            assigned_level,
+            finalized_at
+          )
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    if (level !== 'ALL') {
+      query = query.eq('target_level', level)
+    }
+
+    if (search.trim()) {
+      query = query.or(
+        `full_name.ilike.%${search.trim()}%,phone_number.ilike.%${search.trim()}%`
+      )
+    }
+
+    const { data: students, error: studentsError } = await query
+
+    if (studentsError) {
+      console.error('Error querying students:', studentsError)
+      return NextResponse.json(
+        { error: 'Gagal mengambil data siswa' },
+        { status: 500 }
+      )
+    }
+
+    interface SessionWithEval {
+      id: string
+      status: string
+      score_percentage: number
+      elapsed_seconds: number
+      placement_evaluations?: Array<{
+        assigned_level: string
+        finalized_at: string
+      }>
+    }
+
+    const formattedStudents = (students || []).map((st) => {
+      // Ambil sesi aktif terakhir (bukan RESET)
+      const sessions = (st.test_sessions as unknown as SessionWithEval[]) || []
+      const validSessions = sessions.filter(
+        (s) => s.status !== 'RESET'
+      )
+      const latestSession = validSessions[0]
+      const evalData = latestSession?.placement_evaluations?.[0]
+
+      return {
+        id: st.id,
+        fullName: st.full_name,
+        phoneNumber: st.phone_number,
+        targetLevel: st.target_level,
+        createdAt: st.created_at,
+        sessionId: latestSession?.id || null,
+        sessionStatus: latestSession?.status || 'NOT_STARTED',
+        scorePercentage: latestSession?.score_percentage ?? null,
+        elapsedSeconds: latestSession?.elapsed_seconds ?? 0,
+        assignedLevel: evalData?.assigned_level || null,
+        finalizedAt: evalData?.finalized_at || null,
+      }
+    })
+
+    return NextResponse.json({
+      students: formattedStudents,
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin students GET:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const parsed = createStudentSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Input pendaftaran siswa tidak valid' },
+        { status: 400 }
+      )
+    }
+
+    const { fullName, phoneNumber, targetLevel } = parsed.data
+    const supabase = createAdminClient()
+
+    // Cek apakah nomor HP sudah terdaftar pada jenjang yang sama
+    const { data: existing } = await supabase
+      .from('students')
+      .select('id')
+      .eq('phone_number', phoneNumber.trim())
+      .eq('target_level', targetLevel)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Nomor HP ini sudah terdaftar untuk jenjang yang dipilih' },
+        { status: 409 }
+      )
+    }
+
+    const { data: newStudent, error: insertError } = await supabase
+      .from('students')
+      .insert({
+        full_name: fullName.trim(),
+        phone_number: phoneNumber.trim(),
+        target_level: targetLevel,
+      })
+      .select('*')
+      .single()
+
+    if (insertError || !newStudent) {
+      console.error('Error inserting student:', insertError)
+      return NextResponse.json(
+        { error: 'Gagal mendaftarkan siswa ke database' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      student: {
+        id: newStudent.id,
+        fullName: newStudent.full_name,
+        phoneNumber: newStudent.phone_number,
+        targetLevel: newStudent.target_level,
+        createdAt: newStudent.created_at,
+        sessionStatus: 'NOT_STARTED',
+      },
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin students POST:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}
