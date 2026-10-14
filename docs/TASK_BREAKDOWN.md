@@ -59,8 +59,9 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 | **`TASK-015`** | API Tutor (Evaluasi & Finalisasi Level Siswa) | Fase 4 | `Done` | 2026-10-14 | Route handlers tutor dashboard, evaluations, questions terpasang |
 | **`TASK-016`** | Integrasi Alur Siswa & Hook `useOfflineSync` | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring siswa, hook useOfflineSync & useElapsedTimer |
 | **`TASK-017`** | Integrasi Dashboard Staf (Admin & Tutor) | Fase 5 | `Done` | 2026-10-14 | Fullstack wiring dashboard Admin & Tutor terhubung API real |
+| **`TASK-018`** | Generator Ekspor Excel & PDF | Fase 5 | `Done` | 2026-10-14 | Pustaka SheetJS & jsPDF terintegrasi pada laporan Admin & Tutor |
 | **`TASK-019`** | Unit Testing Fisher-Yates & Black Box Testing | Fase 6 | `Done` | 2026-10-14 | Vitest 6/6 test lulus (100% pass) & TEST_REPORT.md FR-001–017 lengkap |
-| **`TASK-020`** | Konfigurasi Produksi & Deployment Vercel | Fase 6 | `Pending` | - | - |
+| **`TASK-020`** | Konfigurasi Produksi & Deployment Vercel | Fase 6 | `Done` | 2026-10-14 | Vercel production deployment sukses, Auto CI/CD GitHub terhubung |
 
 ---
 
@@ -322,7 +323,7 @@ Tabel berikut menjadi acuan utama bagi AI Coding Agent dan pengembang manusia un
 - **Acceptance Criteria:** Aplikasi berhasil ter-deploy di Vercel tanpa error build; web dapat diakses publik melalui HTTPS; koneksi ke database Supabase berjalan lancar di lingkungan produksi.
 - **Verification:** Buka URL produksi Vercel di perangkat smartphone dan laptop; lakukan uji pengerjaan tes end-to-end secara live.
 - **Risk / Notes:** Pastikan URL aplikasi produksi terdaftar di whitelist CORS/redirect URL Supabase Auth.
-- **Initial Status:** `Pending`
+- **Status:** `Done` (Verified 2026-10-14)
 
 ---
 
