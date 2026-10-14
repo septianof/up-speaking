@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
-import { saveStaffSession } from "@/lib/staff-session";
+import { saveStaffSession, getActiveStaff } from "@/lib/staff-session";
 import { Mail, Lock, AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function StaffLoginPage() {
@@ -14,6 +14,17 @@ export default function StaffLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const staff = getActiveStaff();
+    if (staff) {
+      if (staff.role === "ADMIN") {
+        router.replace("/staff/admin/dashboard");
+      } else {
+        router.replace("/staff/tutor/dashboard");
+      }
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
