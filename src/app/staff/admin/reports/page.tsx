@@ -2,13 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  FileSpreadsheet,
   Download,
   Printer,
   Search,
-  Users,
-  Award,
-  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -73,15 +69,13 @@ export default function AdminReportsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-md border border-primary-100">
-          <GraduationCap className="h-3.5 w-3.5" />
-          Elementary
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+          Elementary (SD)
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-        <GraduationCap className="h-3.5 w-3.5" />
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
         High School
       </span>
     );
@@ -92,9 +86,8 @@ export default function AdminReportsPage() {
       {/* Header and Export Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <FileSpreadsheet className="h-7 w-7 text-emerald-600" />
-            Hasil & Laporan Keseluruhan
+          <h1 className="text-2xl font-black text-text-primary">
+            Hasil &amp; Laporan Keseluruhan
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Rekapitulasi resmi hasil penempatan seluruh jenjang, statistik capaian skor, dan ekspor dokumen.
@@ -119,7 +112,7 @@ export default function AdminReportsPage() {
             variant="primary"
             size="md"
             onClick={handleExportExcel}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-400 text-white"
+            className="gap-2"
           >
             <Download className="h-4 w-4" />
             Export Excel (.csv)
@@ -129,39 +122,24 @@ export default function AdminReportsPage() {
 
       {/* Mini Stats Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Siswa Terfilter</p>
-            <p className="text-2xl font-black text-text-primary mt-0.5">{stats.total}</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-            <Users className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Total Siswa Terfilter</p>
+          <p className="text-2xl font-black text-text-primary">{stats.total}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Selesai Difinalisasi</p>
-            <p className="text-2xl font-black text-emerald-600 mt-0.5">{stats.evaluatedCount}</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Award className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Selesai Difinalisasi</p>
+          <p className="text-2xl font-black text-emerald-600">{stats.evaluatedCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Rata-rata Skor %</p>
-            <p className="text-2xl font-black text-indigo-600 mt-0.5">{stats.avgPercent}%</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <FileSpreadsheet className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Rata-rata Skor</p>
+          <p className="text-2xl font-black text-primary-600">{stats.avgPercent}%</p>
         </div>
       </div>
 
       {/* Filter and Search */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-3">
+      <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="md:col-span-2 relative">
             <Input
@@ -220,7 +198,6 @@ export default function AdminReportsPage() {
               {filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-text-muted">
-                    <FileSpreadsheet className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
                   </td>
                 </tr>

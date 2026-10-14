@@ -2,13 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  FileSpreadsheet,
   Download,
   Printer,
   Search,
-  Users,
-  Award,
-  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -77,8 +73,7 @@ export default function TutorReportsPage() {
       {/* Header and Export Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <FileSpreadsheet className="h-7 w-7 text-emerald-600" />
+          <h1 className="text-2xl font-black text-text-primary">
             Laporan Hasil Penempatan {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </h1>
           <p className="text-sm text-text-muted mt-1">
@@ -104,7 +99,7 @@ export default function TutorReportsPage() {
             variant="primary"
             size="md"
             onClick={handleExportExcel}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-400 text-white"
+            className="gap-2"
           >
             <Download className="h-4 w-4" />
             Export Excel (.csv)
@@ -114,39 +109,24 @@ export default function TutorReportsPage() {
 
       {/* Mini Stats Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Siswa Jenjang Anda</p>
-            <p className="text-2xl font-black text-text-primary mt-0.5">{stats.total}</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-            <Users className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Total Siswa Terfilter</p>
+          <p className="text-2xl font-black text-text-primary">{stats.total}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Selesai Dinilai</p>
-            <p className="text-2xl font-black text-emerald-600 mt-0.5">{stats.evaluatedCount}</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Award className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Selesai Dinilai</p>
+          <p className="text-2xl font-black text-emerald-600">{stats.evaluatedCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Rata-rata Skor %</p>
-            <p className="text-2xl font-black text-indigo-600 mt-0.5">{stats.avgPercent}%</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <GraduationCap className="h-5 w-5" />
-          </div>
+        <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-0.5">Rata-rata Skor</p>
+          <p className="text-2xl font-black text-primary-600">{stats.avgPercent}%</p>
         </div>
       </div>
 
       {/* Filter and Search */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-3">
+      <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2 relative">
             <Input
@@ -192,7 +172,6 @@ export default function TutorReportsPage() {
               {filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-text-muted">
-                    <FileSpreadsheet className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">Tidak ada data hasil pengerjaan siswa yang sesuai filter.</p>
                   </td>
                 </tr>

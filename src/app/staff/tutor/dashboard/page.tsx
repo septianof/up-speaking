@@ -3,9 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
-  Users,
   Award,
-  Clock,
   CheckCircle2,
   HelpCircle,
   FileSpreadsheet,
@@ -56,15 +54,15 @@ export default function TutorDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Dashboard Pengajar (Tutor)
+            Dashboard Pengajar
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Selamat datang, <strong>{staff?.fullName || "Tutor Pengajar"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="success" size="md">
-            🎓 Jenjang Binaan: {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+          <Badge variant="primary" size="md">
+            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
           </Badge>
         </div>
       </div>
@@ -72,105 +70,76 @@ export default function TutorDashboardPage() {
       {/* 3 Kartu Metrik Jenjang */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Siswa Perlu Dinilai */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Perlu Dinilai</p>
-            <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{metrics.needEvaluation}</p>
-            <p className="text-[11px] text-amber-700/80 mt-1 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              Menunggu penetapan level
-            </p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Award className="h-6 w-6" />
-          </div>
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Perlu Dinilai</p>
+          <p className="text-2xl sm:text-3xl font-black text-amber-600">{metrics.needEvaluation}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Menunggu penetapan level</p>
         </div>
 
         {/* Siswa Selesai Dinilai */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Selesai Dinilai</p>
-            <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">{metrics.finalized}</p>
-            <p className="text-[11px] text-emerald-700/80 mt-1 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              Level resmi telah diterbitkan
-            </p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="h-6 w-6" />
-          </div>
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Selesai Dinilai</p>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-600">{metrics.finalized}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Level resmi telah diterbitkan</p>
         </div>
 
         {/* Total Peserta Jenjang */}
-        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary-700">Total Peserta</p>
-            <p className="text-2xl sm:text-3xl font-black text-primary-600 mt-1">{metrics.total}</p>
-            <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              Peserta terdaftar di jenjang Anda
-            </p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-            <Users className="h-6 w-6" />
-          </div>
+        <div className="p-5 rounded-2xl bg-surface-white border border-surface-border shadow-card">
+          <p className="text-xs text-text-muted mb-1">Total Peserta</p>
+          <p className="text-2xl sm:text-3xl font-black text-text-primary">{metrics.total}</p>
+          <p className="text-[11px] text-text-muted mt-1.5">Peserta terdaftar di jenjang Anda</p>
         </div>
       </div>
 
       {/* Baris Tombol Aksi Cepat Tutor (Quick Actions) */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-text-muted">
-          Aksi Cepat Pengajar
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {/* Penilaian Siswa */}
-          <Link
-            href="/staff/tutor/evaluations"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-emerald-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
-          >
-            <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
-              <Award className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-emerald-600 transition-colors">
-                Evaluasi & Penilaian
-              </p>
-              <p className="text-xs text-text-muted">Buka lembar pengerjaan siswa</p>
-            </div>
-          </Link>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        {/* Penilaian Siswa */}
+        <Link
+          href="/staff/tutor/evaluations"
+          className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-primary-200 hover:shadow-card transition-all text-left group"
+        >
+          <div className="h-10 w-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 group-hover:bg-primary-500 group-hover:text-white transition-colors">
+            <Award className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-text-primary">
+              Evaluasi &amp; Penilaian
+            </p>
+            <p className="text-xs text-text-muted">Buka lembar pengerjaan siswa</p>
+          </div>
+        </Link>
 
-          {/* Kelola Bank Soal */}
-          <Link
-            href="/staff/tutor/questions"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-amber-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
-          >
-            <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors shrink-0">
-              <HelpCircle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-amber-600 transition-colors">
-                Bank Soal Jenjang
-              </p>
-              <p className="text-xs text-text-muted">Kurasi soal jenjang binaan</p>
-            </div>
-          </Link>
+        {/* Kelola Bank Soal */}
+        <Link
+          href="/staff/tutor/questions"
+          className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-slate-300 hover:shadow-card transition-all text-left group"
+        >
+          <div className="h-10 w-10 rounded-xl bg-surface-subtle text-text-muted flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+            <HelpCircle className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-text-primary">
+              Bank Soal Jenjang
+            </p>
+            <p className="text-xs text-text-muted">Kurasi soal jenjang binaan</p>
+          </div>
+        </Link>
 
-          {/* Rekap & Laporan */}
-          <Link
-            href="/staff/tutor/reports"
-            className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-primary-300 hover:shadow-card hover:-translate-y-0.5 transition-all text-left group"
-          >
-            <div className="h-11 w-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors shrink-0">
-              <FileSpreadsheet className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text-primary group-hover:text-primary-600 transition-colors">
-                Laporan & Rekap
-              </p>
-              <p className="text-xs text-text-muted">Ekspor hasil penempatan</p>
-            </div>
-          </Link>
-        </div>
+        {/* Rekap & Laporan */}
+        <Link
+          href="/staff/tutor/reports"
+          className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-white border border-surface-border hover:border-slate-300 hover:shadow-card transition-all text-left group"
+        >
+          <div className="h-10 w-10 rounded-xl bg-surface-subtle text-text-muted flex items-center justify-center shrink-0 group-hover:bg-slate-200 transition-colors">
+            <FileSpreadsheet className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-text-primary">
+              Laporan &amp; Rekap
+            </p>
+            <p className="text-xs text-text-muted">Ekspor hasil penempatan</p>
+          </div>
+        </Link>
       </div>
 
       {/* Tabel Menunggu Evaluasi */}
@@ -182,7 +151,7 @@ export default function TutorDashboardPage() {
           </div>
           <Link
             href="/staff/tutor/evaluations"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 hover:underline"
           >
             Lihat Semua Antrean
             <ArrowRight className="h-3.5 w-3.5" />
@@ -228,7 +197,7 @@ export default function TutorDashboardPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedStudent(std)}
-                          className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-primary-500 text-white hover:bg-primary-600 transition-colors shadow-sm"
                         >
                           Evaluasi
                         </button>

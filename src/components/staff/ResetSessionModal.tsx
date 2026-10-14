@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { AlertTriangle, RotateCcw, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { resetMockStudentSession, StudentRecord } from "@/lib/mock-data";
 
 interface ResetSessionModalProps {
@@ -92,9 +91,13 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-muted">Jenjang:</span>
-              <Badge variant="primary" size="sm">
-                {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
-              </Badge>
+              <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded border ${
+                student.targetLevel === "ELEMENTARY"
+                  ? "text-primary-700 bg-primary-50 border-primary-100"
+                  : "text-text-secondary bg-surface-subtle border-surface-border"
+              }`}>
+                {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-muted">Status Saat Ini:</span>
@@ -115,8 +118,8 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
 
           {/* Pilihan Alasan Reset */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-2">
-              Alasan Reset Sesi <span className="text-accent-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Alasan reset sesi <span className="text-accent-500">*</span>
             </label>
             <div className="space-y-2">
               {COMMON_REASONS.map((reason) => (

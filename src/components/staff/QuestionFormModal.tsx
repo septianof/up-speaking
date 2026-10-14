@@ -200,39 +200,39 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
 
           {/* Jenjang Soal */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
-              Target Jenjang Soal <span className="text-accent-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Target jenjang soal <span className="text-accent-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setTargetLevel("ELEMENTARY")}
-                className={`p-2.5 rounded-xl border text-xs font-bold transition-all ${
+                className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all ${
                   targetLevel === "ELEMENTARY"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500"
-                    : "border-surface-border text-text-muted hover:border-slate-300"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
+                    : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                Elementary (SD)
+                Elementary <span className="text-xs font-normal opacity-70">SD</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTargetLevel("HIGH_SCHOOL")}
-                className={`p-2.5 rounded-xl border text-xs font-bold transition-all ${
+                className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all ${
                   targetLevel === "HIGH_SCHOOL"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500"
-                    : "border-surface-border text-text-muted hover:border-slate-300"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
+                    : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                High School (SMP / SMA)
+                High School <span className="text-xs font-normal opacity-70">SMP/SMA</span>
               </button>
             </div>
           </div>
 
           {/* Teks Pertanyaan */}
           <div>
-            <label className="block text-xs font-semibold text-text-primary uppercase tracking-wider mb-1.5">
-              Pertanyaan / Soal <span className="text-accent-500">*</span>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Pertanyaan / soal <span className="text-accent-500">*</span>
             </label>
             <textarea
               rows={3}
@@ -249,11 +249,11 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
           {/* Opsi Pilihan Jawaban Dinamis */}
           <div className="space-y-2.5 pt-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-text-primary uppercase tracking-wider">
-                Opsi Pilihan Jawaban ({options.length}/5)
+              <label className="text-sm font-medium text-text-secondary">
+                Opsi pilihan jawaban ({options.length}/5)
               </label>
               <span className="text-[11px] text-text-muted">
-                Tandai radio sebagai <strong>Kunci Jawaban</strong>
+                Pilih radio sebagai kunci jawaban benar
               </span>
             </div>
 
@@ -327,7 +327,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-6">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-4">
             <Button
               type="button"
               variant="outline"

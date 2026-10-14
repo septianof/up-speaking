@@ -2,13 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  HelpCircle,
   Plus,
   Search,
   Trash2,
   Pencil,
   CheckCircle2,
-  GraduationCap,
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -59,16 +57,14 @@ export default function AdminQuestionsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-md border border-primary-100">
-          <GraduationCap className="h-3.5 w-3.5" />
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
           Elementary (SD)
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-        <GraduationCap className="h-3.5 w-3.5" />
-        High School (SMP/SMA)
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+        High School
       </span>
     );
   };
@@ -78,8 +74,7 @@ export default function AdminQuestionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary flex items-center gap-2.5">
-            <HelpCircle className="h-7 w-7 text-amber-500" />
+          <h1 className="text-2xl font-black text-text-primary">
             Bank Soal Ujian
           </h1>
           <p className="text-sm text-text-muted mt-1">
@@ -92,7 +87,7 @@ export default function AdminQuestionsPage() {
           variant="primary"
           size="md"
           onClick={() => setIsFormOpen(true)}
-          className="shrink-0 gap-2 bg-amber-600 hover:bg-amber-700 focus:ring-amber-400 text-white"
+          className="shrink-0 gap-2"
         >
           <Plus className="h-4 w-4" />
           Tambah Butir Soal
@@ -100,7 +95,7 @@ export default function AdminQuestionsPage() {
       </div>
 
       {/* Filter and Search */}
-      <div className="rounded-2xl bg-surface-white p-4 shadow-card border border-surface-border space-y-3">
+      <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2 relative">
             <Input
@@ -146,7 +141,6 @@ export default function AdminQuestionsPage() {
       <div className="space-y-3.5">
         {filteredQuestions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
-            <HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
             <p className="font-medium">Tidak ada butir soal yang sesuai.</p>
           </div>
         ) : (
