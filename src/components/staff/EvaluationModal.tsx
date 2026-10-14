@@ -29,7 +29,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   onSuccess,
 }) => {
   const [selectedFinalLevel, setSelectedFinalLevel] = useState<FinalLevel>("BEGINNER");
-  const [notes, setNotes] = useState("");
   const [showAnswerSheet, setShowAnswerSheet] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -46,7 +45,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
   useEffect(() => {
     if (student) {
       setSelectedFinalLevel(student.finalLevel || recommendedLevel);
-      setNotes(student.notes || "");
       setShowAnswerSheet(false);
     }
   }, [student, recommendedLevel]);
@@ -92,7 +90,6 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
     setTimeout(() => {
       const updated = finalizeMockStudentEvaluation(student.id, {
         finalLevel: selectedFinalLevel,
-        notes: notes.trim() ? notes.trim() : undefined,
       });
 
       setIsSubmitting(false);
@@ -328,22 +325,8 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
             </div>
           </div>
 
-          {/* Catatan Observasi Tutor (Opsional) */}
-          <div>
-            <label className="block text-xs font-medium text-text-muted mb-1.5">
-              Catatan Evaluasi Tutor (Opsional)
-            </label>
-            <textarea
-              rows={2}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Tambahkan catatan kualitatif atau rekomendasi pengayaan materi siswa..."
-              className="w-full rounded-xl border border-surface-border p-2.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-            />
-          </div>
-
           {/* Modal Action Buttons */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-border mt-3">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-surface-border mt-4">
             <Button
               type="button"
               variant="outline"
