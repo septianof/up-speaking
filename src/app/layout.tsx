@@ -28,7 +28,9 @@ export const metadata: Metadata = {
   title: "Up Speaking Placement Test",
   description: "Sistem Informasi Tes Penempatan Berbasis Web - Up Speaking Learning Centre",
   icons: {
-    icon: "/images/logo.png",
+    icon: "/images/logo_transparent.png",
+    shortcut: "/images/logo_transparent.png",
+    apple: "/images/logo_transparent.png",
   },
 };
 
