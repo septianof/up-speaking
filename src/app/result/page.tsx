@@ -24,11 +24,12 @@ export default function ResultPage() {
   const fetchLiveResult = async (active: StudentSession) => {
     try {
       setIsRefreshing(true);
-      const url = active.sessionId
+      const baseUrl = active.sessionId
         ? `/api/student/result?sessionId=${active.sessionId}`
         : `/api/student/result?studentId=${active.studentId}`;
+      const url = `${baseUrl}&_t=${Date.now()}`;
 
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         const refreshedSession: StudentSession = {

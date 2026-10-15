@@ -44,7 +44,10 @@ export default function TutorEvaluationsPage() {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/tutor/evaluations?level=${tutorAssignedLevel}`);
+      const res = await fetch(
+        `/api/tutor/evaluations?level=${tutorAssignedLevel}&_t=${Date.now()}`,
+        { cache: "no-store" }
+      );
       if (res.ok) {
         const data = await res.json();
         const mapped = ((data.evaluations || []) as ApiEvaluationItem[]).map((e: ApiEvaluationItem) => ({

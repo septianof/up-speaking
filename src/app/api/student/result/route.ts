@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 export async function GET(request: Request) {
   try {
@@ -90,27 +92,37 @@ export async function GET(request: Request) {
         | EvalResultItem[]
     )
 
-    return NextResponse.json({
-      sessionId: session.id,
-      status: session.status,
-      scorePercentage: session.score_percentage,
-      elapsedSeconds: session.elapsed_seconds,
-      submittedAt: session.submitted_at,
-      student: {
-        id: studentData?.id,
-        fullName: studentData?.full_name,
-        phoneNumber: studentData?.phone_number,
-        targetLevel: studentData?.target_level,
+    return NextResponse.json(
+      {
+        sessionId: session.id,
+        status: session.status,
+        scorePercentage: session.score_percentage,
+        elapsedSeconds: session.elapsed_seconds,
+        submittedAt: session.submitted_at,
+        student: {
+          id: studentData?.id,
+          fullName: studentData?.full_name,
+          phoneNumber: studentData?.phone_number,
+          targetLevel: studentData?.target_level,
+        },
+        evaluation: evaluationData
+          ? {
+              id: evaluationData.id,
+              assignedLevel: evaluationData.assigned_level,
+              tutorNotes: evaluationData.tutor_notes,
+              finalizedAt: evaluationData.finalized_at,
+            }
+          : null,
       },
-      evaluation: evaluationData
-        ? {
-            id: evaluationData.id,
-            assignedLevel: evaluationData.assigned_level,
-            tutorNotes: evaluationData.tutor_notes,
-            finalizedAt: evaluationData.finalized_at,
-          }
-        : null,
-    })
+      {
+        headers: {
+          'Cache-Control':
+            'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    )
   } catch (err) {
     console.error('Unexpected error in student result:', err)
     return NextResponse.json(

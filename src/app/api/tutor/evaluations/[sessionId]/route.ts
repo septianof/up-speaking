@@ -6,6 +6,8 @@ import { uuidSchema } from '@/lib/validators'
 import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 const finalizeEvaluationSchema = z.object({
   assignedLevel: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),

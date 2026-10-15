@@ -32,7 +32,10 @@ export default function TutorDashboardPage() {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/tutor/dashboard?level=${tutorLevel}`);
+      const res = await fetch(
+        `/api/tutor/dashboard?level=${tutorLevel}&_t=${Date.now()}`,
+        { cache: "no-store" }
+      );
       if (res.ok) {
         const data = await res.json();
         setMetrics(data.metrics);
