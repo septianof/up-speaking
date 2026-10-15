@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,9 +83,12 @@ export async function GET(request: Request) {
       finalized_at: string
     }
 
-    const studentData = session.students as unknown as StudentItem
-    const evaluations = session.placement_evaluations as unknown as EvalResultItem[]
-    const evaluationData = evaluations?.[0] || null
+    const studentData = normalizeSingleRelation(session.students as unknown as StudentItem | StudentItem[])
+    const evaluationData = normalizeSingleRelation(
+      session.placement_evaluations as unknown as
+        | EvalResultItem
+        | EvalResultItem[]
+    )
 
     return NextResponse.json({
       sessionId: session.id,

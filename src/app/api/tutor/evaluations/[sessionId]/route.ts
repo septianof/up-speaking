@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { uuidSchema } from '@/lib/validators'
+import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,10 +161,19 @@ export async function GET(
       }
     })
 
-    const studentData = session.students as unknown as StudentProfileData
-    const evaluations = session.placement_evaluations as unknown as PlacementEvalData[]
-    const evaluationData = evaluations?.[0]
-    const tutorProfile = evaluationData?.profiles
+    const studentData = normalizeSingleRelation(
+      session.students as unknown as StudentProfileData | StudentProfileData[]
+    )
+    const evaluationData = normalizeSingleRelation(
+      session.placement_evaluations as unknown as
+        | PlacementEvalData
+        | PlacementEvalData[]
+    )
+    const tutorProfile = normalizeSingleRelation(
+      evaluationData?.profiles as unknown as
+        | { full_name: string }
+        | { full_name: string }[]
+    )
 
     return NextResponse.json({
       session: {

@@ -307,7 +307,10 @@ export default function TutorEvaluationsPage() {
         isOpen={Boolean(selectedStudent)}
         student={selectedStudent}
         onClose={() => setSelectedStudent(null)}
-        onSuccess={() => loadData()}
+        onSuccess={() => {
+          loadData();
+          setActiveTab("FINALIZED");
+        }}
       />
     </div>
   );

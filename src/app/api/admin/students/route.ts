@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,7 +87,11 @@ export async function GET(request: Request) {
         (s) => s.status !== 'RESET'
       )
       const latestSession = validSessions[0]
-      const evalData = latestSession?.placement_evaluations?.[0]
+      const evalData = normalizeSingleRelation(
+        latestSession?.placement_evaluations as unknown as
+          | { assigned_level: string; finalized_at: string }
+          | { assigned_level: string; finalized_at: string }[]
+      )
 
       return {
         id: st.id,

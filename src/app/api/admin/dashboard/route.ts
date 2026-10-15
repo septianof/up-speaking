@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,7 +104,9 @@ export async function GET() {
         })
       } else if (latestSession.status === 'FINALIZED') {
         finalizedCount++
-        const evalData = latestSession.placement_evaluations?.[0]
+        const evalData = normalizeSingleRelation(
+          latestSession.placement_evaluations as unknown as EvalItem | EvalItem[]
+        )
         activities.push({
           id: latestSession.id,
           studentName: st.full_name,
