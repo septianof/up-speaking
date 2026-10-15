@@ -84,31 +84,54 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/admin/students", {
-        method: "POST",
+      const url = "/api/admin/students";
+      const method = isEditing ? "PUT" : "POST";
+      const bodyPayload = isEditing
+        ? {
+            id: initialStudent?.id,
+            fullName: fullName.trim(),
+            phoneNumber: phone.trim(),
+            targetLevel,
+          }
+        : {
+            fullName: fullName.trim(),
+            phoneNumber: phone.trim(),
+            targetLevel,
+          };
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          phoneNumber: phone.trim(),
-          targetLevel,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setErrors({ phone: data.error || "Gagal mendaftarkan siswa." });
+        setErrors({
+          phone:
+            data.error ||
+            (isEditing ? "Gagal memperbarui siswa." : "Gagal mendaftarkan siswa."),
+        });
         return;
       }
 
-      setSuccessMessage(`Siswa ${data.student.fullName} berhasil didaftarkan!`);
+      setSuccessMessage(
+        isEditing
+          ? `Data siswa ${data.student.fullName} berhasil diperbarui!`
+          : `Siswa ${data.student.fullName} berhasil didaftarkan!`
+      );
       setTimeout(() => {
         setSuccessMessage(null);
         if (data.student) onSuccess?.(data.student);
         onClose();
       }, 1000);
     } catch {
-      setErrors({ fullName: "Terjadi kendala jaringan saat mendaftarkan siswa." });
+      setErrors({
+        fullName: isEditing
+          ? "Terjadi kendala jaringan saat memperbarui data."
+          : "Terjadi kendala jaringan saat mendaftarkan siswa.",
+      });
     } finally {
       setIsSubmitting(false);
     }
