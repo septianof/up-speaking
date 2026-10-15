@@ -94,14 +94,19 @@ export async function GET(request: Request) {
     const reportRows: ReportRow[] = []
 
     students?.forEach((st) => {
-      // Saring sesi yang bukan RESET
+      // Saring sesi yang bukan RESET dan urutkan sesi terbaru
       const sessions = (st.test_sessions as unknown as ReportSession[]) || []
-      const validSessions = sessions.filter(
-        (s) => s.status !== 'RESET'
-      )
+      const validSessions = sessions
+        .filter((s) => s.status !== 'RESET')
+        .sort((a, b) => new Date(b.started_at || 0).getTime() - new Date(a.started_at || 0).getTime())
       const session = validSessions[0]
 
-      const sessionStatus = session?.status || 'NOT_STARTED'
+      // OPSI A: Laporan Hasil Placement Test hanya memuat siswa yang sudah menyelesaikan ujian
+      if (!session || (session.status !== 'COMPLETED' && session.status !== 'FINALIZED')) {
+        return
+      }
+
+      const sessionStatus = session.status
       if (status !== 'ALL' && sessionStatus !== status) {
         return
       }

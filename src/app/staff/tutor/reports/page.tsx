@@ -129,7 +129,7 @@ export default function TutorReportsPage() {
       {/* Mini Stats Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl bg-surface-white border border-surface-border shadow-card">
-          <p className="text-xs text-text-muted mb-0.5">Total Siswa Binaan</p>
+          <p className="text-xs text-text-muted mb-0.5">Total Siswa Selesai Tes</p>
           <p className="text-2xl font-black text-text-primary">{stats.total}</p>
         </div>
 
@@ -168,7 +168,7 @@ export default function TutorReportsPage() {
               <option value="BEGINNER">Beginner</option>
               <option value="INTERMEDIATE">Intermediate</option>
               <option value="ADVANCED">Advanced</option>
-              <option value="NONE">Belum Ditetapkan</option>
+              <option value="NONE">Menunggu Penilaian</option>
             </select>
           </div>
         </div>
@@ -253,8 +253,8 @@ export default function TutorReportsPage() {
                             {r.assignedLevel}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-text-muted italic">
-                            {r.sessionStatus === "COMPLETED" ? "Menunggu Penilaian" : "Belum Dinilai"}
+                          <span className="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                            Menunggu Penilaian
                           </span>
                         )}
                       </td>
@@ -262,11 +262,7 @@ export default function TutorReportsPage() {
                         <span className="text-xs font-medium text-text-muted">
                           {r.sessionStatus === "FINALIZED"
                             ? "Selesai"
-                            : r.sessionStatus === "COMPLETED"
-                            ? "Perlu Dinilai"
-                            : r.sessionStatus === "IN_PROGRESS"
-                            ? "Sedang Tes"
-                            : "Belum Mulai"}
+                            : "Perlu Dinilai"}
                         </span>
                       </td>
                     </tr>
