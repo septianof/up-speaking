@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { uuidSchema, optionalUuidSchema } from '@/lib/validators'
 
 const submitSchema = z.object({
-  sessionId: z.string().uuid('ID sesi tidak valid'),
+  sessionId: uuidSchema('ID sesi tidak valid'),
   deviceToken: z.string().min(1, 'Device token wajib disertakan'),
   elapsedSeconds: z.number().int().nonnegative(),
   finalResponses: z
     .array(
       z.object({
-        questionId: z.string().uuid(),
-        selectedOptionId: z.string().uuid().nullable(),
+        questionId: uuidSchema('ID butir soal tidak valid'),
+        selectedOptionId: optionalUuidSchema('ID pilihan tidak valid'),
       })
     )
     .optional(),

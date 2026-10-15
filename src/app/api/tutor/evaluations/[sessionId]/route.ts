@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { uuidSchema } from '@/lib/validators'
 
 export const dynamic = 'force-dynamic'
 
 const finalizeEvaluationSchema = z.object({
   assignedLevel: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),
-  tutorId: z.string().uuid().optional(),
+  tutorId: uuidSchema('ID tutor tidak valid').optional(),
   tutorNotes: z.string().optional().nullable(),
 })
 

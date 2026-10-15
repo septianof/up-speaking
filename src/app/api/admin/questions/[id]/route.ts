@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { uuidSchema } from '@/lib/validators'
 
 const updateQuestionSchema = z.object({
   questionText: z.string().min(5, 'Teks pertanyaan minimal 5 karakter'),
@@ -9,7 +10,7 @@ const updateQuestionSchema = z.object({
   options: z
     .array(
       z.object({
-        id: z.string().uuid().optional(),
+        id: uuidSchema('ID opsi tidak valid').optional(),
         optionText: z.string().min(1, 'Teks opsi tidak boleh kosong'),
         isCorrect: z.boolean(),
       })

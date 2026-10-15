@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fisherYatesShuffle } from '@/lib/algorithms/fisher-yates'
+import { uuidSchema } from '@/lib/validators'
 
 const startSchema = z.object({
-  studentId: z.string().uuid('ID siswa tidak valid'),
+  studentId: uuidSchema('ID siswa tidak valid'),
   deviceToken: z.string().min(1, 'Device token wajib disertakan'),
 })
 
