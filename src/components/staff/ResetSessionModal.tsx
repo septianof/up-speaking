@@ -132,7 +132,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
               <span>Perhatian</span>
             </div>
             <p className="leading-relaxed">
-              Seluruh pengerjaan tes siswa saat ini akan dibatalkan dan diulang dari nomor 1. Siswa dapat login kembali menggunakan nomor WhatsApp terdaftar untuk memulai tes baru.
+              Seluruh pengerjaan tes siswa saat ini akan dibatalkan dan diulang dari nomor 1. Siswa dapat login kembali menggunakan nama dan nomor WhatsApp terdaftar untuk memulai tes baru.
             </p>
           </div>
 
