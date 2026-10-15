@@ -15,6 +15,9 @@ interface TutorRegisterModalProps {
   onSuccess?: (tutor: TutorAccount) => void;
 }
 
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|id|io|dev|app|ai|me|info|biz|co|co\.id|ac\.id|sch\.id|go\.id|or\.id|my\.id|web\.id|xyz)$/i;
+
 export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   isOpen,
   onClose,
@@ -59,8 +62,8 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
 
     if (!email.trim()) {
       newErrors.email = "Email tutor wajib diisi";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Format email tidak valid";
+    } else if (!EMAIL_REGEX.test(email.trim())) {
+      newErrors.email = "Format domain email tidak valid (gunakan .com, .id, dsb.)";
     }
 
     // Password hanya wajib saat tambah baru, atau jika diisi saat edit

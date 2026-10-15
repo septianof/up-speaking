@@ -4,12 +4,21 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|id|io|dev|app|ai|me|info|biz|co|co\.id|ac\.id|sch\.id|go\.id|or\.id|my\.id|web\.id|xyz)$/i
+
 const createTutorSchema = z.object({
   fullName: z
     .string()
     .min(2, 'Nama lengkap minimal 2 karakter')
     .max(150, 'Nama terlalu panjang'),
-  email: z.string().email('Format email tidak valid'),
+  email: z
+    .string()
+    .email('Format email tidak valid')
+    .regex(
+      EMAIL_REGEX,
+      'Ekstensi domain email tidak valid (gunakan domain resmi seperti .com, .id, .co.id, dsb.)'
+    ),
   password: z
     .string()
     .min(6, 'Password sementara minimal 6 karakter'),
@@ -22,7 +31,13 @@ const updateTutorSchema = z.object({
     .string()
     .min(2, 'Nama lengkap minimal 2 karakter')
     .max(150, 'Nama terlalu panjang'),
-  email: z.string().email('Format email tidak valid'),
+  email: z
+    .string()
+    .email('Format email tidak valid')
+    .regex(
+      EMAIL_REGEX,
+      'Ekstensi domain email tidak valid (gunakan domain resmi seperti .com, .id, .co.id, dsb.)'
+    ),
   password: z
     .string()
     .min(6, 'Password minimal 6 karakter')
