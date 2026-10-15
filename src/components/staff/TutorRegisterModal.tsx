@@ -27,6 +27,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   const [tempPassword, setTempPassword] = useState("TutorUp2026!");
   const [targetLevel, setTargetLevel] = useState<TargetLevel>("ELEMENTARY");
   const [errors, setErrors] = useState<{ fullName?: string; email?: string; tempPassword?: string }>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -43,6 +44,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
       setTargetLevel("ELEMENTARY");
     }
     setErrors({});
+    setFormError(null);
     setSuccessMessage(null);
   }, [initialTutor, isOpen]);
 
@@ -77,6 +79,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setFormError(null);
     try {
       const res = await fetch("/api/admin/tutors", {
         method: "POST",
@@ -92,7 +95,12 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
       const data = await res.json();
 
       if (!res.ok) {
-        setErrors({ email: data.error || "Gagal membuat akun tutor." });
+        const errorMsg = data.error || "Gagal membuat akun tutor.";
+        if (errorMsg.toLowerCase().includes("email")) {
+          setErrors({ email: errorMsg });
+        } else {
+          setFormError(errorMsg);
+        }
         return;
       }
 
@@ -103,7 +111,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
         onClose();
       }, 1000);
     } catch {
-      setErrors({ email: "Terjadi kendala jaringan saat mendaftarkan tutor." });
+      setFormError("Terjadi kendala jaringan saat mendaftarkan tutor.");
     } finally {
       setIsSubmitting(false);
     }
@@ -138,6 +146,14 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          {formError && (
+            <div
+              role="alert"
+              className="p-3 rounded-xl bg-accent-50 border border-accent-200 text-accent-600 text-xs font-medium"
+            >
+              {formError}
+            </div>
+          )}
           {/* Nama Tutor */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">

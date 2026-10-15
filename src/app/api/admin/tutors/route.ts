@@ -99,7 +99,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Buat user di Supabase Auth melalui Admin Auth API
+    // 2. Validasi ketersediaan SUPABASE_SERVICE_ROLE_KEY
+    if (
+      !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY === process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY belum diatur atau identik dengan anon key.')
+      return NextResponse.json(
+        {
+          error:
+            'Konfigurasi server belum lengkap: SUPABASE_SERVICE_ROLE_KEY belum diatur dengan benar di Environment / Vercel.',
+        },
+        { status: 500 }
+      )
+    }
+
+    // 3. Buat user di Supabase Auth melalui Admin Auth API
     const { data: authUser, error: authError } =
       await supabase.auth.admin.createUser({
         email: email.trim().toLowerCase(),
@@ -112,12 +127,13 @@ export async function POST(request: Request) {
 
     if (authError || !authUser.user) {
       console.error('Error creating user in Supabase Auth:', authError)
+      const errorMsg =
+        authError?.message === 'User not allowed'
+          ? 'Hak akses server ditolak oleh Supabase Auth. Pastikan SUPABASE_SERVICE_ROLE_KEY valid.'
+          : authError?.message || 'Gagal membuat akun autentikasi di Supabase Auth'
+
       return NextResponse.json(
-        {
-          error:
-            authError?.message ||
-            'Gagal membuat akun autentikasi di Supabase Auth',
-        },
+        { error: errorMsg },
         { status: 500 }
       )
     }
