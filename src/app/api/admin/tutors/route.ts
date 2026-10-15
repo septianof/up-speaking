@@ -99,20 +99,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Validasi ketersediaan SUPABASE_SERVICE_ROLE_KEY
-    if (
-      !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_SERVICE_ROLE_KEY === process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    ) {
-      console.error('SUPABASE_SERVICE_ROLE_KEY belum diatur atau identik dengan anon key.')
-      return NextResponse.json(
-        {
-          error:
-            'Konfigurasi server belum lengkap: SUPABASE_SERVICE_ROLE_KEY belum diatur dengan benar di Environment / Vercel.',
-        },
-        { status: 500 }
-      )
-    }
 
     // 3. Buat user di Supabase Auth melalui Admin Auth API
     const { data: authUser, error: authError } =
