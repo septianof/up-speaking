@@ -81,21 +81,35 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
     setIsSubmitting(true);
     setFormError(null);
     try {
-      const res = await fetch("/api/admin/tutors", {
-        method: "POST",
+      const url = "/api/admin/tutors";
+      const method = isEditing ? "PUT" : "POST";
+      const bodyPayload = isEditing
+        ? {
+            id: initialTutor?.id,
+            fullName: fullName.trim(),
+            email: email.trim(),
+            password: tempPassword ? tempPassword.trim() : undefined,
+            role: targetLevel === "ELEMENTARY" ? "TUTOR_ELEMENTARY" : "TUTOR_HIGH_SCHOOL",
+          }
+        : {
+            fullName: fullName.trim(),
+            email: email.trim(),
+            password: tempPassword,
+            role: targetLevel === "ELEMENTARY" ? "TUTOR_ELEMENTARY" : "TUTOR_HIGH_SCHOOL",
+          };
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          email: email.trim(),
-          password: tempPassword,
-          role: targetLevel === "ELEMENTARY" ? "TUTOR_ELEMENTARY" : "TUTOR_HIGH_SCHOOL",
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        const errorMsg = data.error || "Gagal membuat akun tutor.";
+        const errorMsg =
+          data.error ||
+          (isEditing ? "Gagal memperbarui akun tutor." : "Gagal membuat akun tutor.");
         if (errorMsg.toLowerCase().includes("email")) {
           setErrors({ email: errorMsg });
         } else {
@@ -104,14 +118,22 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
         return;
       }
 
-      setSuccessMessage(`Akun tutor untuk ${data.tutor.fullName} berhasil dibuat!`);
+      setSuccessMessage(
+        isEditing
+          ? `Akun pengajar ${data.tutor.fullName} berhasil diperbarui!`
+          : `Akun tutor untuk ${data.tutor.fullName} berhasil dibuat!`
+      );
       setTimeout(() => {
         setSuccessMessage(null);
         if (data.tutor) onSuccess?.(data.tutor);
         onClose();
       }, 1000);
     } catch {
-      setFormError("Terjadi kendala jaringan saat mendaftarkan tutor.");
+      setFormError(
+        isEditing
+          ? "Terjadi kendala jaringan saat memperbarui data tutor."
+          : "Terjadi kendala jaringan saat mendaftarkan tutor."
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -16,6 +16,21 @@ const createTutorSchema = z.object({
   role: z.enum(['TUTOR_ELEMENTARY', 'TUTOR_HIGH_SCHOOL']),
 })
 
+const updateTutorSchema = z.object({
+  id: z.string().min(1, 'ID tutor wajib disertakan'),
+  fullName: z
+    .string()
+    .min(2, 'Nama lengkap minimal 2 karakter')
+    .max(150, 'Nama terlalu panjang'),
+  email: z.string().email('Format email tidak valid'),
+  password: z
+    .string()
+    .min(6, 'Password minimal 6 karakter')
+    .optional()
+    .or(z.literal('')),
+  role: z.enum(['TUTOR_ELEMENTARY', 'TUTOR_HIGH_SCHOOL']),
+})
+
 export async function GET() {
   try {
     const supabase = createAdminClient()
@@ -163,6 +178,120 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     console.error('Unexpected error in admin tutors POST:', err)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan internal server' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const parsed = updateTutorSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Input perbaruan tutor tidak valid' },
+        { status: 400 }
+      )
+    }
+
+    const { id, fullName, email, password, role } = parsed.data
+    const supabase = createAdminClient()
+
+    // 1. Cek profil tutor saat ini
+    const { data: currentProfile, error: currentError } = await supabase
+      .from('profiles')
+      .select('id, email, role')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (currentError || !currentProfile) {
+      return NextResponse.json(
+        { error: 'Akun pengajar tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    // 2. Cek apakah email sudah dipakai oleh akun lain di tabel profiles
+    const { data: existingEmail } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email.trim().toLowerCase())
+      .neq('id', id)
+      .maybeSingle()
+
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: 'Email ini sudah terdaftar untuk akun pengajar lain' },
+        { status: 409 }
+      )
+    }
+
+    // 3. Perbarui akun di Supabase Auth
+    const authUpdatePayload: {
+      email?: string
+      password?: string
+      user_metadata?: { full_name: string }
+    } = {
+      email: email.trim().toLowerCase(),
+      user_metadata: { full_name: fullName.trim() },
+    }
+
+    if (password && password.trim().length >= 6) {
+      authUpdatePayload.password = password.trim()
+    }
+
+    const { error: authError } = await supabase.auth.admin.updateUserById(
+      id,
+      authUpdatePayload
+    )
+
+    if (authError) {
+      console.error('Error updating user in Supabase Auth:', authError)
+      return NextResponse.json(
+        { error: authError.message || 'Gagal memperbarui akun autentikasi di Supabase Auth' },
+        { status: 500 }
+      )
+    }
+
+    // 4. Perbarui data di tabel profiles
+    const { data: updatedProfile, error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        role,
+      })
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    if (profileError || !updatedProfile) {
+      console.error('Error updating profiles:', profileError)
+      return NextResponse.json(
+        { error: 'Gagal memperbarui data profil akun pengajar' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      tutor: {
+        id: updatedProfile.id,
+        fullName: updatedProfile.full_name,
+        email: updatedProfile.email,
+        role: updatedProfile.role,
+        targetLevel:
+          updatedProfile.role === 'TUTOR_ELEMENTARY'
+            ? 'ELEMENTARY'
+            : 'HIGH_SCHOOL',
+        createdAt: updatedProfile.created_at,
+      },
+    })
+  } catch (err) {
+    console.error('Unexpected error in admin tutors PUT:', err)
     return NextResponse.json(
       { error: 'Terjadi kesalahan internal server' },
       { status: 500 }
