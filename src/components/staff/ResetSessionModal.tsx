@@ -13,21 +13,12 @@ interface ResetSessionModalProps {
   onSuccess?: (updated: StudentRecord) => void;
 }
 
-const COMMON_REASONS = [
-  "Kendala teknis / jaringan terputus saat pengerjaan",
-  "Perangkat mati mendadak / browser tertutup",
-  "Siswa salah klik selesai / butuh pengulangan",
-  "Lainnya (alasan khusus)",
-];
-
 export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
   student,
   isOpen,
   onClose,
   onSuccess,
 }) => {
-  const [selectedReason, setSelectedReason] = useState(COMMON_REASONS[0]);
-  const [customReason, setCustomReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -35,16 +26,10 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
 
   const handleReset = async () => {
     setIsSubmitting(true);
-    const finalReason =
-      selectedReason === "Lainnya (alasan khusus)" && customReason.trim()
-        ? customReason.trim()
-        : selectedReason;
-
     try {
       const res = await fetch(`/api/admin/students/${student.id}/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: finalReason }),
       });
 
       const data = await res.json();
@@ -59,8 +44,6 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
 
       setTimeout(() => {
         setSuccessMessage(null);
-        setSelectedReason(COMMON_REASONS[0]);
-        setCustomReason("");
         onSuccess?.(student);
         onClose();
       }, 1200);
@@ -68,6 +51,23 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
       alert("Terjadi kendala jaringan saat melakukan reset sesi.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case "NOT_STARTED":
+        return "Belum Mulai";
+      case "IN_PROGRESS":
+        return "Sedang Tes";
+      case "COMPLETED":
+        return "Menunggu Evaluasi";
+      case "FINALIZED":
+        return "Selesai & Dinilai";
+      case "RESET":
+        return "Direset";
+      default:
+        return status;
     }
   };
 
@@ -80,7 +80,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
           onClose();
         }
       }}
-      title="Konfirmasi Soft Reset Sesi Tes"
+      title="Reset Sesi Siswa"
       maxWidth="md"
     >
       {successMessage ? (
@@ -90,88 +90,53 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
           </div>
           <p className="text-base font-semibold text-text-primary">{successMessage}</p>
           <p className="text-xs text-text-muted mt-1">
-            Status siswa telah kembali ke Belum Mulai (NOT_STARTED) dan siap mengerjakan ulang.
+            Status siswa telah kembali ke Belum Mulai dan siap mengerjakan ulang.
           </p>
         </div>
       ) : (
         <div className="space-y-4 pt-1">
           {/* Detail Ringkas Siswa */}
-          <div className="p-3.5 rounded-xl bg-surface-subtle border border-surface-border text-xs space-y-1.5">
+          <div className="p-3.5 rounded-xl bg-surface-subtle border border-surface-border text-xs space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Nama Siswa:</span>
+              <span className="text-text-muted">Nama siswa:</span>
               <span className="font-bold text-text-primary">{student.fullName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">No. WhatsApp / HP:</span>
+              <span className="text-text-muted">Nomor WhatsApp:</span>
               <span className="font-mono text-text-primary">{student.phone}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-muted">Jenjang:</span>
-              <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded border ${
-                student.targetLevel === "ELEMENTARY"
-                  ? "text-primary-700 bg-primary-50 border-primary-100"
-                  : "text-text-secondary bg-surface-subtle border-surface-border"
-              }`}>
+              <span
+                className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded border ${
+                  student.targetLevel === "ELEMENTARY"
+                    ? "text-primary-700 bg-primary-50 border-primary-100"
+                    : "text-text-secondary bg-surface-subtle border-surface-border"
+                }`}
+              >
                 {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Status Saat Ini:</span>
-              <span className="font-semibold text-text-primary">{student.status}</span>
+              <span className="text-text-muted">Status saat ini:</span>
+              <span className="font-semibold text-text-primary">
+                {formatStatus(student.status)}
+              </span>
             </div>
           </div>
 
-          {/* Peringatan Audit Trail */}
-          <div className="p-3.5 rounded-xl bg-accent-50 border border-accent-200 text-xs text-accent-700 space-y-1">
+          {/* Kotak Peringatan Bersih & Manusiawi */}
+          <div className="p-3.5 rounded-xl bg-accent-50/70 border border-accent-200/80 text-xs text-accent-700 space-y-1">
             <div className="flex items-center gap-1.5 font-bold text-accent-700">
               <AlertTriangle className="h-4 w-4 shrink-0 text-accent-500" />
-              <span>Ketentuan Soft Reset Sesi (Audit Trail)</span>
+              <span>Perhatian</span>
             </div>
             <p className="leading-relaxed">
-              Tindakan ini akan mengarsipkan riwayat pengerjaan sebelumnya dan menerbitkan sesi baru yang bersih (NOT_STARTED). Siswa dapat masuk kembali menggunakan nomor HP untuk mengulang tes dari awal.
+              Seluruh pengerjaan tes siswa saat ini akan dibatalkan dan diulang dari nomor 1. Siswa dapat login kembali menggunakan nomor WhatsApp terdaftar untuk memulai tes baru.
             </p>
           </div>
 
-          {/* Pilihan Alasan Reset */}
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
-              Alasan reset sesi <span className="text-accent-500">*</span>
-            </label>
-            <div className="space-y-2">
-              {COMMON_REASONS.map((reason) => (
-                <label
-                  key={reason}
-                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
-                    selectedReason === reason
-                      ? "border-primary-500 bg-primary-50/50 text-text-primary font-medium"
-                      : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="resetReason"
-                    value={reason}
-                    checked={selectedReason === reason}
-                    onChange={(e) => setSelectedReason(e.target.value)}
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span>{reason}</span>
-                </label>
-              ))}
-            </div>
-
-            {selectedReason === "Lainnya (alasan khusus)" && (
-              <textarea
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Tuliskan catatan spesifik alasan reset..."
-                rows={2}
-                className="mt-2 w-full rounded-xl border border-surface-border p-2.5 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
-              />
-            )}
-          </div>
-
-          {/* Action Buttons */}
+          {/* Tombol Aksi */}
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-surface-border">
             <Button
               type="button"
@@ -191,7 +156,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
               className="gap-2"
             >
               <RotateCcw className="h-4 w-4" />
-              Reset Sesi Siswa
+              Ya, Reset Sesi
             </Button>
           </div>
         </div>
