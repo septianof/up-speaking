@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   UserPlus,
   GraduationCap,
   HelpCircle,
   FileSpreadsheet,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
 import { StudentRegisterModal } from "@/components/staff/StudentRegisterModal";
 import { TargetLevel, SessionStatus } from "@/types/student";
+import { fetcher } from "@/lib/fetcher";
 
 interface RecentStudentItem {
   id: string;
@@ -23,44 +26,47 @@ interface RecentStudentItem {
   createdAt: string;
 }
 
+interface AdminDashboardResponse {
+  metrics: {
+    total?: number;
+    totalStudents?: number;
+    notStarted?: number;
+    notStartedCount?: number;
+    inProgress?: number;
+    inProgressCount?: number;
+    completed?: number;
+    completedCount?: number;
+    finalized?: number;
+    finalizedCount?: number;
+  };
+  recentStudents: RecentStudentItem[];
+}
+
 export default function AdminDashboardPage() {
   const staff = getActiveStaff();
-  const [metrics, setMetrics] = useState({
-    total: 0,
-    notStarted: 0,
-    inProgress: 0,
-    finished: 0,
-  });
-  const [recentStudents, setRecentStudents] = useState<RecentStudentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("/api/admin/dashboard");
-      if (res.ok) {
-        const data = await res.json();
-        setMetrics({
-          total: data.metrics.total ?? data.metrics.totalStudents ?? 0,
-          notStarted: data.metrics.notStarted ?? data.metrics.notStartedCount ?? 0,
-          inProgress: data.metrics.inProgress ?? data.metrics.inProgressCount ?? 0,
-          finished:
-            (data.metrics.completed ?? data.metrics.completedCount ?? 0) +
-            (data.metrics.finalized ?? data.metrics.finalizedCount ?? 0),
-        });
-        setRecentStudents(data.recentStudents || []);
-      }
-    } catch (err) {
-      console.error("Error loading admin dashboard:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data, isLoading, isValidating, mutate } = useSWR<AdminDashboardResponse>(
+    "/api/admin/dashboard",
+    fetcher,
+    { revalidateOnFocus: true }
+  );
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const metrics = useMemo(() => {
+    if (!data?.metrics) {
+      return { total: 0, notStarted: 0, inProgress: 0, finished: 0 };
+    }
+    return {
+      total: data.metrics.total ?? data.metrics.totalStudents ?? 0,
+      notStarted: data.metrics.notStarted ?? data.metrics.notStartedCount ?? 0,
+      inProgress: data.metrics.inProgress ?? data.metrics.inProgressCount ?? 0,
+      finished:
+        (data.metrics.completed ?? data.metrics.completedCount ?? 0) +
+        (data.metrics.finalized ?? data.metrics.finalizedCount ?? 0),
+    };
+  }, [data]);
+
+  const recentStudents = data?.recentStudents || [];
 
   const getStatusBadge = (status: SessionStatus) => {
     switch (status) {
@@ -87,7 +93,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="pb-4 border-b border-surface-border">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
             Dashboard Utama Admin
@@ -95,6 +101,19 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-text-muted mt-1">
             Selamat datang kembali, <strong>{staff?.fullName || "Administrator"}</strong>. Berikut ringkasan aktivitas tes hari ini.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isValidating}
+            title="Segarkan data terbaru dari database"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+            <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+          </button>
         </div>
       </div>
 
@@ -265,7 +284,7 @@ export default function AdminDashboardPage() {
       <StudentRegisterModal
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
-        onSuccess={() => loadData()}
+        onSuccess={() => mutate()}
       />
     </div>
   );

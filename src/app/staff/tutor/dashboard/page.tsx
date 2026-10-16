@@ -1,66 +1,82 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   Award,
   CheckCircle2,
   HelpCircle,
   FileSpreadsheet,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { getActiveStaff } from "@/lib/staff-session";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
 import { TargetLevel } from "@/types/student";
 import { StudentRecord } from "@/lib/mock-data";
+import { fetcher } from "@/lib/fetcher";
+
+interface TutorDashboardResponse {
+  metrics: {
+    total: number;
+    needEvaluation: number;
+    finalized: number;
+    inProgress: number;
+  };
+  pendingStudents: StudentRecord[];
+}
 
 export default function TutorDashboardPage() {
   const staff = getActiveStaff();
   const tutorLevel: TargetLevel = staff?.targetLevel || "ELEMENTARY";
 
-  const [metrics, setMetrics] = useState({
-    total: 0,
-    needEvaluation: 0,
-    finalized: 0,
-    inProgress: 0,
-  });
-  const [pendingStudents, setPendingStudents] = useState<StudentRecord[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(
-        `/api/tutor/dashboard?level=${tutorLevel}&_t=${Date.now()}`,
-        { cache: "no-store" }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setMetrics(data.metrics);
-        setPendingStudents(data.pendingStudents || []);
+  const { data, isLoading, isValidating, mutate } = useSWR<TutorDashboardResponse>(
+    `/api/tutor/dashboard?level=${tutorLevel}`,
+    fetcher,
+    { revalidateOnFocus: true }
+  );
+
+  const metrics = useMemo(() => {
+    return (
+      data?.metrics || {
+        total: 0,
+        needEvaluation: 0,
+        finalized: 0,
+        inProgress: 0,
       }
-    } catch (err) {
-      console.error("Error loading tutor dashboard:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tutorLevel]);
+    );
+  }, [data]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const pendingStudents = data?.pendingStudents || [];
 
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="pb-4 border-b border-surface-border">
-        <h1 className="text-2xl font-black text-text-primary">
-          Dashboard Tutor
-        </h1>
-        <p className="text-sm text-text-muted mt-1">
-          Selamat datang, <strong>{staff?.fullName || "Tutor"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
+        <div>
+          <h1 className="text-2xl font-black text-text-primary">
+            Dashboard Tutor
+          </h1>
+          <p className="text-sm text-text-muted mt-1">
+            Selamat datang, <strong>{staff?.fullName || "Tutor"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isValidating}
+            title="Segarkan data terbaru dari database"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+            <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+          </button>
+        </div>
       </div>
 
       {/* 3 Kartu Metrik Jenjang */}
@@ -222,7 +238,7 @@ export default function TutorDashboardPage() {
         isOpen={Boolean(selectedStudent)}
         student={selectedStudent}
         onClose={() => setSelectedStudent(null)}
-        onSuccess={() => loadData()}
+        onSuccess={() => mutate()}
       />
     </div>
   );

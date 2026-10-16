@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import {
   GraduationCap,
   UserPlus,
@@ -8,13 +9,16 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
 import { TutorRegisterModal } from "@/components/staff/TutorRegisterModal";
 import { TutorAccount } from "@/lib/mock-tutors";
 import { TargetLevel } from "@/types/student";
+import { fetcher } from "@/lib/fetcher";
 
 interface ApiTutor {
   id: string;
@@ -26,43 +30,40 @@ interface ApiTutor {
 }
 
 export default function AdminTutorsPage() {
-  const [tutors, setTutors] = useState<TutorAccount[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [editTargetTutor, setEditTargetTutor] = useState<TutorAccount | null>(null);
   const [deleteTargetTutor, setDeleteTargetTutor] = useState<TutorAccount | null>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  // SWR: Otomatis cache-first dengan revalidasi fokus
+  const { data, isLoading, isValidating, mutate } = useSWR<{ tutors: ApiTutor[] }>(
+    "/api/admin/tutors",
+    fetcher,
+    { revalidateOnFocus: true }
+  );
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("/api/admin/tutors");
-      if (res.ok) {
-        const data = await res.json();
-        const mapped = ((data.tutors || []) as ApiTutor[]).map((t: ApiTutor) => ({
-          id: t.id,
-          fullName: t.fullName,
-          email: t.email,
-          targetLevel: t.targetLevel,
-          evaluationCount: t.evaluationCount || 0,
-          createdAt: t.createdAt,
-          isActive: true,
-          isDeleted: false,
-        }));
-        setTutors(mapped);
-      }
-    } catch (err) {
-      console.error("Error loading tutors:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const tutors = useMemo<TutorAccount[]>(() => {
+    return ((data?.tutors || []) as ApiTutor[]).map((t: ApiTutor) => ({
+      id: t.id,
+      fullName: t.fullName,
+      email: t.email,
+      targetLevel: t.targetLevel,
+      evaluationCount: t.evaluationCount || 0,
+      createdAt: t.createdAt,
+      isActive: true,
+      isDeleted: false,
+    }));
+  }, [data]);
 
+  // Reset pagination ke halaman 1 saat filter atau pencarian berubah
   useEffect(() => {
-    loadData();
-  }, []);
+    setCurrentPage(1);
+  }, [searchQuery, selectedLevel]);
 
   const filteredTutors = useMemo(() => {
     return tutors.filter((tut) => {
@@ -77,6 +78,13 @@ export default function AdminTutorsPage() {
     });
   }, [tutors, searchQuery, selectedLevel]);
 
+  // Hitung total halaman dan data tutor terpaginasi
+  const totalPages = Math.max(1, Math.ceil(filteredTutors.length / itemsPerPage));
+  const paginatedTutors = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredTutors.slice(start, start + itemsPerPage);
+  }, [filteredTutors, currentPage, itemsPerPage]);
+
   const handleDeleteConfirm = async () => {
     if (!deleteTargetTutor) return;
     try {
@@ -85,7 +93,7 @@ export default function AdminTutorsPage() {
       });
       if (res.ok) {
         setDeleteTargetTutor(null);
-        loadData();
+        mutate();
       } else {
         const data = await res.json();
         alert(data.error || "Gagal menghapus akun pengajar.");
@@ -136,19 +144,32 @@ export default function AdminTutorsPage() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          onClick={() => {
-            setEditTargetTutor(null);
-            setIsRegisterOpen(true);
-          }}
-          className="shrink-0 gap-2"
-        >
-          <UserPlus className="h-4 w-4" />
-          Tambah Akun Tutor
-        </Button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isValidating}
+            title="Segarkan data terbaru dari database"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+            <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+          </button>
+
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => {
+              setEditTargetTutor(null);
+              setIsRegisterOpen(true);
+            }}
+            className="shrink-0 gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Tambah Akun Tutor
+          </Button>
+        </div>
       </div>
 
       {/* Filter and Search */}
@@ -239,51 +260,70 @@ export default function AdminTutorsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredTutors.map((tut, idx) => (
-                  <tr key={tut.id} className="hover:bg-surface-subtle/40 transition-colors">
-                    <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
-                      {idx + 1}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-text-primary">
-                      {tut.fullName}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
-                      {tut.email}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {getLevelBadge(tut.targetLevel)}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-text-muted">
-                      {formatDate(tut.createdAt)}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {/* Edit Tutor */}
-                        <button
-                          type="button"
-                          onClick={() => setEditTargetTutor(tut)}
-                          className="p-1.5 rounded-lg text-text-muted hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors"
-                          title="Edit profil atau jenjang tutor"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
+                paginatedTutors.map((tut, idx) => {
+                  const rowNum = (currentPage - 1) * itemsPerPage + idx + 1;
 
-                        {/* Hapus Tutor (Soft Delete) */}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTargetTutor(tut)}
-                          className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 border border-transparent hover:border-accent-200 transition-colors"
-                          title="Hapus akun tutor"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                  return (
+                    <tr key={tut.id} className="hover:bg-surface-subtle/40 transition-colors">
+                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
+                        {rowNum}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-text-primary">
+                        {tut.fullName}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                        {tut.email}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {getLevelBadge(tut.targetLevel)}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-text-muted">
+                        {formatDate(tut.createdAt)}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {/* Edit Tutor */}
+                          <button
+                            type="button"
+                            onClick={() => setEditTargetTutor(tut)}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors"
+                            title="Edit profil atau jenjang tutor"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+
+                          {/* Hapus Tutor (Soft Delete) */}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTargetTutor(tut)}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 border border-transparent hover:border-accent-200 transition-colors"
+                            title="Hapus akun tutor"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="border-t border-surface-border bg-surface-white px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredTutors.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(limit) => {
+              setItemsPerPage(limit);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
 
@@ -295,7 +335,7 @@ export default function AdminTutorsPage() {
           setIsRegisterOpen(false);
           setEditTargetTutor(null);
         }}
-        onSuccess={() => loadData()}
+        onSuccess={() => mutate()}
       />
 
       {/* Modal Hapus Akun Tutor */}
