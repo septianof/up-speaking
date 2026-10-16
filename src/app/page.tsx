@@ -9,7 +9,6 @@ import { Mascot } from "@/components/student/Mascot";
 import { getActiveSession } from "@/lib/session";
 import { SITE_CONFIG } from "@/lib/site-config";
 import {
-  Sparkles,
   BookOpen,
   Timer,
   Shuffle,
@@ -281,17 +280,6 @@ export default function Home() {
         <section id="hero" className="w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 flex flex-col-reverse md:flex-row items-center justify-between gap-10 scroll-mt-24">
           {/* Teks Hero */}
           <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-800 mb-5 border border-sun-300 shadow-xs"
-            >
-              <Sparkles className="w-4 h-4 text-amber-600 animate-spin" style={{ animationDuration: "6s" }} />
-              <span>Placement Test Bahasa Inggris 🌟</span>
-            </motion.div>
-
             {/* Judul Utama + Deskripsi + Tombol CTA */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
