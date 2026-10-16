@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,11 @@ const tutorQuestionSchema = z.object({
 
 export async function GET(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN', 'TUTOR'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const { searchParams } = new URL(request.url)
     const level = searchParams.get('level') || 'ELEMENTARY'
     const search = searchParams.get('search') || ''
@@ -105,6 +111,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN', 'TUTOR'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const body = await request.json()
     const parsed = tutorQuestionSchema.safeParse(body)
 

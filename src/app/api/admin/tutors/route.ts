@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +49,11 @@ const updateTutorSchema = z.object({
 
 export async function GET() {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const supabase = createAdminClient()
 
     // Ambil seluruh profil staf dengan peran Tutor
@@ -102,6 +108,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const body = await request.json()
     const parsed = createTutorSchema.safeParse(body)
 
@@ -145,7 +156,7 @@ export async function POST(request: Request) {
       console.error('Error creating user in Supabase Auth:', authError)
       const errorMsg =
         authError?.message === 'User not allowed'
-          ? 'Hak akses server ditolak oleh Supabase Auth. Pastikan SUPABASE_SERVICE_ROLE_KEY valid.'
+          ? 'Hak akses server ditolak oleh sistem autentikasi.'
           : authError?.message || 'Gagal membuat akun autentikasi di Supabase Auth'
 
       return NextResponse.json(
@@ -202,6 +213,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const body = await request.json()
     const parsed = updateTutorSchema.safeParse(body)
 
@@ -316,6 +332,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 

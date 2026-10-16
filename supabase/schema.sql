@@ -89,3 +89,25 @@ CREATE TABLE IF NOT EXISTS public.placement_evaluations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_placement_evaluations_session ON public.placement_evaluations(session_id);
+
+-- ==============================================================================
+-- 9. Row Level Security (RLS) - Kebijakan Keamanan Berlapis (PRD / Tech Spec Section 8)
+-- Mengunci akses langsung PostgREST publik (Anon Key); seluruh akses data
+-- wajib dikelola melalui Route Handlers server Next.js (Service Role Key).
+-- ==============================================================================
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.test_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.question_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.test_responses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.placement_evaluations ENABLE ROW LEVEL SECURITY;
+
+-- Kebijakan profil: Staf terautentikasi dapat melihat profil mereka sendiri
+CREATE POLICY "Staff can view own profile"
+    ON public.profiles
+    FOR SELECT
+    TO authenticated
+    USING (auth.uid() = id);
+

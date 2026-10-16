@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const studentId = params.id
     if (!studentId) {
       return NextResponse.json(

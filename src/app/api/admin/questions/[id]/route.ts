@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 import { uuidSchema } from '@/lib/validators'
 
 const updateQuestionSchema = z.object({
@@ -28,6 +29,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const questionId = params.id
     const body = await request.json()
     const parsed = updateQuestionSchema.safeParse(body)
@@ -115,6 +121,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const questionId = params.id
     const supabase = createAdminClient()
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 import { uuidSchema } from '@/lib/validators'
 import { normalizeSingleRelation } from '@/lib/utils'
 
@@ -20,6 +20,11 @@ export async function GET(
   { params }: { params: { sessionId: string } }
 ) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN', 'TUTOR'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const sessionId = params.sessionId
     if (!sessionId) {
       return NextResponse.json(
@@ -217,6 +222,11 @@ export async function POST(
   { params }: { params: { sessionId: string } }
 ) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN', 'TUTOR'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const sessionId = params.sessionId
     const body = await request.json()
     const parsed = finalizeEvaluationSchema.safeParse(body)
@@ -229,37 +239,13 @@ export async function POST(
     }
 
     const { assignedLevel, tutorNotes } = parsed.data
-    let tutorId = parsed.data.tutorId
+    // Tentukan tutorId secara aman: Jika Admin, boleh menentukan tutorId spesifik; jika Tutor, wajib ID miliknya sendiri
+    const tutorId =
+      auth.profile.role === 'ADMIN' && parsed.data.tutorId
+        ? parsed.data.tutorId
+        : auth.profile.id
 
     const supabase = createAdminClient()
-
-    // Jika tutorId tidak dikirim dari body, coba baca dari session cookie
-    if (!tutorId) {
-      const serverClient = createClient()
-      const {
-        data: { user },
-      } = await serverClient.auth.getUser()
-
-      if (user) {
-        tutorId = user.id
-      } else {
-        // Fallback default tutor jika testing
-        const { data: defaultTutor } = await supabase
-          .from('profiles')
-          .select('id')
-          .in('role', ['TUTOR_ELEMENTARY', 'TUTOR_HIGH_SCHOOL'])
-          .limit(1)
-          .single()
-        tutorId = defaultTutor?.id
-      }
-    }
-
-    if (!tutorId) {
-      return NextResponse.json(
-        { error: 'Identitas tutor penilai tidak terdeteksi' },
-        { status: 401 }
-      )
-    }
 
     // 1. Upsert ke tabel placement_evaluations
     const { data: evaluation, error: evalError } = await supabase

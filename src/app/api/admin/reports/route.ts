@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const { searchParams } = new URL(request.url)
     const level = searchParams.get('level') || 'ALL'
     const status = searchParams.get('status') || 'ALL'

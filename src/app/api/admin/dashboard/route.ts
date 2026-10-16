@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
 import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    const auth = await verifyStaffAuth(['ADMIN'])
+    if (!auth.isAuthorized) {
+      return auth.errorResponse
+    }
+
     const supabase = createAdminClient()
 
     // 1. Ambil seluruh data siswa dan status sesi mereka
