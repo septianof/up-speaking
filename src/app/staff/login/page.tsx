@@ -122,7 +122,7 @@ export default function StaffLoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                Email Staf <span className="text-accent-500">*</span>
+                Email <span className="text-accent-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted">
@@ -134,7 +134,7 @@ export default function StaffLoginPage() {
                   disabled={isLoading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@upspeaking.com atau tutor@upspeaking.com"
+                  placeholder="admin@upspeaking.com"
                   className="w-full h-11 pl-10 pr-3.5 rounded-btn bg-surface-white border border-surface-border text-text-primary text-sm transition-all focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-100 placeholder:text-text-disabled"
                 />
               </div>
