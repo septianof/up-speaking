@@ -13,7 +13,6 @@ import {
   Timer,
   Shuffle,
   ShieldCheck,
-  ArrowRight,
   HelpCircle,
   ChevronDown,
   Menu,
@@ -202,7 +201,6 @@ export default function Home() {
                 className="text-xs sm:text-sm px-3.5 sm:px-5 h-9 sm:h-10 shadow-[0_3px_0_0_#B91C1C]"
               >
                 <span>Mulai Tes</span>
-                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
               </Button>
             </motion.div>
 
@@ -258,7 +256,6 @@ export default function Home() {
                   className="w-full text-sm h-10 justify-center shadow-[0_3px_0_0_#B91C1C]"
                 >
                   <span>Mulai Tes Sekarang</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
             </motion.div>
@@ -310,10 +307,9 @@ export default function Home() {
                   size="xl"
                   variant="kid"
                   onClick={() => setIsModalOpen(true)}
-                  className="w-full sm:w-auto px-9 text-lg gap-2.5 shadow-[0_6px_0_0_#B91C1C]"
+                  className="w-full sm:w-auto px-9 text-lg shadow-[0_6px_0_0_#B91C1C]"
                 >
                   <span>Mulai Tes Sekarang</span>
-                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
@@ -604,7 +600,6 @@ export default function Home() {
               className="px-7 sm:px-9 text-sm sm:text-base shadow-[0_5px_0_0_#B91C1C] max-w-xs w-full sm:w-auto"
             >
               <span>Mulai Tes Sekarang</span>
-              <ArrowRight className="w-5 h-5 ml-1 shrink-0" />
             </Button>
           </motion.div>
         </section>
