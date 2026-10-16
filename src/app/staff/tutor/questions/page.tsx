@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { QuestionFormModal } from "@/components/staff/QuestionFormModal";
@@ -104,23 +105,28 @@ export default function TutorQuestionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Bank Soal Jenjang {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+            Bank Soal
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola dan tambahkan butir soal dinamis khusus untuk jenjang yang Anda ampu sebagai Tutor.
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          onClick={() => setIsFormOpen(true)}
-          className="shrink-0 gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah Soal {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          <Badge variant="primary" size="md">
+            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+          </Badge>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => setIsFormOpen(true)}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah Butir Soal
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -158,7 +164,7 @@ export default function TutorQuestionsPage() {
         ) : questions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-surface-white border border-surface-border shadow-card text-text-muted">
             <p className="font-semibold text-text-primary text-sm mb-1">Belum ada butir soal aktif pada jenjang Anda.</p>
-            <p className="text-xs text-text-muted mb-4">Tambahkan butir soal baru khusus jenjang bimbingan Anda.</p>
+            <p className="text-xs text-text-muted mb-4">Tambahkan butir soal baru khusus jenjang Anda.</p>
             <Button
               type="button"
               variant="primary"
@@ -167,7 +173,7 @@ export default function TutorQuestionsPage() {
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
-              Tambah Soal {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+              Tambah Butir Soal
             </Button>
           </div>
         ) : filteredQuestions.length === 0 ? (

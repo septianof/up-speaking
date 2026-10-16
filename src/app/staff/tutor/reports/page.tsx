@@ -91,15 +91,18 @@ export default function TutorReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Laporan Hasil Placement Test {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+            Laporan &amp; Rekapitulasi
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Rekapitulasi penetapan level kelas siswa khusus untuk jenjang binaan Anda.
+            Rekapitulasi penetapan level kelas siswa khusus untuk jenjang Anda.
           </p>
         </div>
 
         {/* Action Bar Ekspor */}
         <div className="flex items-center gap-2.5 shrink-0">
+          <Badge variant="primary" size="md">
+            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+          </Badge>
           <Button
             type="button"
             variant="outline"

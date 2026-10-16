@@ -58,10 +58,10 @@ export default function TutorDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Dashboard Pengajar
+            Dashboard Tutor
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Selamat datang, <strong>{staff?.fullName || "Tutor Pengajar"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
+            Selamat datang, <strong>{staff?.fullName || "Tutor"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export default function TutorDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-bold text-text-primary">
-              Evaluasi &amp; Penilaian
+              Penilaian Siswa
             </p>
             <p className="text-xs text-text-muted">Buka lembar pengerjaan siswa</p>
           </div>
@@ -123,9 +123,9 @@ export default function TutorDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-bold text-text-primary">
-              Bank Soal Jenjang
+              Bank Soal
             </p>
-            <p className="text-xs text-text-muted">Kurasi soal jenjang binaan</p>
+            <p className="text-xs text-text-muted">Kurasi paket butir soal</p>
           </div>
         </Link>
 

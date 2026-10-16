@@ -204,7 +204,7 @@ export default function ResultPage() {
               transition={{ delay: 0.5, duration: 0.3 }}
               className="flex items-center justify-between px-4 py-3 rounded-2xl bg-sky-soft border border-primary-100 text-xs sm:text-sm mb-6"
             >
-              <span className="text-text-muted">Jenjang Pendidikan</span>
+              <span className="text-text-muted">Jenjang</span>
               <span className="font-bold text-text-primary">
                 {session.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </span>

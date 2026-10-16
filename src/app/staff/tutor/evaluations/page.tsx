@@ -127,7 +127,7 @@ export default function TutorEvaluationsPage() {
 
         <div className="flex items-center gap-2">
           <Badge variant="primary" size="md">
-            Jenjang Binaan: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary" : "High School"}
+            Jenjang: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </Badge>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function TutorEvaluationsPage() {
                               : "bg-surface-subtle text-text-primary border border-surface-border hover:bg-slate-200"
                           }`}
                         >
-                          {activeTab === "PENDING" ? "Buka Evaluasi" : "Ubah Evaluasi"}
+                          {activeTab === "PENDING" ? "Evaluasi" : "Ubah Evaluasi"}
                         </button>
                       </td>
                     </tr>

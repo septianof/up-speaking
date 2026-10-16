@@ -199,7 +199,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
           {/* Pilihan Jenjang */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Jenjang sasaran <span className="text-accent-500">*</span>
+              Jenjang <span className="text-accent-500">*</span>
             </label>
             <div className="flex gap-2">
               <button

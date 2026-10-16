@@ -200,7 +200,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
               </p>
             </div>
             <div>
-              <p className="text-xs text-text-muted">Jenjang Ujian</p>
+              <p className="text-xs text-text-muted">Jenjang</p>
               <Badge variant="primary" size="sm" className="mt-0.5">
                 {student.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </Badge>

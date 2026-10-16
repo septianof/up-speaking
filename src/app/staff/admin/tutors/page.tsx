@@ -132,7 +132,7 @@ export default function AdminTutorsPage() {
             Kelola Akun Tutor
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Daftarkan pengajar baru, edit jenjang penugasan, atau hapus akun tutor (soft delete).
+            Daftarkan tutor baru, perbarui jenjang penugasan, atau kelola akun tutor.
           </p>
         </div>
 
@@ -273,7 +273,7 @@ export default function AdminTutorsPage() {
                           type="button"
                           onClick={() => setDeleteTargetTutor(tut)}
                           className="p-1.5 rounded-lg text-text-muted hover:text-accent-600 hover:bg-accent-50 border border-transparent hover:border-accent-200 transition-colors"
-                          title="Hapus akun tutor (soft delete)"
+                          title="Hapus akun tutor"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

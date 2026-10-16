@@ -206,7 +206,7 @@ export const QuestionFormModal: React.FC<QuestionFormModalProps> = ({
           {/* Jenjang Soal */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Target jenjang soal <span className="text-accent-500">*</span>
+              Jenjang <span className="text-accent-500">*</span>
             </label>
             <div className="flex gap-2">
               <button
