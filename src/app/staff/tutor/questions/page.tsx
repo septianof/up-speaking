@@ -10,7 +10,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { QuestionFormModal } from "@/components/staff/QuestionFormModal";
@@ -112,21 +111,16 @@ export default function TutorQuestionsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <Badge variant="primary" size="md">
-            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-          </Badge>
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() => setIsFormOpen(true)}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Butir Soal
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="primary"
+          size="md"
+          onClick={() => setIsFormOpen(true)}
+          className="shrink-0 gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Tambah Butir Soal
+        </Button>
       </div>
 
       {/* Search */}

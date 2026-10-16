@@ -100,9 +100,6 @@ export default function TutorReportsPage() {
 
         {/* Action Bar Ekspor */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <Badge variant="primary" size="md">
-            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-          </Badge>
           <Button
             type="button"
             variant="outline"

@@ -115,21 +115,13 @@ export default function TutorEvaluationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
-        <div>
-          <h1 className="text-2xl font-black text-text-primary">
-            Penilaian &amp; Evaluasi Siswa
-          </h1>
-          <p className="text-sm text-text-muted mt-1">
-            Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" size="md">
-            Jenjang: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-          </Badge>
-        </div>
+      <div className="pb-2 border-b border-surface-border">
+        <h1 className="text-2xl font-black text-text-primary">
+          Penilaian &amp; Evaluasi Siswa
+        </h1>
+        <p className="text-sm text-text-muted mt-1">
+          Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
+        </p>
       </div>
 
       {/* Filter Tabs and Search Bar */}

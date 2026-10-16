@@ -9,7 +9,6 @@ import {
   FileSpreadsheet,
   ArrowRight,
 } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
 import { getActiveStaff } from "@/lib/staff-session";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
 import { TargetLevel } from "@/types/student";
@@ -55,20 +54,13 @@ export default function TutorDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
-        <div>
-          <h1 className="text-2xl font-black text-text-primary">
-            Dashboard Tutor
-          </h1>
-          <p className="text-sm text-text-muted mt-1">
-            Selamat datang, <strong>{staff?.fullName || "Tutor"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" size="md">
-            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-          </Badge>
-        </div>
+      <div className="pb-4 border-b border-surface-border">
+        <h1 className="text-2xl font-black text-text-primary">
+          Dashboard Tutor
+        </h1>
+        <p className="text-sm text-text-muted mt-1">
+          Selamat datang, <strong>{staff?.fullName || "Tutor"}</strong>. Berikut ringkasan lembar pengerjaan siswa jenjang Anda.
+        </p>
       </div>
 
       {/* 3 Kartu Metrik Jenjang */}
