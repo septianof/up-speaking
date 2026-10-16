@@ -247,7 +247,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="py-3 px-4">
                       <span className="text-xs font-medium text-text-muted">
-                        {std.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+                        {std.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
                       </span>
                     </td>
                     <td className="py-3 px-4">

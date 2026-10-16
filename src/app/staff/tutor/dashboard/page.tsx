@@ -66,7 +66,7 @@ export default function TutorDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="primary" size="md">
-            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+            Jenjang: {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </Badge>
         </div>
       </div>

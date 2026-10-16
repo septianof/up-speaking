@@ -211,7 +211,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
                     : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                Elementary <span className="text-xs font-normal opacity-70">SD</span>
+                Elementary
               </button>
               <button
                 type="button"
@@ -222,7 +222,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
                     : "border-surface-border bg-surface-white text-text-muted hover:border-slate-300"
                 }`}
               >
-                High School <span className="text-xs font-normal opacity-70">SMP/SMA</span>
+                High School
               </button>
             </div>
           </div>

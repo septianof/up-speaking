@@ -33,10 +33,10 @@ interface LiveAnswerDetail {
   options: LiveAnswerOption[];
 }
 
-const LEVEL_META: Record<FinalLevel, { name: string; range: string }> = {
-  BEGINNER: { name: "Beginner", range: "0% – 59%" },
-  INTERMEDIATE: { name: "Intermediate", range: "60% – 79%" },
-  ADVANCED: { name: "Advanced", range: "80% – 100%" },
+const LEVEL_META: Record<FinalLevel, { name: string }> = {
+  BEGINNER: { name: "Beginner" },
+  INTERMEDIATE: { name: "Intermediate" },
+  ADVANCED: { name: "Advanced" },
 };
 
 export const EvaluationModal: React.FC<EvaluationModalProps> = ({
@@ -202,7 +202,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
             <div>
               <p className="text-xs text-text-muted">Jenjang Ujian</p>
               <Badge variant="primary" size="sm" className="mt-0.5">
-                {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
+                {student.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </Badge>
             </div>
             <div>
@@ -340,25 +340,20 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
                     key={lvl}
                     type="button"
                     onClick={() => setSelectedFinalLevel(lvl)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                       isSelected
                         ? "border-primary-500 bg-primary-50/70 shadow-xs ring-2 ring-primary-500/20"
                         : "border-surface-border bg-surface-white hover:border-slate-300"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`text-sm font-bold ${
-                          isSelected ? "text-primary-700" : "text-text-primary"
-                        }`}
-                      >
-                        {LEVEL_META[lvl].name}
-                      </span>
-                      {isSelected && <Check className="h-4 w-4 text-primary-600 shrink-0" />}
-                    </div>
-                    <span className="text-[11px] text-text-muted block mt-0.5">
-                      Acuan: {LEVEL_META[lvl].range}
+                    <span
+                      className={`text-sm font-bold ${
+                        isSelected ? "text-primary-700" : "text-text-primary"
+                      }`}
+                    >
+                      {LEVEL_META[lvl].name}
                     </span>
+                    {isSelected && <Check className="h-4 w-4 text-primary-600 shrink-0" />}
                   </button>
                 );
               })}

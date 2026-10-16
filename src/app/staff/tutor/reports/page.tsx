@@ -72,7 +72,7 @@ export default function TutorReportsPage() {
   const handleExportExcel = () => {
     const levelLabel = tutorLevel === "ELEMENTARY" ? "Elementary" : "HighSchool";
     exportReportsToExcel(filteredReports, {
-      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
+      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}`,
       filename: `Rekap_Placement_Test_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
     });
   };
@@ -80,7 +80,7 @@ export default function TutorReportsPage() {
   const handleExportPdf = () => {
     const levelLabel = tutorLevel === "ELEMENTARY" ? "Elementary" : "HighSchool";
     exportReportsToPdf(filteredReports, {
-      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}`,
+      title: `Laporan Hasil Placement Test Siswa - Jenjang ${tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}`,
       filename: `Rekap_Placement_Test_${levelLabel}_${new Date().toISOString().slice(0, 10)}`,
     });
   };

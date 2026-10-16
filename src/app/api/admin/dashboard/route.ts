@@ -89,7 +89,7 @@ export async function GET() {
           studentName: st.full_name,
           targetLevel: st.target_level,
           type: 'STARTED',
-          message: `${st.full_name} memulai pengerjaan tes ${st.target_level === 'ELEMENTARY' ? 'SD' : 'High School'}`,
+          message: `${st.full_name} memulai pengerjaan tes ${st.target_level === 'ELEMENTARY' ? 'Elementary' : 'High School'}`,
           timestamp: latestSession.created_at,
         })
       } else if (latestSession.status === 'COMPLETED') {

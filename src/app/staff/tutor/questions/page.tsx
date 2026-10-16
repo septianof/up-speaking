@@ -104,7 +104,7 @@ export default function TutorQuestionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-2xl font-black text-text-primary">
-            Bank Soal Jenjang {tutorLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+            Bank Soal Jenjang {tutorLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola dan tambahkan butir soal dinamis khusus untuk jenjang yang Anda ampu sebagai Tutor.
@@ -197,7 +197,7 @@ export default function TutorQuestionsPage() {
                       ? "text-primary-700 bg-primary-50 border-primary-100"
                       : "text-text-secondary bg-surface-subtle border-surface-border"
                   }`}>
-                    {q.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
+                    {q.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
                   </span>
                   <span className="text-[11px] font-semibold text-text-muted">
                     ({q.options.length} pilihan opsi)

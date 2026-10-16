@@ -85,7 +85,7 @@ export default function AdminReportsPage() {
     if (level === "ELEMENTARY") {
       return (
         <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
-          Elementary (SD)
+          Elementary
         </span>
       );
     }
@@ -176,8 +176,8 @@ export default function AdminReportsPage() {
               className="w-full rounded-xl border border-surface-border bg-surface-white px-3 py-2 text-xs sm:text-sm font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
             >
               <option value="ALL">Semua Jenjang</option>
-              <option value="ELEMENTARY">Elementary (SD)</option>
-              <option value="HIGH_SCHOOL">High School (SMP/SMA)</option>
+              <option value="ELEMENTARY">Elementary</option>
+              <option value="HIGH_SCHOOL">High School</option>
             </select>
           </div>
 

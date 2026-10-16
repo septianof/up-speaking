@@ -127,7 +127,7 @@ export default function TutorEvaluationsPage() {
 
         <div className="flex items-center gap-2">
           <Badge variant="primary" size="md">
-            Jenjang Binaan: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+            Jenjang Binaan: {tutorAssignedLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </Badge>
         </div>
       </div>

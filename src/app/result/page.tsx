@@ -206,7 +206,7 @@ export default function ResultPage() {
             >
               <span className="text-text-muted">Jenjang Pendidikan</span>
               <span className="font-bold text-text-primary">
-                {session.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School (SMP/SMA)"}
+                {session.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </span>
             </motion.div>
 

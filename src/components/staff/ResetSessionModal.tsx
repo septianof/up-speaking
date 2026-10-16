@@ -114,7 +114,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
                     : "text-text-secondary bg-surface-subtle border-surface-border"
                 }`}
               >
-                {student.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School"}
+                {student.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </span>
             </div>
             <div className="flex items-center justify-between">

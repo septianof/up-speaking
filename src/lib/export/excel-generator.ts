@@ -113,7 +113,7 @@ export async function exportReportsToExcel(
         : "-";
 
     const jenjangFormatted =
-      item.targetLevel === "ELEMENTARY" ? "Elementary (SD)" : "High School";
+      item.targetLevel === "ELEMENTARY" ? "Elementary" : "High School";
 
     const skorFormatted =
       item.scorePercentage !== null && item.scorePercentage !== undefined

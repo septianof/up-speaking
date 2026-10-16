@@ -119,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-            {isAdmin ? "Admin" : `Tutor ${user.targetLevel === "ELEMENTARY" ? "SD" : "SMA"}`}
+            {isAdmin ? "Admin" : `Tutor ${user.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}`}
           </span>
         </div>
       </div>
@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-text-primary truncate">{user.fullName}</p>
-              <p className="text-[11px] text-text-muted mt-0.5">{isAdmin ? 'Administrator' : `Tutor ${user.targetLevel === 'ELEMENTARY' ? 'SD' : 'SMA'}`}</p>
+              <p className="text-[11px] text-text-muted mt-0.5">{isAdmin ? 'Administrator' : `Tutor ${user.targetLevel === 'ELEMENTARY' ? 'Elementary' : 'High School'}`}</p>
             </div>
           </div>
 

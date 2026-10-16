@@ -287,7 +287,7 @@ export default function TestPage() {
                 {session.fullName}
               </span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-sun-100 text-amber-800 font-bold">
-                {session.targetLevel === "ELEMENTARY" ? "Jenjang SD" : "High School"}
+                {session.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
               </span>
             </div>
           </div>
@@ -342,7 +342,7 @@ export default function TestPage() {
             </span>
           </div>
           <span className="shrink-0 ml-2 px-2 py-0.5 rounded-full bg-sun-100 text-amber-800 font-bold text-[11px]">
-            {session.targetLevel === "ELEMENTARY" ? "Jenjang SD" : "High School"}
+            {session.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
           </span>
         </div>
 
