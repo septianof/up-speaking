@@ -9,7 +9,7 @@ export const revalidate = 0
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const level = searchParams.get('level') || 'ELEMENTARY'
+    const level = searchParams.get('level') || 'ALL'
     const status = searchParams.get('status') || 'ALL'
     const search = searchParams.get('search') || ''
 
@@ -41,8 +41,11 @@ export async function GET(request: Request) {
           )
         )
       `)
-      .eq('target_level', level)
       .order('created_at', { ascending: false })
+
+    if (level !== 'ALL') {
+      query = query.eq('target_level', level)
+    }
 
     if (search.trim()) {
       query = query.or(

@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
 import { StudentRecord } from "@/lib/mock-data";
-import { getActiveStaff } from "@/lib/staff-session";
 import { TargetLevel, SessionStatus, FinalLevel } from "@/types/student";
 
 interface ApiEvaluationItem {
@@ -25,10 +24,8 @@ interface ApiEvaluationItem {
 }
 
 export default function TutorEvaluationsPage() {
-  const staff = getActiveStaff();
-  const tutorAssignedLevel: TargetLevel = staff?.targetLevel || "ELEMENTARY";
-
   const [students, setStudents] = useState<StudentRecord[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
@@ -38,7 +35,7 @@ export default function TutorEvaluationsPage() {
     try {
       setIsLoading(true);
       const res = await fetch(
-        `/api/tutor/evaluations?level=${tutorAssignedLevel}&_t=${Date.now()}`,
+        `/api/tutor/evaluations?level=ALL&_t=${Date.now()}`,
         { cache: "no-store" }
       );
       if (res.ok) {
@@ -65,25 +62,43 @@ export default function TutorEvaluationsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [tutorAssignedLevel]);
+  }, []);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // Filter siswa berdasarkan pencarian dan status sesi
+  // Filter siswa berdasarkan pencarian, jenjang, dan status sesi
   const filteredStudents = useMemo(() => {
     return students.filter((std) => {
       const matchSearch =
         std.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         std.phone.includes(searchQuery);
 
+      const matchLevel =
+        selectedLevel === "ALL" || std.targetLevel === selectedLevel;
+
       const matchStatus =
         selectedStatus === "ALL" || std.status === selectedStatus;
 
-      return matchSearch && matchStatus;
+      return matchSearch && matchLevel && matchStatus;
     });
-  }, [students, searchQuery, selectedStatus]);
+  }, [students, searchQuery, selectedLevel, selectedStatus]);
+
+  const getLevelBadge = (level: TargetLevel) => {
+    if (level === "ELEMENTARY") {
+      return (
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+          Elementary
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+        High School
+      </span>
+    );
+  };
 
   const getStatusBadge = (status: SessionStatus) => {
     switch (status) {
@@ -110,28 +125,18 @@ export default function TutorEvaluationsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
-        <div>
-          <h1 className="text-2xl font-black text-text-primary">
-            Penilaian &amp; Evaluasi Siswa
-          </h1>
-          <p className="text-sm text-text-muted mt-1">
-            Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
-          </p>
-        </div>
-
-        {/* Badge Jenjang Pengampu Terkunci */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-subtle border border-surface-border self-start sm:self-auto">
-          <span className="text-xs text-text-muted">Jenjang:</span>
-          <span className="text-xs font-bold text-primary-700">
-            {tutorAssignedLevel === "ELEMENTARY" ? "Elementary" : "High School"}
-          </span>
-        </div>
+      <div className="pb-2 border-b border-surface-border">
+        <h1 className="text-2xl font-black text-text-primary">
+          Penilaian &amp; Evaluasi Siswa
+        </h1>
+        <p className="text-sm text-text-muted mt-1">
+          Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
+        </p>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* Search Input */}
           <div className="md:col-span-2 relative">
             <Input
@@ -142,6 +147,19 @@ export default function TutorEvaluationsPage() {
               className="pl-10 text-xs sm:text-sm"
             />
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-text-muted pointer-events-none" />
+          </div>
+
+          {/* Level Filter Dropdown */}
+          <div>
+            <select
+              value={selectedLevel}
+              onChange={(e) => setSelectedLevel(e.target.value)}
+              className="w-full rounded-xl border border-surface-border bg-surface-white px-3 py-2 text-xs sm:text-sm font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+            >
+              <option value="ALL">Semua Jenjang</option>
+              <option value="ELEMENTARY">Elementary</option>
+              <option value="HIGH_SCHOOL">High School</option>
+            </select>
           </div>
 
           {/* Status Filter Dropdown */}
@@ -165,11 +183,12 @@ export default function TutorEvaluationsPage() {
           <span>
             Menampilkan <strong>{filteredStudents.length}</strong> dari <strong>{students.length}</strong> siswa
           </span>
-          {(searchQuery || selectedStatus !== "ALL") && (
+          {(searchQuery || selectedLevel !== "ALL" || selectedStatus !== "ALL") && (
             <button
               type="button"
               onClick={() => {
                 setSearchQuery("");
+                setSelectedLevel("ALL");
                 setSelectedStatus("ALL");
               }}
               className="text-xs text-primary-600 hover:underline font-semibold"
@@ -189,6 +208,7 @@ export default function TutorEvaluationsPage() {
                 <th className="py-3.5 px-4 w-12 text-center">No</th>
                 <th className="py-3.5 px-4">Nama Siswa</th>
                 <th className="py-3.5 px-4">Nomor HP</th>
+                <th className="py-3.5 px-4 text-center">Jenjang</th>
                 <th className="py-3.5 px-4 text-center">Status Sesi</th>
                 <th className="py-3.5 px-4 text-center">Skor Objektif</th>
                 <th className="py-3.5 px-4 text-center">Level Final</th>
@@ -198,21 +218,22 @@ export default function TutorEvaluationsPage() {
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                  <td colSpan={8} className="py-12 text-center text-text-muted">
                     <p className="font-medium">Memuat data siswa...</p>
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-text-muted">
+                  <td colSpan={8} className="py-12 text-center text-text-muted">
                     <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    {searchQuery.trim() || selectedStatus !== "ALL" ? (
+                    {searchQuery.trim() || selectedLevel !== "ALL" || selectedStatus !== "ALL" ? (
                       <div>
                         <p className="font-medium text-sm">Tidak ada siswa yang cocok dengan filter pencarian.</p>
                         <button
                           type="button"
                           onClick={() => {
                             setSearchQuery("");
+                            setSelectedLevel("ALL");
                             setSelectedStatus("ALL");
                           }}
                           className="mt-2 text-xs text-primary-600 hover:underline font-semibold"
@@ -222,7 +243,7 @@ export default function TutorEvaluationsPage() {
                       </div>
                     ) : (
                       <p className="font-medium text-sm">
-                        Belum ada siswa yang terdaftar pada jenjang ini.
+                        Belum ada siswa yang terdaftar saat ini.
                       </p>
                     )}
                   </td>
@@ -247,6 +268,9 @@ export default function TutorEvaluationsPage() {
                       </td>
                       <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
                         {std.phone}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        {getLevelBadge(std.targetLevel)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {getStatusBadge(std.status)}
