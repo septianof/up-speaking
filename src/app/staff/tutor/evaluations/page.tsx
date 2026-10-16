@@ -210,7 +210,6 @@ export default function TutorEvaluationsPage() {
                 <th className="py-3.5 px-4">Nomor HP</th>
                 <th className="py-3.5 px-4 text-center">Jenjang</th>
                 <th className="py-3.5 px-4 text-center">Status Sesi</th>
-                <th className="py-3.5 px-4 text-center">Skor Objektif</th>
                 <th className="py-3.5 px-4 text-center">Level Final</th>
                 <th className="py-3.5 px-4 text-center w-36">Aksi</th>
               </tr>
@@ -218,13 +217,13 @@ export default function TutorEvaluationsPage() {
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-text-muted">
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
                     <p className="font-medium">Memuat data siswa...</p>
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-text-muted">
+                  <td colSpan={7} className="py-12 text-center text-text-muted">
                     <Award className="h-8 w-8 mx-auto mb-2 opacity-30" />
                     {searchQuery.trim() || selectedLevel !== "ALL" || selectedStatus !== "ALL" ? (
                       <div>
@@ -250,11 +249,6 @@ export default function TutorEvaluationsPage() {
                 </tr>
               ) : (
                 filteredStudents.map((std, idx) => {
-                  const hasScore = typeof std.score === "number";
-                  const scorePercent = hasScore
-                    ? Math.round(((std.score || 0) / (std.totalQuestions || 10)) * 100)
-                    : 0;
-
                   return (
                     <tr
                       key={std.id}
@@ -274,18 +268,6 @@ export default function TutorEvaluationsPage() {
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {getStatusBadge(std.status)}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        {hasScore ? (
-                          <>
-                            <span className="font-black text-primary-600">
-                              {std.score}/{std.totalQuestions || 10}
-                            </span>
-                            <span className="text-xs text-text-muted ml-1">({scorePercent}%)</span>
-                          </>
-                        ) : (
-                          <span className="text-text-muted">-</span>
-                        )}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {std.finalLevel ? (
