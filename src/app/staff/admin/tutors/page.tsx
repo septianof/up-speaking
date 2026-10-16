@@ -312,7 +312,7 @@ export default function AdminTutorsPage() {
               <span>Perhatian</span>
             </div>
             <p className="leading-relaxed">
-              Apakah Anda yakin ingin menghapus akun pengajar <strong>{deleteTargetTutor?.fullName}</strong>? Akun ini tidak akan dapat digunakan lagi untuk login ke sistem.
+              Apakah Anda yakin ingin menghapus akun <strong>{deleteTargetTutor?.fullName}</strong>? Akun ini tidak akan dapat digunakan lagi untuk login ke sistem.
             </p>
           </div>
 
