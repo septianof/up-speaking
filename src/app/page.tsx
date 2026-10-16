@@ -287,10 +287,15 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
             >
               {/* Judul Utama */}
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary tracking-tight leading-tight mb-4">
-                Placement Test <br className="hidden sm:inline" />
-                <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2">
-                  Bahasa Inggris
+              <h1 className="font-display tracking-tight leading-tight mb-4">
+                <span className="block text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest text-primary-600 mb-2">
+                  Online Placement Test
+                </span>
+                <span className="block text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary">
+                  Bahasa{" "}
+                  <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2 sm:decoration-4">
+                    Inggris
+                  </span>
                 </span>
               </h1>
 
