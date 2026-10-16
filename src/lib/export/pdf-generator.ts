@@ -110,7 +110,7 @@ export function exportReportsToPdf(
       [
         "No",
         "Nama Siswa",
-        "No. WhatsApp",
+        "Nomor HP",
         "Jenjang",
         "Skor (%)",
         "Durasi",
@@ -142,7 +142,7 @@ export function exportReportsToPdf(
     columnStyles: {
       0: { halign: "center", cellWidth: 28 }, // No
       1: { halign: "left", cellWidth: 140 },   // Nama
-      2: { halign: "center", cellWidth: 85 },  // No WhatsApp
+      2: { halign: "center", cellWidth: 85 },  // Nomor HP
       3: { halign: "center", cellWidth: 85 },  // Jenjang
       4: { halign: "center", cellWidth: 55 },  // Skor
       5: { halign: "center", cellWidth: 60 },  // Durasi

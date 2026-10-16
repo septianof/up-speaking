@@ -247,7 +247,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         <div>
           <label htmlFor="student-phone" className="block text-base font-bold text-text-primary mb-2">
-            Nomor HP / WhatsApp
+            Nomor HP
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary-500">

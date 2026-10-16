@@ -67,7 +67,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
     }
 
     if (!phone.trim()) {
-      newErrors.phone = "Nomor WhatsApp/HP wajib diisi";
+      newErrors.phone = "Nomor HP wajib diisi";
     } else if (!phone.startsWith("08")) {
       newErrors.phone = "Nomor HP harus diawali '08'";
     } else if (phone.length < 10 || phone.length > 14) {
@@ -183,7 +183,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
           {/* Input Nomor HP */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Nomor WhatsApp / HP <span className="text-accent-500">*</span>
+              Nomor HP <span className="text-accent-500">*</span>
             </label>
             <Input
               type="tel"

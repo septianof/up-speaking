@@ -194,7 +194,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
               </p>
             </div>
             <div>
-              <p className="text-xs text-text-muted">No. WhatsApp</p>
+              <p className="text-xs text-text-muted">Nomor HP</p>
               <p className="font-mono font-semibold text-text-primary text-sm mt-0.5">
                 {student.phone}
               </p>

@@ -70,7 +70,7 @@ export async function exportReportsToExcel(
   const headers = [
     "No",
     "Nama Lengkap",
-    "No. WhatsApp / HP",
+    "Nomor HP",
     "Jenjang",
     "Skor Objektif (%)",
     "Durasi Pengerjaan",

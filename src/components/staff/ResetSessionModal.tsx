@@ -102,7 +102,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
               <span className="font-bold text-text-primary">{student.fullName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Nomor WhatsApp:</span>
+              <span className="text-text-muted">Nomor HP:</span>
               <span className="font-mono text-text-primary">{student.phone}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -132,7 +132,7 @@ export const ResetSessionModal: React.FC<ResetSessionModalProps> = ({
               <span>Perhatian</span>
             </div>
             <p className="leading-relaxed">
-              Seluruh pengerjaan tes siswa saat ini akan dibatalkan dan diulang dari nomor 1. Siswa dapat login kembali menggunakan nama dan nomor WhatsApp terdaftar untuk memulai tes baru.
+              Seluruh pengerjaan tes siswa saat ini akan dibatalkan dan diulang dari nomor 1. Siswa dapat login kembali menggunakan nama dan nomor HP terdaftar untuk memulai tes baru.
             </p>
           </div>
 

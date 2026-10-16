@@ -218,7 +218,7 @@ export default function AdminDashboardPage() {
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
                 <th className="py-3 px-4">Nama Siswa</th>
-                <th className="py-3 px-4">Nomor WhatsApp</th>
+                <th className="py-3 px-4">Nomor HP</th>
                 <th className="py-3 px-4">Jenjang</th>
                 <th className="py-3 px-4">Status</th>
               </tr>
