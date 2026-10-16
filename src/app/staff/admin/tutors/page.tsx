@@ -298,24 +298,22 @@ export default function AdminTutorsPage() {
         onSuccess={() => loadData()}
       />
 
-      {/* Modal Konfirmasi Hapus Tutor (Soft Delete) */}
+      {/* Modal Hapus Akun Tutor */}
       <Modal
         isOpen={Boolean(deleteTargetTutor)}
         onClose={() => setDeleteTargetTutor(null)}
-        title="Konfirmasi Hapus Akun Tutor"
+        title="Hapus Akun Tutor"
         maxWidth="sm"
       >
         <div className="space-y-4 pt-1">
-          <div className="p-3.5 rounded-xl bg-accent-50 border border-accent-200 text-xs text-accent-700 flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-accent-500" />
-            <div className="leading-relaxed space-y-1">
-              <p>
-                Apakah Anda yakin ingin menghapus akun pengajar <strong>{deleteTargetTutor?.fullName}</strong>?
-              </p>
-              <p className="text-[11px] text-accent-800">
-                Akun akan dihapus dari sistem (soft delete). Riwayat penilaian siswa yang pernah dilakukan pengajar tetap aman tersimpan dalam database.
-              </p>
+          <div className="p-3.5 rounded-xl bg-accent-50/70 border border-accent-200/80 text-xs text-accent-700 space-y-1">
+            <div className="flex items-center gap-1.5 font-bold text-accent-700">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-accent-500" />
+              <span>Perhatian</span>
             </div>
+            <p className="leading-relaxed">
+              Apakah Anda yakin ingin menghapus akun pengajar <strong>{deleteTargetTutor?.fullName}</strong>? Akun ini tidak akan dapat digunakan lagi untuk login ke sistem.
+            </p>
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-surface-border">
