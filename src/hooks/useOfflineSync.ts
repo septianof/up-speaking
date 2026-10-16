@@ -20,6 +20,7 @@ export interface UseOfflineSyncReturn {
   deviceConflict: boolean
   syncAnswer: (questionId: string, selectedOptionId: string | null) => void
   flushPendingSync: (finalAnswers?: Record<string, string>) => Promise<boolean>
+  syncElapsedSeconds: (seconds?: number) => Promise<void>
 }
 
 export function useOfflineSync({
@@ -189,6 +190,40 @@ export function useOfflineSync({
     [flushPendingSync, saveQueueToStorage]
   )
 
+  // Explicitly sync elapsed seconds to the database (heartbeat)
+  const syncElapsedSeconds = useCallback(
+    async (seconds?: number) => {
+      if (!sessionId || !deviceToken || typeof window === 'undefined') return
+      if (!navigator.onLine) return
+
+      const currentSeconds =
+        typeof seconds === 'number'
+          ? seconds
+          : getElapsedSeconds
+          ? getElapsedSeconds()
+          : undefined
+
+      if (typeof currentSeconds !== 'number') return
+
+      try {
+        await fetch('/api/student/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            deviceToken,
+            elapsedSeconds: currentSeconds,
+            responses: [],
+          }),
+          keepalive: true,
+        })
+      } catch {
+        // Heartbeat error is silent to not interrupt the user experience
+      }
+    },
+    [sessionId, deviceToken, getElapsedSeconds]
+  )
+
   // Listen to network status & page visibility / pagehide for instant flush
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -198,6 +233,8 @@ export function useOfflineSync({
       // Auto-flush pending items when connection is restored
       if (queueRef.current.size > 0) {
         flushPendingSync()
+      } else {
+        syncElapsedSeconds()
       }
     }
 
@@ -206,11 +243,15 @@ export function useOfflineSync({
     }
 
     const handleFlushOnLeave = () => {
-      if (queueRef.current.size > 0 && navigator.onLine) {
+      if (navigator.onLine) {
         if (debounceTimerRef.current) {
           clearTimeout(debounceTimerRef.current)
         }
-        flushPendingSync()
+        if (queueRef.current.size > 0) {
+          flushPendingSync()
+        } else {
+          syncElapsedSeconds()
+        }
       }
     }
 
@@ -235,7 +276,7 @@ export function useOfflineSync({
         flushPendingSync()
       }
     }
-  }, [flushPendingSync])
+  }, [flushPendingSync, syncElapsedSeconds])
 
   return {
     isOnline,
@@ -244,5 +285,6 @@ export function useOfflineSync({
     deviceConflict,
     syncAnswer,
     flushPendingSync,
+    syncElapsedSeconds,
   }
 }

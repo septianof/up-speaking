@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Clock } from "lucide-react";
 
 export interface ElapsedTimerProps {
@@ -15,6 +15,16 @@ export const ElapsedTimer: React.FC<ElapsedTimerProps> = ({
   isPaused = false,
 }) => {
   const [seconds, setSeconds] = useState(initialSeconds);
+  const onTickRef = useRef(onTick);
+
+  useEffect(() => {
+    onTickRef.current = onTick;
+  }, [onTick]);
+
+  // Sinkronkan state saat props initialSeconds diperbarui (misal saat data server selesai dimuat)
+  useEffect(() => {
+    setSeconds(initialSeconds);
+  }, [initialSeconds]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -22,13 +32,13 @@ export const ElapsedTimer: React.FC<ElapsedTimerProps> = ({
     const interval = setInterval(() => {
       setSeconds((prev) => {
         const next = prev + 1;
-        if (onTick) onTick(next);
+        if (onTickRef.current) onTickRef.current(next);
         return next;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPaused, onTick]);
+  }, [isPaused]);
 
   const formatTime = (totalSeconds: number) => {
     const hrs = Math.floor(totalSeconds / 3600);

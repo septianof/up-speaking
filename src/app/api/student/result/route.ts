@@ -71,6 +71,17 @@ export async function GET(request: Request) {
       )
     }
 
+    if (session.status === 'IN_PROGRESS') {
+      return NextResponse.json(
+        {
+          error: 'Ujian masih sedang berlangsung. Mengalihkan ke lembar ujian...',
+          status: 'IN_PROGRESS',
+          sessionId: session.id,
+        },
+        { status: 403 }
+      )
+    }
+
     interface StudentItem {
       id: string
       full_name: string

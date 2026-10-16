@@ -55,6 +55,7 @@ export default function TestPage() {
     deviceConflict,
     syncAnswer,
     flushPendingSync,
+    syncElapsedSeconds,
   } = useOfflineSync({
     sessionId: session?.sessionId,
     deviceToken: session?.deviceToken,
@@ -77,6 +78,15 @@ export default function TestPage() {
       setIsDeviceConflictModalOpen(true);
     }
   }, [deviceConflict]);
+
+  // Periodic heartbeat sinkronisasi detik pengerjaan ke database setiap 15 detik
+  useEffect(() => {
+    if (!session || deviceConflict) return;
+    const interval = setInterval(() => {
+      syncElapsedSeconds();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [session, deviceConflict, syncElapsedSeconds]);
 
   useEffect(() => {
     const active = getActiveSession();

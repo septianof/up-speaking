@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -21,7 +21,7 @@ export default function ResultPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchLiveResult = async (active: StudentSession) => {
+  const fetchLiveResult = useCallback(async (active: StudentSession) => {
     try {
       setIsRefreshing(true);
       const baseUrl = active.sessionId
@@ -30,8 +30,16 @@ export default function ResultPage() {
       const url = `${baseUrl}&_t=${Date.now()}`;
 
       const res = await fetch(url, { cache: "no-store" });
+      if (res.status === 403) {
+        router.push("/test");
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
+        if (data.status === "IN_PROGRESS") {
+          router.push("/test");
+          return;
+        }
         const refreshedSession: StudentSession = {
           ...active,
           status: data.status,
@@ -50,7 +58,7 @@ export default function ResultPage() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     const active = getActiveSession();
@@ -59,9 +67,14 @@ export default function ResultPage() {
       return;
     }
 
+    if (active.status === "IN_PROGRESS") {
+      router.push("/test");
+      return;
+    }
+
     setSession(active);
     fetchLiveResult(active);
-  }, [router]);
+  }, [router, fetchLiveResult]);
 
   const handleFinishAndExit = () => {
     clearSession();

@@ -147,12 +147,8 @@ export async function POST(request: Request) {
       const resumeQuestionIndex =
         firstUnansweredIndex !== -1 ? firstUnansweredIndex : Math.max(0, formattedQuestions.length - 1)
 
-      // Hitung elapsed seconds berdasarkan started_at server
-      const startedAtMs = new Date(activeSession.started_at).getTime()
-      const currentElapsed = Math.max(
-        activeSession.elapsed_seconds,
-        Math.floor((Date.now() - startedAtMs) / 1000)
-      )
+      // Gunakan akumulasi durasi aktif pengerjaan yang tersimpan di sesi
+      const currentElapsed = activeSession.elapsed_seconds || 0
 
       return NextResponse.json({
         session: {
