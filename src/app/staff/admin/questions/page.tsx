@@ -122,17 +122,17 @@ export default function AdminQuestionsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-black text-text-primary">
             Bank Soal Ujian
           </h1>
-          <p className="text-sm text-text-muted mt-1">
+          <p className="text-xs sm:text-sm text-text-muted mt-1">
             Kelola paket butir soal placement test dengan format pilihan dinamis (2 hingga 5 opsi pilihan).
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <button
             type="button"
             onClick={() => mutate()}
@@ -149,7 +149,7 @@ export default function AdminQuestionsPage() {
             variant="primary"
             size="md"
             onClick={() => setIsFormOpen(true)}
-            className="shrink-0 gap-2"
+            className="shrink-0 gap-2 text-xs sm:text-sm"
           >
             <Plus className="h-4 w-4" />
             Tambah Butir Soal
@@ -281,12 +281,12 @@ export default function AdminQuestionsPage() {
                 </div>
 
                 {/* Question Text */}
-                <p className="text-sm font-semibold text-text-primary leading-relaxed pl-8">
+                <p className="text-sm font-semibold text-text-primary leading-relaxed pl-0 sm:pl-8">
                   {q.questionText}
                 </p>
 
                 {/* Options Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-8 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-0 sm:pl-8 pt-1">
                   {q.options.map((opt, optIdx) => {
                     const isCorrect =
                       q.correctOptionId === opt.id || optIdx === 0;

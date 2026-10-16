@@ -47,9 +47,9 @@ export function Pagination({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 text-sm text-slate-600">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5 py-4 px-2 text-xs sm:text-sm text-slate-600">
       {/* Sisi Kiri: Rentang Data & Opsi Limit */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3">
         <span>
           Menampilkan <span className="font-semibold text-slate-900">{startItem}</span> -{" "}
           <span className="font-semibold text-slate-900">{endItem}</span> dari{" "}

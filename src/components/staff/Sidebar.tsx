@@ -98,15 +98,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   return (
     <>
       {/* Mobile Header Bar with Hamburger */}
-      <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-surface-white border-b border-surface-border px-4 py-3 shadow-xs">
-        <div className="flex items-center gap-3">
+      <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-surface-white border-b border-surface-border px-4 py-3 shadow-xs w-full">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setIsMobileOpen(true)}
-            className="p-2 rounded-xl text-text-secondary hover:bg-surface-subtle"
+            className="p-2 rounded-xl text-text-secondary hover:bg-surface-subtle active:scale-95 transition-transform"
             aria-label="Buka menu navigasi"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5 text-text-primary" />
           </button>
           <Image
             src="/images/logo.png"
@@ -118,11 +118,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
+          <span className="text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 truncate max-w-[150px]">
             {isAdmin ? "Admin" : `Tutor • ${user.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}`}
           </span>
         </div>
-      </div>
+      </header>
 
       {/* Mobile Drawer Backdrop */}
       {isMobileOpen && (
@@ -134,13 +134,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
       {/* Sidebar Container (Desktop 260px fixed / Mobile Slide Drawer) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-surface-white border-r border-surface-border flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] bg-surface-white border-r border-surface-border flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          isMobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >
         {/* Top: Logo & Close Button */}
-        <div>
-          <div className="p-5 flex items-center justify-between border-b border-surface-border">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-5 flex items-center justify-between border-b border-surface-border">
             <Image
               src="/images/logo.png"
               alt="Up Speaking Logo"

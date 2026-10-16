@@ -171,7 +171,7 @@ export default function TutorDashboardPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[500px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
                 <th className="py-3 px-4">Nama Siswa</th>

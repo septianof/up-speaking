@@ -78,20 +78,20 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={cn(
-              "relative w-full bg-surface-white shadow-float text-left z-10",
+              "relative w-full bg-surface-white shadow-float text-left z-10 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col my-auto",
               isKid
-                ? cn("rounded-[28px] p-6 sm:p-7 font-kid", topSlot && "mt-16")
-                : "rounded-2xl p-6 border border-surface-border",
+                ? cn("rounded-[28px] p-5 sm:p-7 font-kid", topSlot && "mt-16")
+                : "rounded-2xl p-5 sm:p-6 border border-surface-border",
               maxWidthStyles[maxWidth]
             )}
           >
-            {topSlot && <div className="flex justify-center -mt-20 mb-1">{topSlot}</div>}
+            {topSlot && <div className="flex justify-center -mt-20 mb-1 shrink-0">{topSlot}</div>}
 
             {/* Header */}
             {(title || showCloseButton) && (
               <div
                 className={cn(
-                  "flex items-start justify-between gap-3 mb-4",
+                  "flex items-start justify-between gap-3 mb-4 shrink-0",
                   !isKid && "pb-3.5 border-b border-surface-border",
                   isKid && topSlot && "justify-center text-center"
                 )}
@@ -135,7 +135,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Body */}
-            <div>{children}</div>
+            <div className="overflow-y-auto flex-1 -mr-1 pr-1">{children}</div>
           </motion.div>
         </div>
       )}

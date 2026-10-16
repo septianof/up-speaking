@@ -62,7 +62,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-surface-bg flex">
+    <div className="min-h-screen bg-surface-bg flex flex-col lg:flex-row">
       {/* Sidebar */}
       <Sidebar user={user} />
 

@@ -94,18 +94,18 @@ export default function TutorReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header and Export Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-black text-text-primary">
             Laporan &amp; Rekapitulasi
           </h1>
-          <p className="text-sm text-text-muted mt-1">
+          <p className="text-xs sm:text-sm text-text-muted mt-1">
             Rekapitulasi penetapan level kelas siswa khusus untuk jenjang Anda.
           </p>
         </div>
 
         {/* Action Bar Ekspor & Refresh */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <button
             type="button"
             onClick={() => mutate()}
@@ -123,7 +123,7 @@ export default function TutorReportsPage() {
             size="md"
             onClick={handleExportPdf}
             disabled={filteredReports.length === 0 || isLoading}
-            className="gap-2"
+            className="gap-2 text-xs sm:text-sm"
           >
             <Printer className="h-4 w-4" />
             Export PDF (.pdf)
@@ -135,7 +135,7 @@ export default function TutorReportsPage() {
             size="md"
             onClick={handleExportExcel}
             disabled={filteredReports.length === 0 || isLoading}
-            className="gap-2"
+            className="gap-2 text-xs sm:text-sm"
           >
             <Download className="h-4 w-4" />
             Export Excel (.xlsx)
@@ -194,7 +194,7 @@ export default function TutorReportsPage() {
       {/* Report Table */}
       <div className="rounded-2xl bg-surface-white shadow-card border border-surface-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[650px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
                 <th className="py-3.5 px-4 w-12 text-center">No</th>
