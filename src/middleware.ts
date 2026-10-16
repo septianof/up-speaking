@@ -31,35 +31,154 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Proteksi rute staf: /staff/admin/* dan /staff/tutor/*
-  if (
-    pathname.startsWith('/staff/admin') ||
-    pathname.startsWith('/staff/tutor')
-  ) {
+  // 1. Tangani shortcut /login
+  if (pathname === '/login') {
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
+    const redirectUrl = request.nextUrl.clone()
     if (!user) {
-      const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = '/staff/login'
-      redirectUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Otorisasi Peran: Hanya peran ADMIN yang diizinkan mengakses /staff/admin/*
-    if (pathname.startsWith('/staff/admin')) {
+    // Jika sudah login, lempar ke dashboard sesuai role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role === 'ADMIN') {
+      redirectUrl.pathname = '/staff/admin/dashboard'
+    } else {
+      redirectUrl.pathname = '/staff/tutor/dashboard'
+    }
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // 2. Tangani /staff/login saat pengguna SUDAH login
+  if (pathname === '/staff/login') {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
+      const redirectUrl = request.nextUrl.clone()
+      const targetParam = request.nextUrl.searchParams.get('redirect')
+
+      if (targetParam && targetParam.startsWith('/staff/')) {
+        if (targetParam.startsWith('/staff/admin') && profile?.role !== 'ADMIN') {
+          redirectUrl.pathname = '/staff/tutor/dashboard'
+        } else {
+          redirectUrl.pathname = targetParam
+        }
+        redirectUrl.search = ''
+      } else {
+        if (profile?.role === 'ADMIN') {
+          redirectUrl.pathname = '/staff/admin/dashboard'
+        } else {
+          redirectUrl.pathname = '/staff/tutor/dashboard'
+        }
+      }
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    return supabaseResponse
+  }
+
+  // 3. Tangani rute /staff (portal root staf)
+  if (pathname === '/staff') {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    const redirectUrl = request.nextUrl.clone()
+    if (!user) {
+      redirectUrl.pathname = '/staff/login'
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role === 'ADMIN') {
+      redirectUrl.pathname = '/staff/admin/dashboard'
+    } else {
+      redirectUrl.pathname = '/staff/tutor/dashboard'
+    }
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // 4. Normalisasi shortcut alias /admin dan /tutor ke rute internal /staff/admin dan /staff/tutor
+  let canonicalPath = pathname
+  let isAlias = false
+
+  if (pathname === '/admin') {
+    canonicalPath = '/staff/admin/dashboard'
+    isAlias = true
+  } else if (pathname.startsWith('/admin/')) {
+    canonicalPath = `/staff${pathname}`
+    isAlias = true
+  } else if (pathname === '/tutor') {
+    canonicalPath = '/staff/tutor/dashboard'
+    isAlias = true
+  } else if (pathname.startsWith('/tutor/')) {
+    canonicalPath = `/staff${pathname}`
+    isAlias = true
+  }
+
+  // 5. Proteksi rute staf (baik rute asli /staff/... maupun via shortcut alias)
+  const isStaffRoute =
+    canonicalPath.startsWith('/staff/admin') ||
+    canonicalPath.startsWith('/staff/tutor')
+
+  if (isStaffRoute) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    // Jika belum login: arahkan ke /staff/login dengan param redirect ke canonicalPath
+    if (!user) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/staff/login'
+      redirectUrl.search = ''
+      redirectUrl.searchParams.set('redirect', canonicalPath)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Otorisasi Peran: Verifikasi hak akses admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    // Jika mencoba akses rute Admin tapi role bukan ADMIN -> alihkan ke Dashboard Tutor
+    if (canonicalPath.startsWith('/staff/admin')) {
       if (!profile || profile.role !== 'ADMIN') {
         const redirectUrl = request.nextUrl.clone()
         redirectUrl.pathname = '/staff/tutor/dashboard'
+        redirectUrl.search = ''
         return NextResponse.redirect(redirectUrl)
       }
+    }
+
+    // Jika pengguna mengakses melalui shortcut alias (misal /admin/students), redirect ke URL resminya
+    if (isAlias) {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = canonicalPath
+      return NextResponse.redirect(redirectUrl)
     }
   }
 
@@ -68,7 +187,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/staff/admin/:path*',
-    '/staff/tutor/:path*',
+    '/admin',
+    '/admin/:path*',
+    '/tutor',
+    '/tutor/:path*',
+    '/staff',
+    '/staff/:path*',
+    '/login',
   ],
 }

@@ -18,7 +18,16 @@ export default function StaffLoginPage() {
   useEffect(() => {
     const staff = getActiveStaff();
     if (staff) {
-      if (staff.role === "ADMIN") {
+      const params = new URLSearchParams(window.location.search);
+      const redirectTarget = params.get("redirect");
+
+      if (redirectTarget && redirectTarget.startsWith("/staff/")) {
+        if (redirectTarget.startsWith("/staff/admin") && staff.role !== "ADMIN") {
+          router.replace("/staff/tutor/dashboard");
+        } else {
+          router.replace(redirectTarget);
+        }
+      } else if (staff.role === "ADMIN") {
         router.replace("/staff/admin/dashboard");
       } else {
         router.replace("/staff/tutor/dashboard");
@@ -58,7 +67,16 @@ export default function StaffLoginPage() {
 
       saveStaffSession(data.user);
 
-      if (data.user.role === "ADMIN") {
+      const params = new URLSearchParams(window.location.search);
+      const redirectTarget = params.get("redirect");
+
+      if (redirectTarget && redirectTarget.startsWith("/staff/")) {
+        if (redirectTarget.startsWith("/staff/admin") && data.user.role !== "ADMIN") {
+          router.push("/staff/tutor/dashboard");
+        } else {
+          router.push(redirectTarget);
+        }
+      } else if (data.user.role === "ADMIN") {
         router.push("/staff/admin/dashboard");
       } else {
         router.push("/staff/tutor/dashboard");
