@@ -23,6 +23,20 @@ export interface ExportExcelOptions {
   filename?: string;
 }
 
+/**
+ * Sanitasi string sel Excel untuk mencegah Formula Injection (CSV / Excel Macro Injection).
+ * Memeriksa karakter berbahaya di awal string (=, +, -, @, \t, \r).
+ */
+export function sanitizeForExcel(value: unknown): string {
+  if (value === null || value === undefined) return "-";
+  const str = String(value).trim();
+  if (!str) return "-";
+  if (/^[=+\-@\t\r]/.test(str)) {
+    return `'${str}`;
+  }
+  return str;
+}
+
 export async function exportReportsToExcel(
   items: ReportItem[],
   options: ExportExcelOptions = {}
@@ -47,7 +61,7 @@ export async function exportReportsToExcel(
 
   worksheet.mergeCells("A2:I2");
   const subTitleCell = worksheet.getCell("A2");
-  subTitleCell.value = options.title || "Laporan Rekapitulasi Hasil Placement Test Siswa";
+  subTitleCell.value = sanitizeForExcel(options.title || "Laporan Rekapitulasi Hasil Placement Test Siswa");
   subTitleCell.font = { name: "Arial", size: 11, italic: true, color: { argb: "FF475569" } };
   subTitleCell.alignment = { vertical: "middle", horizontal: "center" };
   worksheet.getRow(2).height = 20;
@@ -139,14 +153,14 @@ export async function exportReportsToExcel(
 
     const row = worksheet.addRow([
       index + 1,
-      item.fullName,
-      `'${item.phoneNumber}`, // Prefix petik agar leading 0 tetap terjaga
+      sanitizeForExcel(item.fullName),
+      `'${sanitizeForExcel(item.phoneNumber)}`, // Prefix petik agar leading 0 tetap terjaga dan formula tidak dieksekusi
       jenjangFormatted,
       skorFormatted,
       durasiFormatted,
       levelFormatted,
       statusFormatted,
-      item.tutorName || "-",
+      sanitizeForExcel(item.tutorName || "-"),
     ]);
 
     row.height = 22;

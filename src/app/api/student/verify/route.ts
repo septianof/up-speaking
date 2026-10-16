@@ -5,6 +5,7 @@ import {
   createStudentToken,
   STUDENT_TOKEN_COOKIE_NAME,
 } from '@/lib/student-token'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter'
 
 const verifySchema = z.object({
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
@@ -13,6 +14,27 @@ const verifySchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request)
+    const rateLimit = checkRateLimit(`student-verify:${clientIp}`, {
+      maxRequests: 10,
+      windowMs: 60_000,
+    })
+
+    if (!rateLimit.success) {
+      const retryAfter = Math.max(1, Math.ceil((rateLimit.resetTime - Date.now()) / 1000))
+      return NextResponse.json(
+        {
+          error: `Terlalu banyak permintaan verifikasi. Harap tunggu ${retryAfter} detik sebelum mencoba kembali.`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+          },
+        }
+      )
+    }
+
     const body = await request.json()
     const parsed = verifySchema.safeParse(body)
 
