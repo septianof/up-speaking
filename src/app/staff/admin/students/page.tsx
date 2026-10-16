@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import {
   Users,
   UserPlus,
@@ -9,15 +10,18 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
 import { StudentRegisterModal } from "@/components/staff/StudentRegisterModal";
 import { ResetSessionModal } from "@/components/staff/ResetSessionModal";
 import { StudentRecord } from "@/lib/mock-data";
 import { TargetLevel, SessionStatus, FinalLevel } from "@/types/student";
+import { fetcher } from "@/lib/fetcher";
 
 interface ApiStudent {
   id: string;
@@ -34,50 +38,45 @@ interface ApiStudent {
 }
 
 export default function AdminStudentsPage() {
-  const [students, setStudents] = useState<StudentRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [editTargetStudent, setEditTargetStudent] = useState<StudentRecord | null>(null);
   const [deleteTargetStudent, setDeleteTargetStudent] = useState<StudentRecord | null>(null);
   const [resetTargetStudent, setResetTargetStudent] = useState<StudentRecord | null>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  // SWR: Cache-first dengan auto revalidation dan manual mutate
+  const { data, isLoading, isValidating, mutate } = useSWR<{ students: ApiStudent[] }>(
+    "/api/admin/students",
+    fetcher,
+    { revalidateOnFocus: true }
+  );
 
-  // Load students
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("/api/admin/students");
-      if (res.ok) {
-        const data = await res.json();
-        const mapped = ((data.students || []) as ApiStudent[]).map((s: ApiStudent) => ({
-          id: s.id,
-          fullName: s.fullName,
-          phone: s.phoneNumber,
-          targetLevel: s.targetLevel,
-          status: s.sessionStatus,
-          score: s.scorePercentage,
-          finalLevel: s.assignedLevel,
-          elapsedSeconds: s.elapsedSeconds,
-          createdAt: s.createdAt,
-          sessionId: s.sessionId,
-          resetCount: s.resetCount,
-        }));
-        setStudents(mapped);
-      }
-    } catch (err) {
-      console.error("Error loading students:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const students = useMemo<StudentRecord[]>(() => {
+    return ((data?.students || []) as ApiStudent[]).map((s: ApiStudent) => ({
+      id: s.id,
+      fullName: s.fullName,
+      phone: s.phoneNumber,
+      targetLevel: s.targetLevel,
+      status: s.sessionStatus,
+      score: s.scorePercentage,
+      finalLevel: s.assignedLevel,
+      elapsedSeconds: s.elapsedSeconds,
+      createdAt: s.createdAt,
+      sessionId: s.sessionId,
+      resetCount: s.resetCount,
+    }));
+  }, [data]);
 
+  // Reset ke halaman 1 saat filter atau pencarian berubah
   useEffect(() => {
-    loadData();
-  }, []);
+    setCurrentPage(1);
+  }, [searchQuery, selectedLevel, selectedStatus]);
 
   // Filter students
   const filteredStudents = useMemo(() => {
@@ -96,6 +95,13 @@ export default function AdminStudentsPage() {
     });
   }, [students, searchQuery, selectedLevel, selectedStatus]);
 
+  // Hitung total halaman dan data terpaginasi
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+  const paginatedStudents = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredStudents.slice(start, start + itemsPerPage);
+  }, [filteredStudents, currentPage, itemsPerPage]);
+
   const handleDeleteConfirm = async () => {
     if (!deleteTargetStudent) return;
     try {
@@ -104,7 +110,7 @@ export default function AdminStudentsPage() {
       });
       if (res.ok) {
         setDeleteTargetStudent(null);
-        loadData();
+        mutate();
       } else {
         const data = await res.json();
         alert(data.error || "Gagal menghapus data siswa.");
@@ -179,19 +185,32 @@ export default function AdminStudentsPage() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="primary"
-          size="md"
-          onClick={() => {
-            setEditTargetStudent(null);
-            setIsRegisterOpen(true);
-          }}
-          className="shrink-0 gap-2"
-        >
-          <UserPlus className="h-4 w-4" />
-          Daftarkan Siswa Baru
-        </Button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isValidating}
+            title="Segarkan data terbaru dari database"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+            <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+          </button>
+
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => {
+              setEditTargetStudent(null);
+              setIsRegisterOpen(true);
+            }}
+            className="shrink-0 gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Daftarkan Siswa Baru
+          </Button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -319,8 +338,9 @@ export default function AdminStudentsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredStudents.map((std, idx) => {
+                paginatedStudents.map((std, idx) => {
                   const canReset = std.status === "IN_PROGRESS" || std.status === "COMPLETED";
+                  const rowNum = (currentPage - 1) * itemsPerPage + idx + 1;
 
                   return (
                     <tr
@@ -328,7 +348,7 @@ export default function AdminStudentsPage() {
                       className="hover:bg-surface-subtle/40 transition-colors"
                     >
                       <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
-                        {idx + 1}
+                        {rowNum}
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-text-primary">{std.fullName}</div>
@@ -400,6 +420,21 @@ export default function AdminStudentsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <div className="border-t border-surface-border bg-surface-white px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredStudents.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(limit) => {
+              setItemsPerPage(limit);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
       </div>
 
       {/* Registration & Edit Modal */}
@@ -410,7 +445,7 @@ export default function AdminStudentsPage() {
           setIsRegisterOpen(false);
           setEditTargetStudent(null);
         }}
-        onSuccess={() => loadData()}
+        onSuccess={() => mutate()}
       />
 
       {/* Reset Session Modal */}
@@ -418,7 +453,7 @@ export default function AdminStudentsPage() {
         isOpen={Boolean(resetTargetStudent)}
         student={resetTargetStudent}
         onClose={() => setResetTargetStudent(null)}
-        onSuccess={() => loadData()}
+        onSuccess={() => mutate()}
       />
 
       {/* Delete Student Confirmation Modal */}

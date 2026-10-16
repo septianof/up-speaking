@@ -1,42 +1,41 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Download, Printer, Search } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
+import { Download, Printer, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import { Pagination } from "@/components/ui/Pagination";
 import { getActiveStaff } from "@/lib/staff-session";
 import { exportReportsToExcel, ReportItem } from "@/lib/export/excel-generator";
 import { exportReportsToPdf } from "@/lib/export/pdf-generator";
 import { TargetLevel } from "@/types/student";
+import { fetcher } from "@/lib/fetcher";
 
 export default function TutorReportsPage() {
   const staff = getActiveStaff();
   const tutorLevel: TargetLevel = staff?.targetLevel || "ELEMENTARY";
 
-  const [reports, setReports] = useState<ReportItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFinalLevel, setSelectedFinalLevel] = useState<string>("ALL");
-  const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(`/api/admin/reports?level=${tutorLevel}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReports(data.reports || []);
-      }
-    } catch (err) {
-      console.error("Error loading tutor reports:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tutorLevel]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // SWR: Otomatis cache-first dengan revalidasi fokus
+  const { data, isLoading, isValidating, mutate } = useSWR<{ reports: ReportItem[] }>(
+    `/api/admin/reports?level=${tutorLevel}`,
+    fetcher,
+    { revalidateOnFocus: true }
+  );
+
+  const reports = useMemo(() => data?.reports || [], [data]);
+
+  // Reset pagination ke halaman 1 saat filter atau pencarian berubah
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    setCurrentPage(1);
+  }, [searchQuery, selectedFinalLevel]);
 
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
@@ -52,6 +51,13 @@ export default function TutorReportsPage() {
       return matchSearch && matchFinalLevel;
     });
   }, [reports, searchQuery, selectedFinalLevel]);
+
+  // Hitung total halaman dan data laporan terpaginasi
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
+  const paginatedReports = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredReports.slice(start, start + itemsPerPage);
+  }, [filteredReports, currentPage, itemsPerPage]);
 
   const stats = useMemo(() => {
     const evaluated = filteredReports.filter((s) => s.assignedLevel);
@@ -98,8 +104,19 @@ export default function TutorReportsPage() {
           </p>
         </div>
 
-        {/* Action Bar Ekspor */}
+        {/* Action Bar Ekspor & Refresh */}
         <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isValidating}
+            title="Segarkan data terbaru dari database"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+            <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+          </button>
+
           <Button
             type="button"
             variant="outline"
@@ -219,11 +236,13 @@ export default function TutorReportsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredReports.map((r, idx) => {
+                paginatedReports.map((r, idx) => {
+                  const rowNum = (currentPage - 1) * itemsPerPage + idx + 1;
+
                   return (
                     <tr key={r.studentId} className="hover:bg-surface-subtle/40 transition-colors">
                       <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
-                        {idx + 1}
+                        {rowNum}
                       </td>
                       <td className="py-3.5 px-4 font-bold text-text-primary">
                         {r.fullName}
@@ -271,6 +290,21 @@ export default function TutorReportsPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="border-t border-surface-border bg-surface-white px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredReports.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(limit) => {
+              setItemsPerPage(limit);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
     </div>

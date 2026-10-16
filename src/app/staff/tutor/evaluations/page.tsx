@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, Award } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
+import { Search, Award, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import { Pagination } from "@/components/ui/Pagination";
 import { EvaluationModal } from "@/components/staff/EvaluationModal";
 import { StudentRecord } from "@/lib/mock-data";
 import { TargetLevel, SessionStatus, FinalLevel } from "@/types/student";
+import { fetcher } from "@/lib/fetcher";
 
 interface ApiEvaluationItem {
   sessionId: string | null;
@@ -24,49 +27,43 @@ interface ApiEvaluationItem {
 }
 
 export default function TutorEvaluationsPage() {
-  const [students, setStudents] = useState<StudentRecord[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(
-        `/api/tutor/evaluations?level=ALL&_t=${Date.now()}`,
-        { cache: "no-store" }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const mapped = ((data.evaluations || []) as ApiEvaluationItem[]).map((e: ApiEvaluationItem) => ({
-          id: e.studentId,
-          sessionId: e.sessionId || undefined,
-          fullName: e.fullName,
-          phone: e.phoneNumber,
-          targetLevel: e.targetLevel,
-          status: e.sessionStatus,
-          score: e.scorePercentage !== null ? Math.round(((e.scorePercentage || 0) / 100) * 10) : undefined,
-          totalQuestions: 10,
-          elapsedSeconds: e.elapsedSeconds,
-          finalLevel: e.assignedLevel || undefined,
-          submittedAt: e.submittedAt || undefined,
-          notes: e.tutorNotes || undefined,
-          createdAt: e.createdAt || new Date().toISOString(),
-        }));
-        setStudents(mapped);
-      }
-    } catch (err) {
-      console.error("Error loading tutor evaluations:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // SWR: Otomatis cache-first dengan revalidasi fokus window
+  const { data, isLoading, isValidating, mutate } = useSWR<{ evaluations: ApiEvaluationItem[] }>(
+    "/api/tutor/evaluations?level=ALL",
+    fetcher,
+    { revalidateOnFocus: true }
+  );
+
+  const students = useMemo<StudentRecord[]>(() => {
+    return ((data?.evaluations || []) as ApiEvaluationItem[]).map((e: ApiEvaluationItem) => ({
+      id: e.studentId,
+      sessionId: e.sessionId || undefined,
+      fullName: e.fullName,
+      phone: e.phoneNumber,
+      targetLevel: e.targetLevel,
+      status: e.sessionStatus,
+      score: e.scorePercentage !== null ? Math.round(((e.scorePercentage || 0) / 100) * 10) : undefined,
+      totalQuestions: 10,
+      elapsedSeconds: e.elapsedSeconds,
+      finalLevel: e.assignedLevel || undefined,
+      submittedAt: e.submittedAt || undefined,
+      notes: e.tutorNotes || undefined,
+      createdAt: e.createdAt || new Date().toISOString(),
+    }));
+  }, [data]);
+
+  // Reset ke halaman 1 jika filter atau pencarian berubah
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    setCurrentPage(1);
+  }, [searchQuery, selectedLevel, selectedStatus]);
 
   // Filter siswa berdasarkan pencarian, jenjang, dan status sesi
   const filteredStudents = useMemo(() => {
@@ -84,6 +81,13 @@ export default function TutorEvaluationsPage() {
       return matchSearch && matchLevel && matchStatus;
     });
   }, [students, searchQuery, selectedLevel, selectedStatus]);
+
+  // Hitung total halaman dan data terpaginasi
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+  const paginatedStudents = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredStudents.slice(start, start + itemsPerPage);
+  }, [filteredStudents, currentPage, itemsPerPage]);
 
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
@@ -125,13 +129,26 @@ export default function TutorEvaluationsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="pb-2 border-b border-surface-border">
-        <h1 className="text-2xl font-black text-text-primary">
-          Penilaian &amp; Evaluasi Siswa
-        </h1>
-        <p className="text-sm text-text-muted mt-1">
-          Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-surface-border">
+        <div>
+          <h1 className="text-2xl font-black text-text-primary">
+            Penilaian &amp; Evaluasi Siswa
+          </h1>
+          <p className="text-sm text-text-muted mt-1">
+            Peninjauan hasil lembar placement test dan penetapan level resmi siswa.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => mutate()}
+          disabled={isValidating}
+          title="Segarkan data terbaru dari database"
+          className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
+          <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
+        </button>
       </div>
 
       {/* Filter and Search Bar */}
@@ -248,14 +265,16 @@ export default function TutorEvaluationsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredStudents.map((std, idx) => {
+                paginatedStudents.map((std, idx) => {
+                  const rowNum = (currentPage - 1) * itemsPerPage + idx + 1;
+
                   return (
                     <tr
                       key={std.id}
                       className="hover:bg-surface-subtle/40 transition-colors"
                     >
                       <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
-                        {idx + 1}
+                        {rowNum}
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-text-primary">{std.fullName}</div>
@@ -317,6 +336,21 @@ export default function TutorEvaluationsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <div className="border-t border-surface-border bg-surface-white px-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredStudents.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(limit) => {
+              setItemsPerPage(limit);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
       </div>
 
       {/* Modal Evaluasi */}
@@ -325,7 +359,7 @@ export default function TutorEvaluationsPage() {
         student={selectedStudent}
         onClose={() => setSelectedStudent(null)}
         onSuccess={() => {
-          loadData();
+          mutate();
         }}
       />
     </div>
