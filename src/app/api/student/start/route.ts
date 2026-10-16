@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { fisherYatesShuffle } from '@/lib/algorithms/fisher-yates'
+import { fisherYatesShuffle, seededFisherYatesShuffle } from '@/lib/algorithms/fisher-yates'
 import { uuidSchema } from '@/lib/validators'
 
 const startSchema = z.object({
@@ -38,24 +38,41 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Cek apakah ada sesi IN_PROGRESS yang sedang berjalan
-    const { data: activeSession, error: activeSessionError } = await supabase
+    // 2. Cek sesi tes terakhir siswa yang belum di-reset
+    const { data: latestSession, error: sessionError } = await supabase
       .from('test_sessions')
       .select('*')
       .eq('student_id', studentId)
-      .eq('status', 'IN_PROGRESS')
+      .neq('status', 'RESET')
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
 
-    if (activeSessionError) {
-      console.error('Error checking active session:', activeSessionError)
+    if (sessionError) {
+      console.error('Error checking active session:', sessionError)
       return NextResponse.json(
         { error: 'Gagal memeriksa sesi tes' },
         { status: 500 }
       )
     }
 
-    // A. JIKA SUDAH ADA SESI BERJALAN: Lanjutkan sesi (Single Device Takeover)
-    if (activeSession) {
+    // A. JIKA STATUS SUDAH SELESAI (COMPLETED atau FINALIZED): Tolak pembuatan sesi baru!
+    if (latestSession && (latestSession.status === 'COMPLETED' || latestSession.status === 'FINALIZED')) {
+      return NextResponse.json(
+        {
+          error: 'Kamu sudah menyelesaikan tes ini. Mengalihkan ke lembar hasil...',
+          isCompleted: true,
+          status: latestSession.status,
+          sessionId: latestSession.id,
+        },
+        { status: 409 }
+      )
+    }
+
+    // B. JIKA SUDAH ADA SESI BERJALAN: Lanjutkan sesi (Single Device Takeover)
+    if (latestSession && latestSession.status === 'IN_PROGRESS') {
+      const activeSession = latestSession
+
       // Perbarui device token ke perangkat aktif terbaru
       await supabase
         .from('test_sessions')
@@ -106,10 +123,12 @@ export async function POST(request: Request) {
 
       const formattedQuestions = responses.map((resp) => {
         const q = resp.questions as unknown as RawQuestion
-        const options = (q?.question_options || []).map((opt) => ({
+        const rawOptions = (q?.question_options || []).map((opt) => ({
           id: opt.id,
           optionText: opt.option_text,
         }))
+        // Acak opsi secara deterministik per sesi & butir soal agar urutannya konsisten di semua perangkat
+        const shuffledOptions = seededFisherYatesShuffle(rawOptions, `${activeSession.id}_${q.id}`)
 
         return {
           id: q.id,
@@ -117,9 +136,16 @@ export async function POST(request: Request) {
           questionText: q.question_text,
           targetLevel: q.target_level,
           selectedOptionId: resp.selected_option_id,
-          options,
+          options: shuffledOptions,
         }
       })
+
+      // Cari nomor butir pertama yang belum dijawab
+      const firstUnansweredIndex = formattedQuestions.findIndex(
+        (q) => !q.selectedOptionId
+      )
+      const resumeQuestionIndex =
+        firstUnansweredIndex !== -1 ? firstUnansweredIndex : Math.max(0, formattedQuestions.length - 1)
 
       // Hitung elapsed seconds berdasarkan started_at server
       const startedAtMs = new Date(activeSession.started_at).getTime()
@@ -134,6 +160,7 @@ export async function POST(request: Request) {
           startedAt: activeSession.started_at,
           elapsedSeconds: currentElapsed,
           status: activeSession.status,
+          currentQuestionIndex: resumeQuestionIndex,
           questions: formattedQuestions,
         },
       })
@@ -217,12 +244,12 @@ export async function POST(request: Request) {
         selected_option_id: null,
       })
 
-      // Acak urutan pilihan opsi jawaban dengan Fisher-Yates
+      // Acak urutan pilihan opsi jawaban dengan seeded Fisher-Yates per sesi
       const rawOptions = (q.question_options || []).map((opt) => ({
         id: opt.id,
         optionText: opt.option_text,
       }))
-      const shuffledOptions = fisherYatesShuffle(rawOptions)
+      const shuffledOptions = seededFisherYatesShuffle(rawOptions, `${newSession.id}_${q.id}`)
 
       clientQuestions.push({
         id: q.id,
@@ -253,6 +280,7 @@ export async function POST(request: Request) {
         startedAt: newSession.started_at,
         elapsedSeconds: 0,
         status: newSession.status,
+        currentQuestionIndex: 0,
         questions: clientQuestions,
       },
     })

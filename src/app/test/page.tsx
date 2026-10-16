@@ -60,6 +60,16 @@ export default function TestPage() {
     deviceToken: session?.deviceToken,
     getElapsedSeconds: () => session?.elapsedSeconds || 0,
     onDeviceConflict: () => setIsDeviceConflictModalOpen(true),
+    onSessionCompleted: () => {
+      if (session) {
+        const completedSession: StudentSession = {
+          ...session,
+          status: "COMPLETED",
+        };
+        saveSession(completedSession);
+      }
+      router.push("/result");
+    },
   });
 
   useEffect(() => {
@@ -70,7 +80,17 @@ export default function TestPage() {
 
   useEffect(() => {
     const active = getActiveSession();
-    if (!active || active.status !== "IN_PROGRESS") {
+    if (!active) {
+      router.push("/");
+      return;
+    }
+
+    if (active.status === "COMPLETED" || active.status === "FINALIZED") {
+      router.push("/result");
+      return;
+    }
+
+    if (active.status !== "IN_PROGRESS") {
       router.push("/");
       return;
     }
@@ -93,14 +113,37 @@ export default function TestPage() {
           deviceToken: active.deviceToken,
         }),
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === 409) {
+            router.push("/result");
+            return null;
+          }
+          return res.json();
+        })
         .then((data) => {
+          if (!data) return;
+          if (data.isCompleted || data.status === "COMPLETED" || data.status === "FINALIZED") {
+            const updated = { ...active, status: data.status || "COMPLETED" };
+            saveSession(updated);
+            router.push("/result");
+            return;
+          }
           if (data.session?.questions) {
             setQuestions(data.session.questions);
+            const firstUnanswered = data.session.questions.findIndex(
+              (q: { selectedOptionId?: string | null }) => !q.selectedOptionId
+            );
+            const resumeIdx =
+              typeof data.session.currentQuestionIndex === "number"
+                ? data.session.currentQuestionIndex
+                : (firstUnanswered !== -1 ? firstUnanswered : 0);
+
+            setCurrentIndex(resumeIdx);
             const updated: StudentSession = {
               ...active,
               questions: data.session.questions,
               elapsedSeconds: data.session.elapsedSeconds || active.elapsedSeconds,
+              currentQuestionIndex: resumeIdx,
             };
             setSession(updated);
             saveSession(updated);

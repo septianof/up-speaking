@@ -10,6 +10,7 @@ export interface UseOfflineSyncOptions {
   deviceToken?: string
   getElapsedSeconds?: () => number
   onDeviceConflict?: () => void
+  onSessionCompleted?: () => void
 }
 
 export interface UseOfflineSyncReturn {
@@ -26,6 +27,7 @@ export function useOfflineSync({
   deviceToken,
   getElapsedSeconds,
   onDeviceConflict,
+  onSessionCompleted,
 }: UseOfflineSyncOptions): UseOfflineSyncReturn {
   const [isOnline, setIsOnline] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -126,6 +128,7 @@ export function useOfflineSync({
             elapsedSeconds,
             responses,
           }),
+          keepalive: true,
         })
 
         const data = await res.json()
@@ -133,6 +136,13 @@ export function useOfflineSync({
         if (res.status === 403 || data.deviceConflict) {
           setDeviceConflict(true)
           onDeviceConflict?.()
+          return false
+        }
+
+        if (res.status === 409) {
+          if (data.status === 'COMPLETED' || data.status === 'FINALIZED') {
+            onSessionCompleted?.()
+          }
           return false
         }
 
@@ -153,7 +163,7 @@ export function useOfflineSync({
         setIsSyncing(false)
       }
     },
-    [sessionId, deviceToken, getElapsedSeconds, onDeviceConflict, saveQueueToStorage]
+    [sessionId, deviceToken, getElapsedSeconds, onDeviceConflict, onSessionCompleted, saveQueueToStorage]
   )
 
   // Enqueue an answer and trigger debounced sync if online
@@ -179,7 +189,7 @@ export function useOfflineSync({
     [flushPendingSync, saveQueueToStorage]
   )
 
-  // Listen to network status
+  // Listen to network status & page visibility / pagehide for instant flush
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -195,14 +205,34 @@ export function useOfflineSync({
       setIsOnline(false)
     }
 
+    const handleFlushOnLeave = () => {
+      if (queueRef.current.size > 0 && navigator.onLine) {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current)
+        }
+        flushPendingSync()
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleFlushOnLeave()
+      }
+    }
+
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', handleFlushOnLeave)
 
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', handleFlushOnLeave)
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current)
+        flushPendingSync()
       }
     }
   }, [flushPendingSync])

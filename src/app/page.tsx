@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { LoginModal } from "@/components/student/LoginModal";
 import { Mascot } from "@/components/student/Mascot";
-import { getActiveSession } from "@/lib/session";
+import { getActiveSession, saveSession, clearSession } from "@/lib/session";
+import { StudentSession } from "@/types/student";
 import { SITE_CONFIG } from "@/lib/site-config";
 import {
   BookOpen,
@@ -93,13 +94,67 @@ export default function Home() {
   // Auto-Redirect check for active ongoing test session (FR-005, SCR-001)
   useEffect(() => {
     const session = getActiveSession();
-    if (session && session.status === "IN_PROGRESS") {
-      setActiveSession(session);
-      // Auto-redirect directly to the active test sheet
-      router.push("/test");
-    } else {
+    if (!session) {
       setCheckingSession(false);
+      return;
     }
+
+    // Jika sedang offline, percayai status sesi di cache lokal
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      if (session.status === "IN_PROGRESS") {
+        setActiveSession(session);
+        router.push("/test");
+      } else if (session.status === "COMPLETED" || session.status === "FINALIZED") {
+        router.push("/result");
+      } else {
+        setCheckingSession(false);
+      }
+      return;
+    }
+
+    // Validasi status sesi ke server Supabase untuk mencegah redirect data usang
+    fetch("/api/student/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: session.fullName,
+        phoneNumber: session.phone,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Verification failed");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.status === "IN_PROGRESS") {
+          setActiveSession(session);
+          router.push("/test");
+        } else if (data.status === "COMPLETED" || data.status === "FINALIZED") {
+          const updatedSession: StudentSession = {
+            ...session,
+            sessionId: data.sessionId || session.sessionId,
+            status: data.status,
+          };
+          saveSession(updatedSession);
+          router.push("/result");
+        } else {
+          // Status RESET atau NOT_STARTED -> Bersihkan sesi usang
+          clearSession();
+          setActiveSession(null);
+          setCheckingSession(false);
+        }
+      })
+      .catch(() => {
+        // Fallback jika verifikasi gagal (network error)
+        if (session.status === "IN_PROGRESS") {
+          setActiveSession(session);
+          router.push("/test");
+        } else if (session.status === "COMPLETED" || session.status === "FINALIZED") {
+          router.push("/result");
+        } else {
+          setCheckingSession(false);
+        }
+      });
   }, [router]);
 
   if (checkingSession && activeSession) {
@@ -109,7 +164,7 @@ export default function Home() {
           <Mascot mood="think" size={90} floating />
           <div className="h-9 w-9 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
           <p className="text-base font-bold text-text-secondary">
-            Mendeteksi sesi tesmu yang sedang berjalan... Mengalihkan ke lembar soal ya!
+            Mendeteksi status sesi tesmu... Mengalihkan ke halaman yang sesuai ya!
           </p>
         </div>
       </main>

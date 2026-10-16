@@ -118,6 +118,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
       const startData = await startRes.json();
 
+      if (startRes.status === 409 || startData.isCompleted) {
+        const resultSession = {
+          sessionId: startData.sessionId || verifyData.sessionId || `sess_${verifyData.studentId}`,
+          studentId: verifyData.studentId,
+          fullName: verifyData.fullName,
+          phone: verifyData.phoneNumber,
+          targetLevel: verifyData.targetLevel,
+          status: startData.status || "COMPLETED",
+          currentQuestionIndex: 0,
+          totalQuestions: 10,
+          answers: {},
+          elapsedSeconds: 0,
+          deviceToken: "readonly",
+          startedAt: new Date().toISOString(),
+        };
+        saveSession(resultSession);
+        onClose();
+        router.push("/result");
+        return;
+      }
+
       if (!startRes.ok) {
         setError(
           startData.error ||
@@ -135,6 +156,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         }
       });
 
+      const resumeIndex =
+        typeof startData.session?.currentQuestionIndex === "number"
+          ? startData.session.currentQuestionIndex
+          : 0;
+
       const studentSession = {
         sessionId: startData.session.id,
         studentId: verifyData.studentId,
@@ -142,7 +168,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         phone: verifyData.phoneNumber,
         targetLevel: verifyData.targetLevel,
         status: "IN_PROGRESS" as const,
-        currentQuestionIndex: 0,
+        currentQuestionIndex: resumeIndex,
         totalQuestions: questionsList.length,
         answers: existingAnswers,
         elapsedSeconds: startData.session.elapsedSeconds || 0,
