@@ -83,7 +83,7 @@ export async function GET(request: Request) {
     }
 
     interface EvaluationItem {
-      sessionId: string
+      sessionId: string | null
       studentId: string
       fullName: string
       phoneNumber: string
@@ -107,35 +107,29 @@ export async function GET(request: Request) {
         (s) => s.status !== 'RESET'
       )
       const session = validSessions[0]
+      const sessionStatus = session?.status || 'NOT_STARTED'
 
-      if (!session) return
-
-      // Hanya tampilkan siswa yang sudah COMPLETED atau FINALIZED
-      if (session.status !== 'COMPLETED' && session.status !== 'FINALIZED') {
-        return
-      }
-
-      if (status !== 'ALL' && session.status !== status) {
+      if (status !== 'ALL' && sessionStatus !== status) {
         return
       }
 
       const evalData = normalizeSingleRelation(
-        session.placement_evaluations as unknown as EvalInfo | EvalInfo[]
+        session?.placement_evaluations as unknown as EvalInfo | EvalInfo[]
       )
       const tutorProfile = normalizeSingleRelation(
         evalData?.profiles as unknown as TutorProfile | TutorProfile[]
       )
 
       evaluationList.push({
-        sessionId: session.id,
+        sessionId: session?.id || null,
         studentId: st.id,
         fullName: st.full_name,
         phoneNumber: st.phone_number,
         targetLevel: st.target_level,
-        sessionStatus: session.status,
-        scorePercentage: session.score_percentage,
-        elapsedSeconds: session.elapsed_seconds,
-        submittedAt: session.submitted_at || session.started_at,
+        sessionStatus: sessionStatus,
+        scorePercentage: session?.score_percentage ?? null,
+        elapsedSeconds: session?.elapsed_seconds ?? 0,
+        submittedAt: session?.submitted_at || session?.started_at || null,
         assignedLevel: evalData?.assigned_level || null,
         tutorNotes: evalData?.tutor_notes || null,
         tutorName: tutorProfile?.full_name || null,
