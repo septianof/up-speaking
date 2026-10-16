@@ -46,6 +46,21 @@ export async function middleware(request: NextRequest) {
       redirectUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(redirectUrl)
     }
+
+    // Otorisasi Peran: Hanya peran ADMIN yang diizinkan mengakses /staff/admin/*
+    if (pathname.startsWith('/staff/admin')) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'ADMIN') {
+        const redirectUrl = request.nextUrl.clone()
+        redirectUrl.pathname = '/staff/tutor/dashboard'
+        return NextResponse.redirect(redirectUrl)
+      }
+    }
   }
 
   return supabaseResponse

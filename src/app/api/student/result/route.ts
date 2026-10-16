@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { normalizeSingleRelation } from '@/lib/utils'
+import {
+  verifyStudentToken,
+  STUDENT_TOKEN_COOKIE_NAME,
+} from '@/lib/student-token'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -17,6 +23,41 @@ export async function GET(request: Request) {
         { error: 'Parameter studentId atau sessionId wajib disertakan' },
         { status: 400 }
       )
+    }
+
+    // 1. Cek apakah diakses oleh staf lembaga terautentikasi (Admin atau Tutor)
+    const serverClient = createClient()
+    const {
+      data: { user: staffUser },
+    } = await serverClient.auth.getUser()
+
+    // 2. Jika bukan staf lembaga, wajib divalidasi kepemilikan sesi via cookie token siswa
+    if (!staffUser) {
+      const cookieStore = cookies()
+      const rawToken = cookieStore.get(STUDENT_TOKEN_COOKIE_NAME)?.value
+      const verifiedToken = verifyStudentToken(rawToken)
+
+      if (!verifiedToken) {
+        return NextResponse.json(
+          { error: 'Akses ditolak: Autentikasi sesi siswa diperlukan untuk melihat hasil ujian.' },
+          { status: 401 }
+        )
+      }
+
+      // Pastikan token siswa cocok dengan studentId atau sessionId yang diminta
+      const matchesStudent =
+        !!studentId && verifiedToken.studentId === studentId
+      const matchesSession =
+        !!sessionId &&
+        (verifiedToken.sessionId === sessionId ||
+          verifiedToken.studentId === studentId)
+
+      if (!matchesStudent && !matchesSession) {
+        return NextResponse.json(
+          { error: 'Akses ditolak: Anda tidak memiliki wewenang untuk melihat lembar hasil ujian ini.' },
+          { status: 403 }
+        )
+      }
     }
 
     const supabase = createAdminClient()

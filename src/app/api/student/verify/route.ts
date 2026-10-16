@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  createStudentToken,
+  STUDENT_TOKEN_COOKIE_NAME,
+} from '@/lib/student-token'
 
 const verifySchema = z.object({
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
@@ -69,7 +73,12 @@ export async function POST(request: Request) {
     const hasActiveSession =
       !!latestSession && latestSession.status === 'IN_PROGRESS'
 
-    return NextResponse.json({
+    const studentToken = createStudentToken({
+      studentId: student.id,
+      sessionId: latestSession?.id || null,
+    })
+
+    const response = NextResponse.json({
       studentId: student.id,
       fullName: student.full_name,
       phoneNumber: student.phone_number,
@@ -78,6 +87,18 @@ export async function POST(request: Request) {
       sessionId: latestSession?.id || null,
       status: latestSession?.status || 'NOT_STARTED',
     })
+
+    response.cookies.set({
+      name: STUDENT_TOKEN_COOKIE_NAME,
+      value: studentToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 hari
+    })
+
+    return response
   } catch (err) {
     console.error('Unexpected error in student verify:', err)
     return NextResponse.json(

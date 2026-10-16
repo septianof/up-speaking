@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/staff/Sidebar";
-import { getActiveStaff } from "@/lib/staff-session";
+import { saveStaffSession } from "@/lib/staff-session";
 import { StaffUser } from "@/types/staff";
 
 export default function AdminLayout({
@@ -16,20 +16,38 @@ export default function AdminLayout({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const active = getActiveStaff();
-    if (!active) {
-      router.push("/staff/login");
-      return;
-    }
+    let isMounted = true;
 
-    // Role Guard: If tutor tries to access admin, redirect to tutor dashboard
-    if (active.role !== "ADMIN") {
-      router.push("/staff/tutor/dashboard");
-      return;
-    }
+    fetch("/api/auth/me")
+      .then((res) => {
+        if (!res.ok) throw new Error("Sesi tidak valid");
+        return res.json();
+      })
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data.authenticated || !data.user) {
+          router.replace("/staff/login");
+          return;
+        }
 
-    setUser(active);
-    setIsLoading(false);
+        // Role Guard: Pastikan peran adalah ADMIN
+        if (data.user.role !== "ADMIN") {
+          router.replace("/staff/tutor/dashboard");
+          return;
+        }
+
+        saveStaffSession(data.user);
+        setUser(data.user);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        router.replace("/staff/login");
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (isLoading || !user) {

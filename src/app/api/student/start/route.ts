@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fisherYatesShuffle, seededFisherYatesShuffle } from '@/lib/algorithms/fisher-yates'
 import { uuidSchema } from '@/lib/validators'
+import {
+  createStudentToken,
+  verifyStudentToken,
+  STUDENT_TOKEN_COOKIE_NAME,
+} from '@/lib/student-token'
 
 const startSchema = z.object({
   studentId: uuidSchema('ID siswa tidak valid'),
@@ -22,6 +28,19 @@ export async function POST(request: Request) {
     }
 
     const { studentId, deviceToken } = parsed.data
+
+    // Validasi token verifikasi identitas siswa yang diterbitkan saat /api/student/verify
+    const cookieStore = cookies()
+    const rawToken = cookieStore.get(STUDENT_TOKEN_COOKIE_NAME)?.value
+    const verifiedToken = verifyStudentToken(rawToken)
+
+    if (!verifiedToken || verifiedToken.studentId !== studentId) {
+      return NextResponse.json(
+        { error: 'Akses tidak sah: Silakan verifikasi identitas siswa terlebih dahulu.' },
+        { status: 401 }
+      )
+    }
+
     const supabase = createAdminClient()
 
     // 1. Verifikasi eksistensi siswa
@@ -150,7 +169,13 @@ export async function POST(request: Request) {
       // Gunakan akumulasi durasi aktif pengerjaan yang tersimpan di sesi
       const currentElapsed = activeSession.elapsed_seconds || 0
 
-      return NextResponse.json({
+      const updatedToken = createStudentToken({
+        studentId,
+        sessionId: activeSession.id,
+        deviceToken,
+      })
+
+      const response = NextResponse.json({
         session: {
           id: activeSession.id,
           startedAt: activeSession.started_at,
@@ -160,6 +185,18 @@ export async function POST(request: Request) {
           questions: formattedQuestions,
         },
       })
+
+      response.cookies.set({
+        name: STUDENT_TOKEN_COOKIE_NAME,
+        value: updatedToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      })
+
+      return response
     }
 
     // B. JIKA BELUM ADA SESI BERJALAN: Inisialisasi sesi baru dengan Fisher-Yates Shuffle
@@ -270,7 +307,13 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({
+    const updatedToken = createStudentToken({
+      studentId,
+      sessionId: newSession.id,
+      deviceToken,
+    })
+
+    const response = NextResponse.json({
       session: {
         id: newSession.id,
         startedAt: newSession.started_at,
@@ -280,6 +323,18 @@ export async function POST(request: Request) {
         questions: clientQuestions,
       },
     })
+
+    response.cookies.set({
+      name: STUDENT_TOKEN_COOKIE_NAME,
+      value: updatedToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    })
+
+    return response
   } catch (err) {
     console.error('Unexpected error in student start:', err)
     return NextResponse.json(

@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { uuidSchema, optionalUuidSchema } from '@/lib/validators'
+import {
+  createStudentToken,
+  STUDENT_TOKEN_COOKIE_NAME,
+} from '@/lib/student-token'
 
 const submitSchema = z.object({
   sessionId: uuidSchema('ID sesi tidak valid'),
@@ -158,7 +162,13 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({
+    const updatedToken = createStudentToken({
+      studentId: session.student_id,
+      sessionId,
+      deviceToken,
+    })
+
+    const response = NextResponse.json({
       success: true,
       status: 'COMPLETED',
       scorePercentage,
@@ -166,6 +176,18 @@ export async function POST(request: Request) {
       correctCount,
       totalQuestions,
     })
+
+    response.cookies.set({
+      name: STUDENT_TOKEN_COOKIE_NAME,
+      value: updatedToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    })
+
+    return response
   } catch (err) {
     console.error('Unexpected error in student submit:', err)
     return NextResponse.json(
