@@ -90,13 +90,13 @@ export default function AdminReportsPage() {
   const getLevelBadge = (level: TargetLevel | string) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 whitespace-nowrap">
           Elementary
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border whitespace-nowrap">
         High School
       </span>
     );
@@ -220,13 +220,13 @@ export default function AdminReportsPage() {
           <table className="w-full min-w-[720px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-12 text-center">No</th>
-                <th className="py-3.5 px-4">Nama Siswa</th>
-                <th className="py-3.5 px-4">Nomor HP</th>
-                <th className="py-3.5 px-4">Jenjang</th>
-                <th className="py-3.5 px-4 text-center">Skor Objektif</th>
-                <th className="py-3.5 px-4 text-center">Level Final Resmi</th>
-                <th className="py-3.5 px-4 text-center">Tutor Penilai</th>
+                <th className="py-3.5 px-4 w-12 text-center whitespace-nowrap">No</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nama Siswa</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nomor HP</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Jenjang</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Skor</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Level</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Tutor</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -266,26 +266,26 @@ export default function AdminReportsPage() {
 
                   return (
                     <tr key={r.studentId} className="hover:bg-surface-subtle/40 transition-colors">
-                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
+                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs whitespace-nowrap">
                         {rowNum}
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-text-primary">
+                      <td className="py-3.5 px-4 font-bold text-text-primary whitespace-nowrap">
                         {r.fullName}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {r.phoneNumber}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {getLevelBadge(r.targetLevel)}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <span className="font-bold text-primary-600">
                           {r.scorePercentage !== null && r.scorePercentage !== undefined
                             ? `${Math.round(r.scorePercentage)}%`
                             : "-"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {r.assignedLevel ? (
                           <Badge
                             variant={
@@ -300,12 +300,12 @@ export default function AdminReportsPage() {
                             {r.assignedLevel}
                           </Badge>
                         ) : (
-                          <span className="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                          <span className="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 whitespace-nowrap">
                             Menunggu Penilaian
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center text-xs text-text-muted">
+                      <td className="py-3.5 px-4 text-center text-xs text-text-muted whitespace-nowrap">
                         {r.tutorName || "-"}
                       </td>
                     </tr>

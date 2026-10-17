@@ -106,13 +106,13 @@ export default function AdminTutorsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 whitespace-nowrap">
           Elementary
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border whitespace-nowrap">
         High School
       </span>
     );
@@ -206,12 +206,12 @@ export default function AdminTutorsPage() {
           <table className="w-full min-w-[650px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-12 text-center">No</th>
-                <th className="py-3.5 px-4">Nama Lengkap Tutor</th>
-                <th className="py-3.5 px-4">Email Staf</th>
-                <th className="py-3.5 px-4">Jenjang Pengampu</th>
-                <th className="py-3.5 px-4">Terdaftar</th>
-                <th className="py-3.5 px-4 text-center w-28">Aksi</th>
+                <th className="py-3.5 px-4 w-12 text-center whitespace-nowrap">No</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nama Tutor</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Email</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Jenjang</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Terdaftar</th>
+                <th className="py-3.5 px-4 text-center w-28 whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -265,22 +265,22 @@ export default function AdminTutorsPage() {
 
                   return (
                     <tr key={tut.id} className="hover:bg-surface-subtle/40 transition-colors">
-                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
+                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs whitespace-nowrap">
                         {rowNum}
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-text-primary">
+                      <td className="py-3.5 px-4 font-bold text-text-primary whitespace-nowrap">
                         {tut.fullName}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {tut.email}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {getLevelBadge(tut.targetLevel)}
                       </td>
-                      <td className="py-3.5 px-4 text-xs text-text-muted">
+                      <td className="py-3.5 px-4 text-xs text-text-muted whitespace-nowrap">
                         {formatDate(tut.createdAt)}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-1.5">
                           {/* Edit Tutor */}
                           <button

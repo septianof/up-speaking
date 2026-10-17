@@ -92,13 +92,13 @@ export default function TutorEvaluationsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 whitespace-nowrap">
           Elementary
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border whitespace-nowrap">
         High School
       </span>
     );
@@ -110,15 +110,15 @@ export default function TutorEvaluationsPage() {
         return <Badge variant="neutral" size="sm">Belum Mulai</Badge>;
       case "IN_PROGRESS":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
             Sedang Tes
           </span>
         );
       case "COMPLETED":
-        return <Badge variant="primary" size="sm">Menunggu Evaluasi</Badge>;
+        return <Badge variant="primary" size="sm">Perlu Dinilai</Badge>;
       case "FINALIZED":
-        return <Badge variant="success" size="sm">Selesai & Dinilai</Badge>;
+        return <Badge variant="success" size="sm">Dinilai</Badge>;
       case "RESET":
         return <Badge variant="accent" size="sm">Direset</Badge>;
       default:
@@ -222,13 +222,13 @@ export default function TutorEvaluationsPage() {
           <table className="w-full min-w-[700px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-12 text-center">No</th>
-                <th className="py-3.5 px-4">Nama Siswa</th>
-                <th className="py-3.5 px-4">Nomor HP</th>
-                <th className="py-3.5 px-4 text-center">Jenjang</th>
-                <th className="py-3.5 px-4 text-center">Status Sesi</th>
-                <th className="py-3.5 px-4 text-center">Level Final</th>
-                <th className="py-3.5 px-4 text-center w-36">Aksi</th>
+                <th className="py-3.5 px-4 w-12 text-center whitespace-nowrap">No</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nama Siswa</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nomor HP</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Jenjang</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-4 text-center whitespace-nowrap">Level</th>
+                <th className="py-3.5 px-4 text-center w-36 whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -273,22 +273,22 @@ export default function TutorEvaluationsPage() {
                       key={std.id}
                       className="hover:bg-surface-subtle/40 transition-colors"
                     >
-                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs">
+                      <td className="py-3.5 px-4 text-center font-mono text-text-muted text-xs whitespace-nowrap">
                         {rowNum}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="font-bold text-text-primary">{std.fullName}</div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {std.phone}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {getLevelBadge(std.targetLevel)}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {getStatusBadge(std.status)}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {std.finalLevel ? (
                           <Badge
                             variant={
@@ -303,17 +303,17 @@ export default function TutorEvaluationsPage() {
                             {std.finalLevel}
                           </Badge>
                         ) : std.status === "COMPLETED" ? (
-                          <span className="text-xs text-text-muted italic">Belum ditetapkan</span>
+                          <span className="text-xs text-text-muted italic whitespace-nowrap">Belum ditetapkan</span>
                         ) : (
-                          <span className="text-text-muted">-</span>
+                          <span className="text-text-muted whitespace-nowrap">-</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         {std.status === "COMPLETED" ? (
                           <button
                             type="button"
                             onClick={() => setSelectedStudent(std)}
-                            className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs bg-primary-500 text-white hover:bg-primary-600"
+                            className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs bg-primary-500 text-white hover:bg-primary-600 whitespace-nowrap"
                           >
                             Evaluasi
                           </button>
@@ -321,12 +321,12 @@ export default function TutorEvaluationsPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedStudent(std)}
-                            className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs bg-surface-subtle text-text-primary border border-surface-border hover:bg-slate-200"
+                            className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs bg-surface-subtle text-text-primary border border-surface-border hover:bg-slate-200 whitespace-nowrap"
                           >
                             Ubah Evaluasi
                           </button>
                         ) : (
-                          <span className="text-xs text-text-muted font-medium">-</span>
+                          <span className="text-xs text-text-muted font-medium whitespace-nowrap">-</span>
                         )}
                       </td>
                     </tr>

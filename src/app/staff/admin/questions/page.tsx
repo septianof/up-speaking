@@ -107,13 +107,13 @@ export default function AdminQuestionsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 whitespace-nowrap">
           Elementary
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border whitespace-nowrap">
         High School
       </span>
     );

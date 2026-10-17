@@ -126,15 +126,15 @@ export default function AdminStudentsPage() {
         return <Badge variant="neutral" size="sm">Belum Mulai</Badge>;
       case "IN_PROGRESS":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
             Sedang Tes
           </span>
         );
       case "COMPLETED":
-        return <Badge variant="primary" size="sm">Menunggu Evaluasi</Badge>;
+        return <Badge variant="primary" size="sm">Perlu Dinilai</Badge>;
       case "FINALIZED":
-        return <Badge variant="success" size="sm">Selesai & Dinilai</Badge>;
+        return <Badge variant="success" size="sm">Dinilai</Badge>;
       case "RESET":
         return <Badge variant="accent" size="sm">Direset</Badge>;
       default:
@@ -145,13 +145,13 @@ export default function AdminStudentsPage() {
   const getLevelBadge = (level: TargetLevel) => {
     if (level === "ELEMENTARY") {
       return (
-        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+        <span className="inline-flex items-center text-xs font-medium text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 whitespace-nowrap">
           Elementary
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border">
+      <span className="inline-flex items-center text-xs font-medium text-text-secondary bg-surface-subtle px-2 py-0.5 rounded border border-surface-border whitespace-nowrap">
         High School
       </span>
     );
@@ -282,13 +282,13 @@ export default function AdminStudentsPage() {
           <table className="w-full min-w-[760px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-12 text-center">No</th>
-                <th className="py-3.5 px-4">Nama Siswa</th>
-                <th className="py-3.5 px-4">Nomor HP</th>
-                <th className="py-3.5 px-4">Jenjang</th>
-                <th className="py-3.5 px-4">Status Sesi</th>
-                <th className="py-3.5 px-4">Tanggal Daftar</th>
-                <th className="py-3.5 px-4 text-center w-44">Aksi</th>
+                <th className="py-3.5 px-4 w-12 text-center whitespace-nowrap">No</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nama Siswa</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Nomor HP</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Jenjang</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Terdaftar</th>
+                <th className="py-3.5 px-4 text-center w-44 whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -358,19 +358,19 @@ export default function AdminStudentsPage() {
                           </span>
                         ) : null}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
+                      <td className="py-3.5 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {std.phone}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {getLevelBadge(std.targetLevel)}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         {getStatusBadge(std.status)}
                       </td>
-                      <td className="py-3.5 px-4 text-xs text-text-muted">
+                      <td className="py-3.5 px-4 text-xs text-text-muted whitespace-nowrap">
                         {formatDate(std.createdAt)}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-1.5">
                           {/* Soft Reset */}
                           <button

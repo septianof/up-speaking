@@ -174,10 +174,10 @@ export default function TutorDashboardPage() {
           <table className="w-full min-w-[500px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Siswa</th>
-                <th className="py-3 px-4">Nomor HP</th>
-                <th className="py-3 px-4 text-center">Skor Objektif</th>
-                <th className="py-3 px-4 text-center w-32">Aksi</th>
+                <th className="py-3 px-4 whitespace-nowrap">Nama Siswa</th>
+                <th className="py-3 px-4 whitespace-nowrap">Nomor HP</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Skor</th>
+                <th className="py-3 px-4 text-center w-32 whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -206,20 +206,20 @@ export default function TutorDashboardPage() {
 
                   return (
                     <tr key={std.id} className="hover:bg-surface-subtle/30 transition-colors">
-                      <td className="py-3 px-4 font-semibold text-text-primary">
+                      <td className="py-3 px-4 font-semibold text-text-primary whitespace-nowrap">
                         {std.fullName}
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-text-secondary">
+                      <td className="py-3 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {std.phone}
                       </td>
-                      <td className="py-3 px-4 text-center font-bold text-primary-600">
+                      <td className="py-3 px-4 text-center font-bold text-primary-600 whitespace-nowrap">
                         {std.score || 0}/{std.totalQuestions || 10} ({scorePercent}%)
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => setSelectedStudent(std)}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-primary-500 text-white hover:bg-primary-600 transition-colors shadow-sm"
+                          className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-primary-500 text-white hover:bg-primary-600 transition-colors shadow-sm whitespace-nowrap"
                         >
                           Evaluasi
                         </button>

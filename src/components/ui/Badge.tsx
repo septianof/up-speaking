@@ -14,7 +14,7 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center font-medium rounded-pill border select-none transition-colors";
+    "inline-flex items-center font-medium rounded-pill border select-none whitespace-nowrap transition-colors";
 
   const variantStyles = {
     primary: "bg-primary-50 text-primary-700 border-primary-200",

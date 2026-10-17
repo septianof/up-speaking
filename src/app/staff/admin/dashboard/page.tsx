@@ -74,15 +74,15 @@ export default function AdminDashboardPage() {
         return <Badge variant="neutral" size="sm">Belum Mulai</Badge>;
       case "IN_PROGRESS":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
             Sedang Tes
           </span>
         );
       case "COMPLETED":
-        return <Badge variant="primary" size="sm">Menunggu Evaluasi</Badge>;
+        return <Badge variant="primary" size="sm">Perlu Dinilai</Badge>;
       case "FINALIZED":
-        return <Badge variant="success" size="sm">Selesai & Dinilai</Badge>;
+        return <Badge variant="success" size="sm">Dinilai</Badge>;
       case "RESET":
         return <Badge variant="accent" size="sm">Direset</Badge>;
       default:
@@ -236,10 +236,10 @@ export default function AdminDashboardPage() {
           <table className="w-full min-w-[500px] text-left border-collapse">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-surface-border text-xs font-bold text-text-muted uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Siswa</th>
-                <th className="py-3 px-4">Nomor HP</th>
-                <th className="py-3 px-4">Jenjang</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 whitespace-nowrap">Nama Siswa</th>
+                <th className="py-3 px-4 whitespace-nowrap">Nomor HP</th>
+                <th className="py-3 px-4 whitespace-nowrap">Jenjang</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border text-xs sm:text-sm">
@@ -258,18 +258,18 @@ export default function AdminDashboardPage() {
               ) : (
                 recentStudents.map((std) => (
                   <tr key={std.id} className="hover:bg-surface-subtle/30 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-text-primary">
+                    <td className="py-3 px-4 font-semibold text-text-primary whitespace-nowrap">
                       {std.fullName}
                     </td>
-                    <td className="py-3 px-4 font-mono text-xs text-text-secondary">
+                    <td className="py-3 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
                       {std.phone}
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="text-xs font-medium text-text-muted">
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className="text-xs font-medium text-text-muted whitespace-nowrap">
                         {std.targetLevel === "ELEMENTARY" ? "Elementary" : "High School"}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       {getStatusBadge(std.status)}
                     </td>
                   </tr>
