@@ -144,6 +144,14 @@ export async function GET(request: Request) {
       })
     })
 
+    // Smart Default Sorting:
+    // Urutkan laporan rekapitulasi berdasarkan waktu finalisasi / waktu pengumpulan ujian terbaru (DESC).
+    reportRows.sort((a, b) => {
+      const timeA = new Date(a.finalizedAt || a.submittedAt || a.registeredAt).getTime()
+      const timeB = new Date(b.finalizedAt || b.submittedAt || b.registeredAt).getTime()
+      return timeB - timeA
+    })
+
     return NextResponse.json({
       reports: reportRows,
     })

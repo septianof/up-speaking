@@ -86,6 +86,7 @@ export async function GET(request: Request) {
       totalQuestions: number
       elapsedSeconds: number
       createdAt: string
+      submittedAt: string | null
     }> = []
 
     students?.forEach((st) => {
@@ -127,6 +128,7 @@ export async function GET(request: Request) {
           totalQuestions: 10,
           elapsedSeconds: session.elapsed_seconds,
           createdAt: st.created_at,
+          submittedAt: session.submitted_at || session.started_at || null,
         })
       } else if (session.status === 'FINALIZED') {
         finalizedCount++
@@ -143,6 +145,13 @@ export async function GET(request: Request) {
     recentSubmissions.sort(
       (a, b) =>
         new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    )
+
+    // Urutkan antrean evaluasi tutor: siswa yang paling baru submit ujian berada di urutan teratas
+    pendingStudentsList.sort(
+      (a, b) =>
+        new Date(b.submittedAt || b.createdAt).getTime() -
+        new Date(a.submittedAt || a.createdAt).getTime()
     )
 
     return NextResponse.json({

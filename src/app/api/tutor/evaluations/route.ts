@@ -147,6 +147,52 @@ export async function GET(request: Request) {
       })
     })
 
+    // Smart Default Sorting:
+    // 1. Prioritaskan siswa COMPLETED (Perlu Dinilai) di paling atas, diurutkan dari yang terbaru mengumpulkan ujian (submittedAt DESC).
+    // 2. Diikuti FINALIZED (Sudah Dinilai) berdasarkan waktu finalisasi terbaru.
+    // 3. Diikuti status lainnya berdasarkan waktu pendaftaran terbaru.
+    const getStatusPriority = (status: string) => {
+      switch (status) {
+        case 'COMPLETED':
+          return 1 // Prioritas tertinggi: butuh penilaian segera
+        case 'FINALIZED':
+          return 2 // Sudah dinilai
+        case 'IN_PROGRESS':
+          return 3 // Sedang tes
+        case 'NOT_STARTED':
+          return 4 // Belum tes
+        case 'RESET':
+          return 5 // Direset
+        default:
+          return 6
+      }
+    }
+
+    evaluationList.sort((a, b) => {
+      const pA = getStatusPriority(a.sessionStatus)
+      const pB = getStatusPriority(b.sessionStatus)
+      if (pA !== pB) return pA - pB
+
+      // Antrean COMPLETED diurutkan berdasarkan waktu submit terbaru
+      if (a.sessionStatus === 'COMPLETED') {
+        const timeA = new Date(a.submittedAt || a.createdAt).getTime()
+        const timeB = new Date(b.submittedAt || b.createdAt).getTime()
+        return timeB - timeA
+      }
+
+      // Riwayat FINALIZED diurutkan berdasarkan waktu finalisasi / submit terbaru
+      if (a.sessionStatus === 'FINALIZED') {
+        const timeA = new Date(a.finalizedAt || a.submittedAt || a.createdAt).getTime()
+        const timeB = new Date(b.finalizedAt || b.submittedAt || b.createdAt).getTime()
+        return timeB - timeA
+      }
+
+      // Status lainnya diurutkan berdasarkan pendaftaran terbaru
+      const timeA = new Date(a.createdAt).getTime()
+      const timeB = new Date(b.createdAt).getTime()
+      return timeB - timeA
+    })
+
     return NextResponse.json(
       {
         evaluations: evaluationList,
