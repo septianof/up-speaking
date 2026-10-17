@@ -93,17 +93,17 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-border">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-surface-border">
         <div>
-          <h1 className="text-2xl font-black text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-black text-text-primary">
             Dashboard Utama Admin
           </h1>
-          <p className="text-sm text-text-muted mt-1">
+          <p className="text-xs sm:text-sm text-text-muted mt-1">
             Selamat datang kembali, <strong>{staff?.fullName || "Administrator"}</strong>. Berikut ringkasan aktivitas tes hari ini.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => mutate()}

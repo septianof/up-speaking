@@ -94,7 +94,7 @@ export default function TutorReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header and Export Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2 border-b border-surface-border">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-text-primary">
             Laporan &amp; Rekapitulasi
@@ -105,7 +105,7 @@ export default function TutorReportsPage() {
         </div>
 
         {/* Action Bar Ekspor & Refresh */}
-        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             type="button"
             onClick={() => mutate()}
@@ -126,7 +126,7 @@ export default function TutorReportsPage() {
             className="gap-2 text-xs sm:text-sm"
           >
             <Printer className="h-4 w-4" />
-            Export PDF (.pdf)
+            Export PDF
           </Button>
 
           <Button
@@ -138,7 +138,7 @@ export default function TutorReportsPage() {
             className="gap-2 text-xs sm:text-sm"
           >
             <Download className="h-4 w-4" />
-            Export Excel (.xlsx)
+            Export Excel
           </Button>
         </div>
       </div>

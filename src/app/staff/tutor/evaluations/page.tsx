@@ -129,7 +129,7 @@ export default function TutorEvaluationsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-2 border-b border-surface-border">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-2 border-b border-surface-border">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-text-primary">
             Penilaian &amp; Evaluasi Siswa
@@ -144,7 +144,7 @@ export default function TutorEvaluationsPage() {
           onClick={() => mutate()}
           disabled={isValidating}
           title="Segarkan data terbaru dari database"
-          className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
+          className="self-start lg:self-center inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-text-primary bg-surface-white border border-surface-border rounded-xl hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 text-text-muted ${isValidating ? "animate-spin text-primary-500" : ""}`} />
           <span>{isValidating ? "Menyinkronkan..." : "Segarkan"}</span>
