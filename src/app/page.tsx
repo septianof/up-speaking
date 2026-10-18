@@ -211,7 +211,7 @@ export default function Home() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            className="flex items-center gap-3 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg"
+            className="flex items-center gap-2 sm:gap-2.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg"
           >
             <Image
               src="/images/logo.png"
@@ -221,6 +221,9 @@ export default function Home() {
               priority
               className="h-8 sm:h-9 w-auto object-contain"
             />
+            <span className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight">
+              Speaking
+            </span>
           </motion.a>
 
           {/* Navigasi Desktop di Bagian Tengah */}
@@ -239,12 +242,13 @@ export default function Home() {
             ))}
           </nav>
 
-          {/* Aksi Kanan: Tombol CTA & Hamburger Mobile */}
+          {/* Aksi Kanan: Tombol CTA Desktop & Hamburger Mobile */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <motion.div
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.96 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="hidden md:block"
             >
               <Button
                 size="md"
@@ -672,6 +676,7 @@ export default function Home() {
           <motion.div
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className="flex items-center gap-2"
           >
             <Image
               src="/images/logo.png"
@@ -680,6 +685,9 @@ export default function Home() {
               height={34}
               className="h-8 w-auto object-contain opacity-90"
             />
+            <span className="font-display font-black text-xl text-text-primary tracking-tight opacity-90">
+              Speaking
+            </span>
           </motion.div>
 
           <p className="text-xs text-text-secondary max-w-md">
