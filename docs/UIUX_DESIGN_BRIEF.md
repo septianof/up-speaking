@@ -104,7 +104,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 | **SCR-011** | Tutor Penilaian Siswa | Tutor | Peninjauan detail jawaban, skor, durasi, dan formulir penetapan level | Tinjau Jawaban, Tetapkan Level Final |
 | **SCR-012** | Tutor Laporan & Rekap | Tutor | Rekapitulasi hasil penempatan khusus jenjang yang diampu | Filter data, Export Excel (.xlsx) & PDF (.pdf) |
 | **SCR-013** | Tutor Bank Soal | Tutor | Manajemen butir soal khusus jenjang yang diampu tutor | Tambah Soal Dinamis, Edit, Hapus |
-| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Hapus (Soft Delete) |
+| **SCR-014** | Admin Kelola Tutor | Admin | Pendaftaran dan pengelolaan akun staf Tutor per jenjang | Tambah Akun Tutor, Edit Akun/Jenjang, Hapus Akun (Proteksi Riwayat Penilaian) |
 
 ---
 
@@ -168,7 +168,7 @@ Identitas visual mengadopsi warna asli logo resmi **Up Speaking Learning Centre*
 ## 8. Screen Layouts and Component Specifications
 
 ### 8.1 Layar Siswa (Student UI)
-- `SCR-001`: Student Landing & Guidance (Hero, Panduan 4 Poin, Tombol Mulai Tes, Auto-redirect).
+- `SCR-001`: Student Landing & Guidance (Hero dengan Maskot Interaktif Beranimasi & Balon Dialog Sentuh, Panduan 4 Poin, Tombol Mulai Tes, Auto-redirect).
 - `SCR-002`: Student Login Modal (Form Nama Lengkap & No HP).
 - `SCR-003`: Student Test Sheet (Topbar sticky: Timer Elapsed `CMP-003`, Status Koneksi `CMP-004`; Kolom Kiri: Soal Aktif & Opsi Dinamis `CMP-002`; Kolom Kanan: Palet Soal `CMP-001`).
 - `SCR-004`: Student Result & Summary (Konfirmasi Selesai & Kartu Level Resmi jika sudah final).

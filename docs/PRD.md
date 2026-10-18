@@ -106,12 +106,13 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 
 ### F-01: User, Tutor, & Student Management
 - Autentikasi email & password untuk staf (`Admin`, `Tutor Elementary`, `Tutor High School`).
-- **Manajemen Akun Tutor oleh Admin:** Form pendaftaran akun tutor baru, pengeditan profil & jenjang penugasan, serta penghapusan akun tutor secara aman (*soft delete* untuk menjaga integritas data riwayat penilaian).
+- **Manajemen Akun Tutor oleh Admin:** Form pendaftaran akun tutor baru, pengeditan profil & jenjang penugasan, serta penghapusan akun tutor secara aman berbasis proteksi integritas relasi (menolak penghapusan akun jika tutor telah memiliki riwayat penilaian siswa guna menjamin keutuhan arsip laporan lembaga, serta proteksi larangan *self-deletion* admin).
 - **Manajemen Siswa oleh Admin:** Pendaftaran siswa (Nama Lengkap, Nomor HP Siswa/Ortu, Pilihan Jenjang: *Elementary* / *High School*), pengeditan identitas siswa (koreksi nama/HP/jenjang), dan penghapusan data siswa yang belum mengikuti tes.
 - Autentikasi siswa langsung berbasis **Nama Lengkap + Nomor HP** (tanpa layar perantara, langsung membuka lembar soal).
 - Role-Based Access Control (RBAC) ketat antara Tutor Elementary dan High School.
 
 ### F-02: Session Lifecycle, Recovery, & Soft Reset
+- **Token Sesi Siswa Kriptografis (HMAC-SHA256):** Penerbitan token sesi terenkripsi berumur 7 hari dengan cookie `HttpOnly` + `SameSite=lax` untuk verifikasi kepemilikan sesi dan lembar hasil ujian.
 - **Session Recovery Lokal:** Penyimpanan session identifier di `localStorage` perangkat siswa untuk mencegah kebutuhan login ulang saat refresh/buka tab baru.
 - **Single Active Device Control:** Mekanisme pengambilalihan sesi (*device takeover*) jika siswa ganti HP, membatalkan token sesi di perangkat lama.
 - **Mekanisme Soft Reset oleh Admin:** Membatalkan sesi lama dengan status `RESET` (tetap tersimpan di database sebagai audit trail) dan menerbitkan sesi baru berstatus `NOT_STARTED` untuk siswa bersangkutan.

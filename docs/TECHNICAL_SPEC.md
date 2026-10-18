@@ -291,6 +291,8 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
 | `POST`| `/api/admin/students/[id]/reset` | Staf ADMIN | Soft Reset: membatalkan sesi lama (`status = RESET`), membuat sesi baru `NOT_STARTED`. |
 | `GET` | `/api/admin/tutors` | Staf ADMIN | Mengambil daftar seluruh akun Tutor yang terdaftar di sistem. |
 | `POST`| `/api/admin/tutors` | Staf ADMIN | **Mendaftarkan akun Tutor baru.** Menggunakan Supabase Admin Auth API (`admin.createUser`) dan mencatat ke tabel `profiles`.<br>**Body:** `{ fullName, email, password, role }` |
+| `PUT` | `/api/admin/tutors` | Staf ADMIN | Memperbarui nama lengkap, email, password baru (opsional), dan jenjang penugasan tutor.<br>**Body:** `{ id, fullName, email, password?, role }` |
+| `DELETE`| `/api/admin/tutors?id={id}` | Staf ADMIN | **Menghapus akun Tutor dengan Proteksi Relasi.** Memvalidasi `id` (UUID), mencegah *self-deletion* admin, dan memblokir penghapusan jika tutor telah memiliki riwayat evaluasi siswa (HTTP 409) untuk melindungi foreign key `placement_evaluations`. |
 | `GET` | `/api/admin/questions` | Staf ADMIN | Mengambil daftar bank soal seluruh jenjang. |
 | `POST`| `/api/admin/questions` | Staf ADMIN | Menambah butir soal baru dengan 2 s/d 5 baris opsi dinamis. |
 | `PUT` | `/api/admin/questions/[id]` | Staf ADMIN | Mengubah teks pertanyaan, opsi jawaban, atau kunci benar. |
@@ -318,15 +320,20 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
    - Admin membuat akun Tutor melalui antarmuka web di `/staff/admin/tutors`.
    - Backend memanggil `supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true })`.
    - Data otomatis dicatat ke tabel `profiles` dengan role `'TUTOR_ELEMENTARY'` atau `'TUTOR_HIGH_SCHOOL'`.
-3. **Role Enforcement (RBAC Middleware):**
+3. **Role Enforcement (RBAC Middleware & Route Guards):**
    - Rute `/staff/admin/*` dan `/api/admin/*` menolak akses jika role pengguna bukan `ADMIN` (HTTP 403 Forbidden).
    - Rute `/staff/tutor/*` dan `/api/tutor/*` memvalidasi bahwa Tutor Elementary hanya dapat melihat/mengubah data siswa jenjang `ELEMENTARY`, sedangkan Tutor High School hanya untuk `HIGH_SCHOOL`.
+4. **Proteksi Integritas Penghapusan Akun Tutor (Opsi A):**
+   - Sebelum menghapus akun staf tutor dari Supabase Auth, backend memverifikasi apakah akun tersebut telah memiliki relasi pada tabel `placement_evaluations`.
+   - Jika sudah memiliki riwayat penilaian siswa, penghapusan ditolak (HTTP 409 Conflict) demi menjaga keutuhan laporan audit placement test lembaga.
+   - Dilengkapi proteksi larangan *self-deletion* (admin tidak dapat menghapus akunnya sendiri) dan proteksi *role boundary* (akun admin tidak dapat dihapus melalui rute tutor).
 
-### 8.2 Keamanan Sesi Siswa (Single Active Device & Anti-Cheating)
-- Setiap kali siswa memulai sesi pengerjaan, sistem mengenerate token perangkat acak: `device_token`.
-- `device_token` disimpan di `localStorage` siswa dan di kolom `test_sessions.device_token`.
-- Jika siswa berpindah ke HP lain (misal HP pertama mati), login di HP baru akan memperbarui `device_token` di server. HP lama otomatis ditolak dengan pesan: *"Sesi telah dipindahkan ke perangkat lain."*
-- **Kunci Jawaban Aman:** Endpoint siswa **tidak pernah mengirimkan kolom `is_correct`** ke browser. Penilaian murni dihitung di backend saat tombol submit dikirim.
+### 8.2 Keamanan Sesi Siswa, Kriptografi, & Anti-Abuse
+- **Token Kriptografis Siswa (HMAC-SHA256):** Identitas siswa diikat menggunakan token terenkripsi HMAC-SHA256 yang disimpan pada cookie `HttpOnly`, `SameSite=lax` (`up_speaking_student_token`). Verifikasi tanda tangan menggunakan `crypto.timingSafeEqual` untuk mencegah *timing attack* dan pemalsuan token sesi.
+- **Single Active Device Control:** Setiap kali siswa memulai sesi pengerjaan, sistem mengenerate token perangkat acak: `device_token` yang disimpan di `localStorage` siswa dan di kolom `test_sessions.device_token`. Jika siswa berpindah gawai, sesi lama otomatis dinonaktifkan dengan pesan konflik perangkat.
+- **Kunci Jawaban Aman:** Endpoint siswa **tidak pernah mengirimkan kolom `is_correct`** ke browser. Penilaian murni dihitung secara deterministik di backend saat tombol submit dikirim.
+- **Proteksi Brute-Force (Rate Limiting):** Endpoint publik `/api/auth/login` (5 req/menit) dan `/api/student/verify` (10 req/menit) dilindungi pembatas laju permintaan dengan ekstraksi IP terpercaya (`x-vercel-ip`, `x-real-ip`).
+- **Mitigasi Kerentanan Gambar & Header Keamanan:** Format gambar Next.js dibatasi ke WebP (`formats: ['image/webp']`) di `next.config.mjs` untuk memitigasi kerentanan AVIF RCE upstream (GHSA-2xp9-vwfh-vxw4). Header keamanan lengkap mencakup HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, dan CSP frame-ancestors none.
 
 ---
 

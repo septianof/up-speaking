@@ -102,15 +102,18 @@ Selain pengujian fungsional standar, dilakukan 4 skenario uji ketahanan:
 4. **Edge Case 4: Ekspor Rekapitulasi Berkapasitas Data Besar**
    - *Aksi:* Admin mengunduh laporan PDF dan Excel dengan puluhan baris data siswa dan opsi jenjang berbeda.
    - *Hasil:* File `.xlsx` terunduh dengan styling kolom rapi; file `.pdf` terformat landscape A4 dengan pagination otomatis tanpa teks yang terpotong.
+5. **Edge Case 5: Proteksi Integritas Penghapusan Akun Tutor (Opsi A) & Self-Deletion Guard**
+   - *Aksi:* Admin mencoba menghapus akunnya sendiri (`id === auth.user.id`) atau mencoba menghapus akun tutor yang telah memiliki riwayat penilaian siswa di tabel `placement_evaluations`.
+   - *Hasil:* Sistem menolak permintaan dengan HTTP 400 (larangan *self-deletion*) dan HTTP 409 Conflict (proteksi riwayat evaluasi), mencegah kegagalan relasi foreign key database (`ON DELETE RESTRICT`) dan menjamin keutuhan arsip laporan nilai lembaga.
 
 ---
 
 ## 5. Kesimpulan & Rekomendasi Kesiapan Rilis
 
 Berdasarkan hasil pengujian komprehensif di atas:
-- **Unit Test Algoritma:** 6/6 Lulus (100% Pass) dengan distribusi acak seragam terbukti secara statistik.
+- **Unit Test Algoritma & Keamanan:** 14/14 Lulus (100% Pass) mencakup keacakan Fisher-Yates, token HMAC-SHA256, rate limiter, isolasi peran RBAC, dan guard proteksi Opsi A akun staf.
 - **Black Box Testing:** 17/17 Kebutuhan Fungsional PRD berstatus Lulus (100% Pass).
 - **Integritas Build Produksi:** `npm run build` menghasilkan **Exit Code 0** tanpa peringatan linting atau tipe data.
 
 > [!NOTE]
-> Sistem dinyatakan **Siap dan Memenuhi Syarat (*Production-Ready*)** untuk melanjutkan ke tugas akhir `TASK-020`: Persiapan Konfigurasi Produksi & Deployment ke Vercel.
+> Sistem dinyatakan **Siap dan Memenuhi Syarat (*Production-Ready*)** untuk rilis dan deployment ke Vercel dengan proteksi keamanan aktif.
