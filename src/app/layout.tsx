@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} ${nunito.variable} ${baloo.variable}`}>
+    <html lang="id" className={`scroll-smooth ${plusJakartaSans.variable} ${nunito.variable} ${baloo.variable}`}>
       <body className="min-h-screen bg-surface-bg text-text-primary antialiased selection:bg-primary-100 selection:text-primary-700">
         {children}
       </body>

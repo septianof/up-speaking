@@ -91,6 +91,19 @@ export default function Home() {
     { label: "FAQ", href: "#faq" },
   ];
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      setIsMobileMenuOpen(false);
+      const targetId = href.replace("#", "");
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.pushState(null, "", href);
+      }
+    }
+  };
+
   // Auto-Redirect check for active ongoing test session (FR-005, SCR-001)
   useEffect(() => {
     const session = getActiveSession();
@@ -207,11 +220,11 @@ export default function Home() {
           {/* Logo Brand */}
           <motion.a
             href="#hero"
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={(e) => handleScrollTo(e, "#hero")}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            className="flex items-center gap-2 sm:gap-2.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg"
+            className="flex items-center gap-2 sm:gap-2.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg cursor-pointer"
           >
             <Image
               src="/images/logo.png"
@@ -232,6 +245,7 @@ export default function Home() {
               <motion.a
                 key={item.href}
                 href={item.href}
+                onClick={(e) => handleScrollTo(e, item.href)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -295,8 +309,8 @@ export default function Home() {
                   <a
                     key={item.href}
                     href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors"
+                    onClick={(e) => handleScrollTo(e, item.href)}
+                    className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-text-secondary hover:text-primary-600 hover:bg-sky-soft transition-colors cursor-pointer"
                   >
                     <span>{item.label}</span>
                     <ChevronRight className="w-4 h-4 text-text-muted" />
