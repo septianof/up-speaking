@@ -61,7 +61,39 @@ const WhatsAppIcon: React.FC<{ className?: string }> = ({ className }) => (
     className={className}
   >
     <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+  </svg>
+);
+
+const CloudSvg: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 120 60"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M20 50 C10 50 0 42 0 32 C0 24 6 18 14 16 C16 8 26 2 38 2 C48 2 56 7 60 14 C64 10 72 8 80 8 C92 8 102 16 104 26 C114 26 120 34 120 42 C120 50 112 50 102 50 Z" />
+  </svg>
+);
+
+const SparkleStar: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" />
+  </svg>
+);
+
+const SpeechBubbleSvg: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 40 36"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M6 0 C2.7 0 0 2.7 0 6 L0 22 C0 25.3 2.7 28 6 28 L24 28 L34 36 L32 28 L34 28 C37.3 28 40 25.3 40 22 L40 6 C40 2.7 37.3 0 34 0 Z" />
   </svg>
 );
 
@@ -352,64 +384,173 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 w-full flex flex-col items-center">
-        {/* HERO SECTION (Full Viewport on Desktop, Natural Flow on Mobile/Tablet) */}
+        {/* HERO SECTION DENGAN AMBIENT MOTION */}
         <section
           id="hero"
-          className="w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 lg:min-h-[calc(100vh-68px)] lg:py-0 flex flex-col-reverse md:flex-row items-center justify-between gap-10 scroll-mt-24"
+          className="relative w-full overflow-hidden scroll-mt-24"
         >
-          {/* Teks Hero */}
-          <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
-            {/* Judul Utama + Deskripsi + Tombol CTA */}
+          {/* Latar Belakang Ambient Animasi (Awan, Bintang Sparkle, Obrolan Kartun) */}
+          <div
+            className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0"
+            aria-hidden="true"
+          >
+            {/* Awan 1 - Melayang lembut di kiri atas */}
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              animate={{ x: [-15, 25, -15], y: [0, -6, 0] }}
+              transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-4 -left-6 sm:left-10 w-36 sm:w-52 text-white/70 drop-shadow-xs"
             >
-              {/* Judul Utama */}
-              <h1 className="font-display tracking-tight leading-tight mb-4">
-                <span className="block text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest text-primary-600 mb-2">
-                  Up Speaking Learning Centre
-                </span>
-                <span className="block text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary">
-                  Placement{" "}
-                  <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2 sm:decoration-4 underline-offset-6 sm:underline-offset-8 [text-decoration-skip-ink:none]">
-                    Test
+              <CloudSvg />
+            </motion.div>
+
+            {/* Awan 2 - Melayang lembut di kanan atas di belakang maskot */}
+            <motion.div
+              animate={{ x: [20, -20, 20], y: [0, 8, 0] }}
+              transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-10 right-4 sm:right-16 w-32 sm:w-48 text-white/60 drop-shadow-xs"
+            >
+              <CloudSvg />
+            </motion.div>
+
+            {/* Awan 3 - Melayang halus di bagian bawah lipatan layar */}
+            <motion.div
+              animate={{ x: [-25, 20, -25] }}
+              transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+              className="hidden lg:block absolute bottom-8 left-1/4 w-44 text-white/50"
+            >
+              <CloudSvg />
+            </motion.div>
+
+            {/* Bintang Sparkle 1 - Berdenyut di atas tulisan Placement Test */}
+            <motion.div
+              animate={{
+                scale: [0.85, 1.25, 0.85],
+                rotate: [0, 15, 0],
+                opacity: [0.45, 0.95, 0.45],
+              }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-16 left-8 sm:left-24 text-sun-400 w-5 h-5 drop-shadow-xs"
+            >
+              <SparkleStar />
+            </motion.div>
+
+            {/* Bintang Sparkle 2 - Berdenyut di kanan atas maskot */}
+            <motion.div
+              animate={{
+                scale: [1.2, 0.8, 1.2],
+                rotate: [15, -15, 15],
+                opacity: [0.8, 0.35, 0.8],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute top-20 right-16 sm:right-32 text-sun-400 w-6 h-6 drop-shadow-xs"
+            >
+              <SparkleStar />
+            </motion.div>
+
+            {/* Bintang Sparkle 3 - Kecil di kiri bawah */}
+            <motion.div
+              animate={{
+                scale: [0.75, 1.2, 0.75],
+                opacity: [0.35, 0.9, 0.35],
+              }}
+              transition={{
+                duration: 3.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.8,
+              }}
+              className="hidden sm:block absolute bottom-20 left-16 text-sun-400/80 w-4 h-4"
+            >
+              <SparkleStar />
+            </motion.div>
+
+            {/* Gelembung Bicara Speaking Bubble Doodle */}
+            <motion.div
+              animate={{
+                y: [0, -12, 0],
+                rotate: [-4, 4, -4],
+                opacity: [0.35, 0.65, 0.35],
+              }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-36 right-8 sm:right-28 text-primary-300/60 w-8 h-8"
+            >
+              <SpeechBubbleSvg />
+            </motion.div>
+
+            {/* Gelembung Pastel Melayang */}
+            <motion.div
+              animate={{ y: [0, -14, 0], scale: [1, 1.08, 1] }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+              className="hidden sm:block absolute bottom-16 right-1/4 w-8 h-8 rounded-full bg-primary-200/40 border border-primary-300/30 backdrop-blur-2xs"
+            />
+          </div>
+
+          {/* Konten Hero Utama */}
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 lg:min-h-[calc(100vh-68px)] lg:py-0 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+            {/* Teks Hero */}
+            <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
+              {/* Judul Utama + Deskripsi + Tombol CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                {/* Judul Utama */}
+                <h1 className="font-display tracking-tight leading-tight mb-4">
+                  <span className="block text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest text-primary-600 mb-2">
+                    Up Speaking Learning Centre
                   </span>
-                </span>
-              </h1>
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary">
+                    Placement{" "}
+                    <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2 sm:decoration-4 underline-offset-6 sm:underline-offset-8 [text-decoration-skip-ink:none]">
+                      Test
+                    </span>
+                  </span>
+                </h1>
 
-              {/* Deskripsi */}
-              <p className="text-base sm:text-lg text-text-secondary max-w-xl mb-7 leading-relaxed">
-                Kerjakan placement test secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
-              </p>
+                {/* Deskripsi */}
+                <p className="text-base sm:text-lg text-text-secondary max-w-xl mb-7 leading-relaxed">
+                  Kerjakan placement test secara mandiri dan teliti. Cukup masukkan nama dan nomor telepon yang telah didaftarkan untuk memulai tes.
+                </p>
 
-              {/* Tombol CTA */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                <Button
-                  size="xl"
-                  variant="kid"
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-full sm:w-auto px-9 text-lg shadow-[0_6px_0_0_#B91C1C]"
-                >
-                  <span>Mulai Tes Sekarang</span>
-                </Button>
+                {/* Tombol CTA */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                  <Button
+                    size="xl"
+                    variant="kid"
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full sm:w-auto px-9 text-lg shadow-[0_6px_0_0_#B91C1C]"
+                  >
+                    <span>Mulai Tes Sekarang</span>
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Maskot Ilustrasi Hero */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="flex-1 flex justify-center items-center relative"
+            >
+              {/* Blob Background Dekoratif */}
+              <div className="absolute w-64 h-64 sm:w-80 sm:h-80 bg-primary-100/70 rounded-full blur-2xl -z-10 animate-pulse" />
+              <div className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 backdrop-blur-xs border-2 border-primary-200/50 shadow-kid-card flex flex-col items-center">
+                <Mascot mood="wave" size={210} floating />
               </div>
             </motion.div>
           </div>
-
-          {/* Maskot Ilustrasi Hero */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="flex-1 flex justify-center items-center relative"
-          >
-            {/* Blob Background Dekoratif */}
-            <div className="absolute w-64 h-64 sm:w-80 sm:h-80 bg-primary-100/70 rounded-full blur-2xl -z-10 animate-pulse" />
-            <div className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 backdrop-blur-xs border-2 border-primary-200/50 shadow-kid-card flex flex-col items-center">
-              <Mascot mood="wave" size={210} floating />
-            </div>
-          </motion.div>
         </section>
 
         {/* SECTION: 3 LANGKAH PELAKSANAAN TES */}
