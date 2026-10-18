@@ -554,8 +554,65 @@ export default function Home() {
         </section>
 
         {/* SECTION: 3 LANGKAH PELAKSANAAN TES */}
-        <section id="alur" className="w-full bg-surface-white py-14 px-6 border-y border-primary-100/60 scroll-mt-20">
-          <div className="max-w-5xl mx-auto">
+        <section
+          id="alur"
+          className="relative w-full bg-surface-white py-14 px-6 border-y border-primary-100/60 scroll-mt-20 overflow-hidden"
+        >
+          {/* Latar Belakang Ambient Animasi Alur */}
+          <div
+            className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0"
+            aria-hidden="true"
+          >
+            {/* Awan melayang lembut di kanan atas */}
+            <motion.div
+              animate={{ x: [0, 24, 0], y: [0, -4, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-6 -right-10 w-36 sm:w-48 text-primary-50/70"
+            >
+              <CloudSvg />
+            </motion.div>
+
+            {/* Sparkle di kiri */}
+            <motion.div
+              animate={{
+                scale: [0.8, 1.2, 0.8],
+                opacity: [0.3, 0.85, 0.3],
+                rotate: [0, 10, 0],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-12 left-6 sm:left-16 text-sun-400/80 w-5 h-5"
+            >
+              <SparkleStar />
+            </motion.div>
+
+            {/* Bubble pastel di kiri bawah */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute bottom-6 left-10 w-6 h-6 rounded-full bg-primary-100/60 border border-primary-200/40"
+            />
+
+            {/* Sparkle kecil di kanan bawah */}
+            <motion.div
+              animate={{ scale: [1, 0.75, 1], opacity: [0.75, 0.25, 0.75] }}
+              transition={{
+                duration: 3.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+              className="hidden sm:block absolute bottom-8 right-20 text-sun-300/70 w-4 h-4"
+            >
+              <SparkleStar />
+            </motion.div>
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -577,6 +634,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                whileHover={{ y: -6 }}
                 transition={{ duration: 0.4, delay: 0 }}
                 className="p-6 rounded-[24px] bg-sky-soft border-2 border-primary-100 shadow-sm flex flex-col items-center text-center relative group hover:border-primary-300 transition-colors"
               >
@@ -596,6 +654,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                whileHover={{ y: -6 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
                 className="p-6 rounded-[24px] bg-sun-50 border-2 border-sun-300/80 shadow-sm flex flex-col items-center text-center relative group hover:border-sun-400 transition-colors"
               >
@@ -615,6 +674,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                whileHover={{ y: -6 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
                 className="p-6 rounded-[24px] bg-mint-50 border-2 border-mint-400/60 shadow-sm flex flex-col items-center text-center relative group hover:border-mint-500 transition-colors"
               >
@@ -633,112 +693,240 @@ export default function Home() {
         </section>
 
         {/* SECTION: KETENTUAN PENGERJAAN TES */}
-        <section id="ketentuan" className="w-full max-w-5xl mx-auto px-6 py-14 sm:py-18 scroll-mt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="text-center max-w-xl mx-auto mb-10"
+        <section
+          id="ketentuan"
+          className="relative w-full max-w-5xl mx-auto px-6 py-14 sm:py-18 scroll-mt-20 overflow-hidden"
+        >
+          {/* Latar Belakang Ambient Animasi Ketentuan */}
+          <div
+            className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0"
+            aria-hidden="true"
           >
-            <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
-              Ketentuan Pengerjaan Tes
-            </h2>
-            <p className="text-sm sm:text-base text-text-muted mt-2">
-              Sistem tes dirancang agar pelaksanaan ujian berjalan tertib, mandiri, dan akurat.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Poin 1 */}
+            {/* Awan melayang di kiri atas */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0 }}
-              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+              animate={{ x: [-15, 15, -15], y: [0, 5, 0] }}
+              transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-2 -left-10 w-40 sm:w-52 text-white/70 drop-shadow-xs"
             >
-              <div className="p-3 rounded-2xl bg-primary-100 text-primary-600 shrink-0">
-                <Shuffle className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-text-primary mb-1">
-                  Urutan Soal Diacak
-                </h3>
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Setiap peserta mendapatkan susunan soal acak secara adil. Fokuslah pada lembar tes masing-masing.
-                </p>
-              </div>
+              <CloudSvg />
             </motion.div>
 
-            {/* Poin 2 */}
+            {/* Sparkle di kanan atas */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.08 }}
-              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+              animate={{
+                scale: [0.85, 1.25, 0.85],
+                rotate: [0, 15, 0],
+                opacity: [0.35, 0.85, 0.35],
+              }}
+              transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-10 right-8 sm:right-16 text-sun-400 w-5 h-5 drop-shadow-xs"
             >
-              <div className="p-3 rounded-2xl bg-sun-100 text-amber-600 shrink-0">
-                <Timer className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-text-primary mb-1">
-                  Pencatatan Waktu Pengerjaan
-                </h3>
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Waktu pengerjaan dicatat secara otomatis oleh sistem selama sesi tes berlangsung tanpa alarm mendadak.
-                </p>
-              </div>
+              <SparkleStar />
             </motion.div>
 
-            {/* Poin 3 */}
+            {/* Speech bubble doodle di kanan tengah */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.16 }}
-              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+              animate={{
+                y: [0, -10, 0],
+                rotate: [4, -4, 4],
+                opacity: [0.25, 0.55, 0.25],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.8,
+              }}
+              className="hidden sm:block absolute top-1/2 -right-2 text-primary-300/50 w-7 h-7"
             >
-              <div className="p-3 rounded-2xl bg-mint-100 text-mint-600 shrink-0">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-text-primary mb-1">
-                  Penyimpanan Jawaban Otomatis
-                </h3>
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Semua jawaban tersimpan otomatis di perangkat sehingga tidak hilang jika terjadi kendala jaringan.
-                </p>
-              </div>
+              <SpeechBubbleSvg />
             </motion.div>
 
-            {/* Poin 4 */}
+            {/* Pastel bubble di kiri bawah */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              animate={{ y: [0, -12, 0], scale: [1, 1.1, 1] }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.2,
+              }}
+              className="absolute bottom-10 left-6 w-8 h-8 rounded-full bg-mint-100/50 border border-mint-200/40"
+            />
+          </div>
+
+          <div className="relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.24 }}
-              className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 shadow-kid-card flex gap-4 items-start"
+              transition={{ duration: 0.4 }}
+              className="text-center max-w-xl mx-auto mb-10"
             >
-              <div className="p-3 rounded-2xl bg-accent-100 text-accent-600 shrink-0">
-                <BookOpen className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-display text-base font-bold text-text-primary mb-1">
-                  Penilaian Tim Pengajar
-                </h3>
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Lembar tes akan dinilai langsung oleh tim pengajar untuk menentukan hasil penempatan kelas.
-                </p>
-              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-black text-text-primary">
+                Ketentuan Pengerjaan Tes
+              </h2>
+              <p className="text-sm sm:text-base text-text-muted mt-2">
+                Sistem tes dirancang agar pelaksanaan ujian berjalan tertib, mandiri, dan akurat.
+              </p>
             </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Poin 1 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.4, delay: 0 }}
+                className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 hover:border-primary-300 shadow-kid-card flex gap-4 items-start transition-colors"
+              >
+                <div className="p-3 rounded-2xl bg-primary-100 text-primary-600 shrink-0">
+                  <Shuffle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold text-text-primary mb-1">
+                    Urutan Soal Diacak
+                  </h3>
+                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+                    Setiap peserta mendapatkan susunan soal acak secara adil. Fokuslah pada lembar tes masing-masing.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Poin 2 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.4, delay: 0.08 }}
+                className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 hover:border-primary-300 shadow-kid-card flex gap-4 items-start transition-colors"
+              >
+                <div className="p-3 rounded-2xl bg-sun-100 text-amber-600 shrink-0">
+                  <Timer className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold text-text-primary mb-1">
+                    Pencatatan Waktu Pengerjaan
+                  </h3>
+                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+                    Waktu pengerjaan dicatat secara otomatis oleh sistem selama sesi tes berlangsung tanpa alarm mendadak.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Poin 3 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.4, delay: 0.16 }}
+                className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 hover:border-primary-300 shadow-kid-card flex gap-4 items-start transition-colors"
+              >
+                <div className="p-3 rounded-2xl bg-mint-100 text-mint-600 shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold text-text-primary mb-1">
+                    Penyimpanan Jawaban Otomatis
+                  </h3>
+                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+                    Semua jawaban tersimpan otomatis di perangkat sehingga tidak hilang jika terjadi kendala jaringan.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Poin 4 */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.4, delay: 0.24 }}
+                className="p-6 rounded-[24px] bg-surface-white border-2 border-primary-100 hover:border-primary-300 shadow-kid-card flex gap-4 items-start transition-colors"
+              >
+                <div className="p-3 rounded-2xl bg-accent-100 text-accent-600 shrink-0">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold text-text-primary mb-1">
+                    Penilaian Tim Pengajar
+                  </h3>
+                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+                    Lembar tes akan dinilai langsung oleh tim pengajar untuk menentukan hasil penempatan kelas.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
         {/* SECTION: FAQ (PERTANYAAN UMUM) */}
-        <section id="faq" className="w-full bg-surface-white py-14 px-6 border-t border-primary-100/60 scroll-mt-20">
-          <div className="max-w-3xl mx-auto">
+        <section
+          id="faq"
+          className="relative w-full bg-surface-white py-14 px-6 border-t border-primary-100/60 scroll-mt-20 overflow-hidden"
+        >
+          {/* Latar Belakang Ambient Animasi FAQ */}
+          <div
+            className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0"
+            aria-hidden="true"
+          >
+            {/* Awan melayang di kiri atas */}
+            <motion.div
+              animate={{ x: [0, -25, 0], y: [0, -5, 0] }}
+              transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-4 -left-10 w-44 text-primary-50/70"
+            >
+              <CloudSvg />
+            </motion.div>
+
+            {/* Sparkle di kanan dekat judul */}
+            <motion.div
+              animate={{
+                scale: [0.75, 1.2, 0.75],
+                opacity: [0.3, 0.9, 0.3],
+                rotate: [0, 12, 0],
+              }}
+              transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-12 right-12 sm:right-28 text-sun-400/90 w-5 h-5"
+            >
+              <SparkleStar />
+            </motion.div>
+
+            {/* Mini Speech bubble doodle di kiri bawah */}
+            <motion.div
+              animate={{
+                y: [0, -8, 0],
+                rotate: [-6, 6, -6],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute bottom-16 left-8 sm:left-20 text-primary-200/70 w-8 h-8"
+            >
+              <SpeechBubbleSvg />
+            </motion.div>
+
+            {/* Bubble pastel di kanan bawah */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{
+                duration: 4.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+              className="hidden sm:block absolute bottom-12 right-16 w-7 h-7 rounded-full bg-sun-100/50 border border-sun-200/50"
+            />
+          </div>
+
+          <div className="relative z-10 max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -766,7 +954,7 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.35, delay: idx * 0.08, ease: "easeOut" }}
                     whileHover={{ scale: 1.01 }}
-                    className="rounded-2xl border-2 border-primary-100 overflow-hidden bg-sky-soft/40 transition-colors"
+                    className="rounded-2xl border-2 border-primary-100 hover:border-primary-200 overflow-hidden bg-sky-soft/40 transition-colors"
                   >
                     <button
                       type="button"
