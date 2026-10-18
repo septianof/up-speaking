@@ -280,15 +280,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Laci Navigasi Dropdown Mobile */}
+        {/* Laci Navigasi Dropdown Mobile (Overlay Floating) */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden border-t border-primary-100/70 bg-surface-white px-5 py-4 shadow-lg"
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute top-full left-0 right-0 w-full md:hidden border-b border-primary-100/80 bg-surface-white px-5 py-4 shadow-xl z-30"
             >
               <nav className="flex flex-col gap-1 pb-3">
                 {navLinks.map((item) => (
@@ -323,12 +323,18 @@ export default function Home() {
       </motion.header>
 
       {/* Backdrop Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-20 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-slate-900/30 backdrop-blur-2xs z-20 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <main className="flex-1 w-full flex flex-col items-center">
