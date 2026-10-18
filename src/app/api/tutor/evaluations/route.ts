@@ -19,6 +19,13 @@ export async function GET(request: Request) {
     const status = searchParams.get('status') || 'ALL'
     const search = searchParams.get('search') || ''
 
+    // SEC-002: Jika bukan Admin, paksa filter jenjang sesuai peran tutor pengampu
+    let enforcedLevel = level
+    if (auth.profile.role !== 'ADMIN') {
+      enforcedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+    }
+
     const supabase = createAdminClient()
 
     let query = supabase
@@ -49,13 +56,14 @@ export async function GET(request: Request) {
       `)
       .order('created_at', { ascending: false })
 
-    if (level !== 'ALL') {
-      query = query.eq('target_level', level)
+    if (enforcedLevel !== 'ALL') {
+      query = query.eq('target_level', enforcedLevel)
     }
 
-    if (search.trim()) {
+    const sanitizedSearch = search.trim().replace(/[,()]/g, '')
+    if (sanitizedSearch) {
       query = query.or(
-        `full_name.ilike.%${search.trim()}%,phone_number.ilike.%${search.trim()}%`
+        `full_name.ilike.%${sanitizedSearch}%,phone_number.ilike.%${sanitizedSearch}%`
       )
     }
 

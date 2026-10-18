@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyStaffAuth } from '@/lib/supabase/auth-guard'
+import { uuidSchema } from '@/lib/validators'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,7 @@ const createTutorSchema = z.object({
 })
 
 const updateTutorSchema = z.object({
-  id: z.string().min(1, 'ID tutor wajib disertakan'),
+  id: uuidSchema('ID tutor tidak valid'),
   fullName: z
     .string()
     .min(2, 'Nama lengkap minimal 2 karakter')
@@ -245,6 +246,13 @@ export async function PUT(request: Request) {
       )
     }
 
+    if (currentProfile.role === 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Tindakan ditolak: Akun administrator tidak dapat diubah melalui menu ini.' },
+        { status: 403 }
+      )
+    }
+
     // 2. Cek apakah email sudah dipakai oleh akun lain di tabel profiles
     const { data: existingEmail } = await supabase
       .from('profiles')
@@ -347,20 +355,84 @@ export async function DELETE(request: Request) {
       )
     }
 
+    const parsedId = uuidSchema('Format ID tutor tidak valid').safeParse(id)
+    if (!parsedId.success) {
+      return NextResponse.json(
+        { error: parsedId.error.issues[0]?.message || 'Format ID tutor tidak valid' },
+        { status: 400 }
+      )
+    }
+
+    // 1. Larang penghapusan akun sendiri (Self-deletion Protection)
+    if (id === auth.user.id) {
+      return NextResponse.json(
+        { error: 'Tindakan ditolak: Anda tidak dapat menghapus akun Anda sendiri.' },
+        { status: 400 }
+      )
+    }
+
     const supabase = createAdminClient()
+
+    // 2. Verifikasi target profil adalah akun pengajar (Tutor) dan bukan Admin
+    const { data: targetProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (profileError || !targetProfile) {
+      return NextResponse.json(
+        { error: 'Akun pengajar tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    if (targetProfile.role === 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Tindakan ditolak: Akun administrator tidak dapat dihapus melalui menu ini.' },
+        { status: 403 }
+      )
+    }
+
+    // 3. Opsi A: Cek riwayat evaluasi placement test siswa (Foreign Key Safety)
+    const { data: existingEvaluations, error: evalCheckError } = await supabase
+      .from('placement_evaluations')
+      .select('id')
+      .eq('tutor_id', id)
+      .limit(1)
+
+    if (evalCheckError) {
+      console.error('Error checking tutor evaluations before delete:', evalCheckError)
+      return NextResponse.json(
+        { error: 'Gagal memverifikasi riwayat penilaian pengajar' },
+        { status: 500 }
+      )
+    }
+
+    if (existingEvaluations && existingEvaluations.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            'Akun pengajar ini tidak dapat dihapus karena telah memiliki riwayat penilaian placement test siswa (diperlukan untuk arsip laporan lembaga).',
+        },
+        { status: 409 }
+      )
+    }
+
+    // 4. Hapus user di Supabase Auth (CASCADE ke profiles)
     const { error: authError } = await supabase.auth.admin.deleteUser(id)
 
     if (authError) {
       console.error('Error deleting auth user for tutor:', authError)
       return NextResponse.json(
-        { error: 'Gagal menghapus akun pengajar' },
+        { error: 'Gagal menghapus akun pengajar dari sistem autentikasi' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Akun pengajar berhasil dihapus',
+      message: `Akun pengajar ${targetProfile.full_name} berhasil dihapus.`,
     })
   } catch (err) {
     console.error('Unexpected error in admin tutors DELETE:', err)

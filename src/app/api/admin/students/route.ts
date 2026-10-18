@@ -73,9 +73,10 @@ export async function GET(request: Request) {
       query = query.eq('target_level', level)
     }
 
-    if (search.trim()) {
+    const sanitizedSearch = search.trim().replace(/[,()]/g, '')
+    if (sanitizedSearch) {
       query = query.or(
-        `full_name.ilike.%${search.trim()}%,phone_number.ilike.%${search.trim()}%`
+        `full_name.ilike.%${sanitizedSearch}%,phone_number.ilike.%${sanitizedSearch}%`
       )
     }
 

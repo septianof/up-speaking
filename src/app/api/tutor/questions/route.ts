@@ -35,6 +35,13 @@ export async function GET(request: Request) {
     const level = searchParams.get('level') || 'ELEMENTARY'
     const search = searchParams.get('search') || ''
 
+    // SEC-002: Jika bukan Admin, paksa filter jenjang sesuai peran tutor pengampu
+    let enforcedLevel = level
+    if (auth.profile.role !== 'ADMIN') {
+      enforcedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+    }
+
     const supabase = createAdminClient()
 
     let query = supabase
@@ -52,7 +59,7 @@ export async function GET(request: Request) {
           sort_order
         )
       `)
-      .eq('target_level', level)
+      .eq('target_level', enforcedLevel)
       .order('created_at', { ascending: false })
 
     if (search.trim()) {
@@ -127,6 +134,23 @@ export async function POST(request: Request) {
     }
 
     const { questionText, targetLevel, isActive, options } = parsed.data
+
+    if (auth.profile.role !== 'ADMIN') {
+      const allowedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+
+      if (targetLevel !== allowedLevel) {
+        return NextResponse.json(
+          {
+            error: `Akses ditolak: Anda hanya berwenang menambahkan butir soal untuk jenjang ${
+              allowedLevel === 'ELEMENTARY' ? 'Elementary' : 'High School'
+            }.`,
+          },
+          { status: 403 }
+        )
+      }
+    }
+
     const supabase = createAdminClient()
 
     const { data: newQuestion, error: qError } = await supabase

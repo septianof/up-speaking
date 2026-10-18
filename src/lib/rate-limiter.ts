@@ -90,17 +90,34 @@ export function checkRateLimit(
   }
 }
 
+const IP_REGEX =
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}$/
+
 /**
- * Ekstraksi IP address klien dari Request headers
+ * Ekstraksi IP address klien dari Request headers dengan proteksi spoofing
  */
 export function getClientIp(request: Request): string {
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim()
+  // 1. Prioritaskan header terpercaya dari edge proxy / reverse proxy (Vercel)
+  const vercelIp = request.headers.get('x-vercel-ip')
+  if (vercelIp && IP_REGEX.test(vercelIp.trim())) {
+    return vercelIp.trim()
   }
+
   const realIp = request.headers.get('x-real-ip')
-  if (realIp) {
+  if (realIp && IP_REGEX.test(realIp.trim())) {
     return realIp.trim()
   }
+
+  // 2. Fallback x-forwarded-for dengan validasi format IP
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) {
+    const parts = forwardedFor.split(',').map((s) => s.trim())
+    for (const ip of parts) {
+      if (IP_REGEX.test(ip)) {
+        return ip
+      }
+    }
+  }
+
   return '127.0.0.1'
 }

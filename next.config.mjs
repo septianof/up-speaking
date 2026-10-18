@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  images: {
+    // Menghilangkan format AVIF untuk memitigasi kerentanan RCE Image Optimizer (GHSA-2xp9-vwfh-vxw4)
+    formats: ['image/webp'],
+  },
   async headers() {
     return [
       {
@@ -20,6 +25,10 @@ const nextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
+          },
+          {
+            key: 'X-Permitted-Cross-Domain-Policies',
+            value: 'none',
           },
           {
             key: 'Referrer-Policy',

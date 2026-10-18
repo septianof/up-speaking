@@ -10,7 +10,13 @@ export interface StudentTokenPayload {
 export const STUDENT_TOKEN_COOKIE_NAME = 'up_speaking_student_token'
 
 function getSecret(): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || 'up_speaking_default_secure_salt'
+  const secret =
+    process.env.STUDENT_TOKEN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!secret) {
+    throw new Error(
+      'Konfigurasi keamanan server gagal: Kunci signing token siswa (STUDENT_TOKEN_SECRET atau SUPABASE_SERVICE_ROLE_KEY) belum diatur.'
+    )
+  }
   return secret
 }
 

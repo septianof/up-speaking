@@ -18,6 +18,15 @@ interface TutorRegisterModalProps {
 const EMAIL_REGEX =
   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|id|io|dev|app|ai|me|info|biz|co|co\.id|ac\.id|sch\.id|go\.id|or\.id|my\.id|web\.id|xyz)$/i;
 
+function generateRandomTempPassword(): string {
+  const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$";
+  let pass = "UpTutor";
+  for (let i = 0; i < 5; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+}
+
 export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   isOpen,
   onClose,
@@ -27,7 +36,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
   const isEditing = Boolean(initialTutor);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [tempPassword, setTempPassword] = useState("TutorUp2026!");
+  const [tempPassword, setTempPassword] = useState("");
   const [targetLevel, setTargetLevel] = useState<TargetLevel>("ELEMENTARY");
   const [errors, setErrors] = useState<{ fullName?: string; email?: string; tempPassword?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -43,7 +52,7 @@ export const TutorRegisterModal: React.FC<TutorRegisterModalProps> = ({
     } else {
       setFullName("");
       setEmail("");
-      setTempPassword("TutorUp2026!");
+      setTempPassword(generateRandomTempPassword());
       setTargetLevel("ELEMENTARY");
     }
     setErrors({});

@@ -73,6 +73,28 @@ export async function GET(
       )
     }
 
+    // Validasi otorisasi jenjang spesialisasi tutor (SEC-001)
+    if (auth.profile.role !== 'ADMIN') {
+      const studentData = normalizeSingleRelation(
+        session.students as unknown as
+          | { target_level: string }
+          | { target_level: string }[]
+      )
+      const allowedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+
+      if (studentData?.target_level !== allowedLevel) {
+        return NextResponse.json(
+          {
+            error: `Akses ditolak: Anda hanya berwenang melihat evaluasi siswa jenjang ${
+              allowedLevel === 'ELEMENTARY' ? 'Elementary' : 'High School'
+            }.`,
+          },
+          { status: 403 }
+        )
+      }
+    }
+
     // 2. Ambil lembar respon jawaban siswa secara urut
     const { data: responses, error: responsesError } = await supabase
       .from('test_responses')
@@ -246,6 +268,41 @@ export async function POST(
         : auth.profile.id
 
     const supabase = createAdminClient()
+
+    // 0. Validasi eksistensi sesi dan kecocokan jenjang spesialisasi tutor
+    const { data: targetSession, error: targetSessionError } = await supabase
+      .from('test_sessions')
+      .select('id, status, students ( target_level )')
+      .eq('id', sessionId)
+      .single()
+
+    if (targetSessionError || !targetSession) {
+      return NextResponse.json(
+        { error: 'Sesi tes tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    if (auth.profile.role !== 'ADMIN') {
+      const studentData = normalizeSingleRelation(
+        targetSession.students as unknown as
+          | { target_level: string }
+          | { target_level: string }[]
+      )
+      const allowedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+
+      if (studentData?.target_level !== allowedLevel) {
+        return NextResponse.json(
+          {
+            error: `Akses ditolak: Anda hanya berwenang mengevaluasi siswa jenjang ${
+              allowedLevel === 'ELEMENTARY' ? 'Elementary' : 'High School'
+            }.`,
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     // 1. Upsert ke tabel placement_evaluations
     const { data: evaluation, error: evalError } = await supabase

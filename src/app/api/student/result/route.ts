@@ -50,6 +50,7 @@ export async function GET(request: Request) {
       const matchesSession =
         !!sessionId &&
         (verifiedToken.sessionId === sessionId ||
+          !studentId ||
           verifiedToken.studentId === studentId)
 
       if (!matchesStudent && !matchesSession) {
@@ -85,14 +86,32 @@ export async function GET(request: Request) {
         )
       `)
 
-    if (sessionId) {
-      query = query.eq('id', sessionId)
-    } else if (studentId) {
-      query = query
-        .eq('student_id', studentId)
-        .neq('status', 'RESET')
-        .order('created_at', { ascending: false })
-        .limit(1)
+    if (!staffUser) {
+      // Siswa non-staf HANYA boleh mengakses data miliknya sendiri yang terikat pada verifiedToken
+      const verifiedToken = verifyStudentToken(
+        cookies().get(STUDENT_TOKEN_COOKIE_NAME)?.value
+      )!
+
+      query = query.eq('student_id', verifiedToken.studentId)
+      if (sessionId) {
+        query = query.eq('id', sessionId)
+      } else {
+        query = query
+          .neq('status', 'RESET')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      }
+    } else {
+      // Staf lembaga (Admin/Tutor) memiliki izin melihat sesi berdasarkan parameter
+      if (sessionId) {
+        query = query.eq('id', sessionId)
+      } else if (studentId) {
+        query = query
+          .eq('student_id', studentId)
+          .neq('status', 'RESET')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      }
     }
 
     const { data: session, error: sessionError } = await query.maybeSingle()

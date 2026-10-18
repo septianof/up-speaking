@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { uuidSchema, optionalUuidSchema } from '@/lib/validators'
+import {
+  verifyStudentToken,
+  STUDENT_TOKEN_COOKIE_NAME,
+} from '@/lib/student-token'
 
 const syncSchema = z.object({
   sessionId: uuidSchema('ID sesi tidak valid'),
@@ -28,12 +33,32 @@ export async function POST(request: Request) {
     }
 
     const { sessionId, deviceToken, elapsedSeconds, responses } = parsed.data
+
+    // Verifikasi token cookie identitas siswa
+    const cookieStore = cookies()
+    const rawToken = cookieStore.get(STUDENT_TOKEN_COOKIE_NAME)?.value
+    const verifiedToken = verifyStudentToken(rawToken)
+
+    if (!verifiedToken) {
+      return NextResponse.json(
+        { error: 'Akses tidak sah: Sesi siswa tidak valid atau telah berakhir.' },
+        { status: 401 }
+      )
+    }
+
+    if (verifiedToken.sessionId && verifiedToken.sessionId !== sessionId) {
+      return NextResponse.json(
+        { error: 'Akses ditolak: Token tidak sesuai dengan sesi ujian ini.' },
+        { status: 403 }
+      )
+    }
+
     const supabase = createAdminClient()
 
     // 1. Verifikasi status sesi dan kepemilikan token perangkat
     const { data: session, error: sessionError } = await supabase
       .from('test_sessions')
-      .select('id, device_token, status')
+      .select('id, student_id, device_token, status')
       .eq('id', sessionId)
       .single()
 
@@ -41,6 +66,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Sesi tes tidak ditemukan' },
         { status: 404 }
+      )
+    }
+
+    if (session.student_id !== verifiedToken.studentId) {
+      return NextResponse.json(
+        { error: 'Akses ditolak: Anda tidak memiliki wewenang untuk sesi ini.' },
+        { status: 403 }
       )
     }
 

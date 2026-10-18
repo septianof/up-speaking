@@ -14,6 +14,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const level = searchParams.get('level') || 'ELEMENTARY'
 
+    // SEC-002: Jika bukan Admin, paksa filter jenjang sesuai peran tutor pengampu
+    let enforcedLevel = level
+    if (auth.profile.role !== 'ADMIN') {
+      enforcedLevel =
+        auth.profile.role === 'TUTOR_ELEMENTARY' ? 'ELEMENTARY' : 'HIGH_SCHOOL'
+    }
+
     const supabase = createAdminClient()
 
     // 1. Ambil data siswa dan sesi ujian khusus jenjang yang diampu tutor
@@ -38,7 +45,7 @@ export async function GET(request: Request) {
           )
         )
       `)
-      .eq('target_level', level)
+      .eq('target_level', enforcedLevel)
       .order('created_at', { ascending: false })
 
     if (studentsError) {
