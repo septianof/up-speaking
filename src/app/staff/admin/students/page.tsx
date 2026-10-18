@@ -248,11 +248,11 @@ export default function AdminStudentsPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full rounded-xl border border-surface-border bg-surface-white px-3 py-2 text-xs sm:text-sm font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
             >
-              <option value="ALL">Semua Status Sesi</option>
+              <option value="ALL">Semua Status</option>
               <option value="NOT_STARTED">Belum Mulai</option>
-              <option value="IN_PROGRESS">Sedang Mengerjakan</option>
-              <option value="COMPLETED">Menunggu Evaluasi</option>
-              <option value="FINALIZED">Selesai & Dinilai</option>
+              <option value="IN_PROGRESS">Sedang Tes</option>
+              <option value="COMPLETED">Perlu Dinilai</option>
+              <option value="FINALIZED">Dinilai</option>
               <option value="RESET">Direset</option>
             </select>
           </div>
