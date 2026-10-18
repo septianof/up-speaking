@@ -155,10 +155,16 @@ export const Mascot: React.FC<MascotProps> = ({
     <motion.div
       className={cn("inline-block", className)}
       style={{ width: size, maxWidth: "100%" }}
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      animate={{
+        y: [0, -8, 0],
+        rotate: [-2, 2, -2],
+        scaleX: [1, 1.015, 1],
+        scaleY: [1, 0.985, 1],
+      }}
+      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
     >
       {body}
     </motion.div>
   );
 };
+

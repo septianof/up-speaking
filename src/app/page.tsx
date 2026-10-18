@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { LoginModal } from "@/components/student/LoginModal";
-import { Mascot } from "@/components/student/Mascot";
+import { Mascot, MascotMood } from "@/components/student/Mascot";
 import { getActiveSession, saveSession, clearSession } from "@/lib/session";
 import { StudentSession } from "@/types/student";
 import { SITE_CONFIG } from "@/lib/site-config";
@@ -96,6 +96,153 @@ const SpeechBubbleSvg: React.FC<{ className?: string }> = ({ className }) => (
     <path d="M6 0 C2.7 0 0 2.7 0 6 L0 22 C0 25.3 2.7 28 6 28 L24 28 L34 36 L32 28 L34 28 C37.3 28 40 25.3 40 22 L40 6 C40 2.7 37.3 0 34 0 Z" />
   </svg>
 );
+
+const HERO_SPEECH_MESSAGES = [
+  "Hello! Let's speak English! ✨",
+  "Semangat tesnya ya! Kamu hebat! 🚀",
+  "You've got this! Show your best! 💪",
+  "Chirp chirp! Siap placement test? 🐥",
+  "Senang bertemu kamu! Have fun! 🌟",
+  "High five! Yuk tunjukkan yang terbaik! 🙌",
+];
+
+const HeroMascotInteractive: React.FC = () => {
+  const [mood, setMood] = useState<MascotMood>("wave");
+  const [speechText, setSpeechText] = useState<string | null>(null);
+  const [bounceKey, setBounceKey] = useState(0);
+  const [showHint, setShowHint] = useState(true);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handleTap = () => {
+    setShowHint(false);
+    setBounceKey((prev) => prev + 1);
+    setMood("cheer");
+
+    // Pilih pesan acak yang berbeda dari sebelumnya
+    const candidates = HERO_SPEECH_MESSAGES.filter((msg) => msg !== speechText);
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+    setSpeechText(chosen);
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setMood("wave");
+      setSpeechText(null);
+    }, 2800);
+  };
+
+  return (
+    <div className="relative flex flex-col items-center select-none">
+      {/* Balon Ucapan Muncul di Atas Maskot saat di-tap */}
+      <AnimatePresence>
+        {speechText && (
+          <motion.div
+            key={speechText}
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 450, damping: 25 }}
+            className="absolute -top-14 sm:-top-16 z-30 px-4 py-2 rounded-2xl bg-white border-2 border-primary-200 shadow-md text-text-primary text-xs sm:text-sm font-bold flex items-center gap-1.5 whitespace-nowrap pointer-events-none"
+          >
+            <span>{speechText}</span>
+            {/* Ekor balon ucapan */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-primary-200" />
+            <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Partikel Sparkle Burst saat di-tap */}
+      <AnimatePresence>
+        {bounceKey > 0 && (
+          <motion.div
+            key={bounceKey}
+            className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {/* Partikel 1 */}
+            <motion.div
+              initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
+              animate={{ x: -45, y: -45, scale: 1.3, rotate: -40 }}
+              transition={{ duration: 0.65, ease: "easeOut" }}
+              className="absolute text-sun-400 w-5 h-5 drop-shadow-xs"
+            >
+              <SparkleStar />
+            </motion.div>
+            {/* Partikel 2 */}
+            <motion.div
+              initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
+              animate={{ x: 45, y: -40, scale: 1.2, rotate: 35 }}
+              transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
+              className="absolute text-amber-400 w-5 h-5 drop-shadow-xs"
+            >
+              <SparkleStar />
+            </motion.div>
+            {/* Partikel 3 */}
+            <motion.div
+              initial={{ x: 0, y: 0, scale: 0 }}
+              animate={{ x: 0, y: -60, scale: 1.1 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
+              className="absolute text-sun-300 w-4 h-4 drop-shadow-xs"
+            >
+              <SparkleStar />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Kartu Wadah Maskot Interaktif */}
+      <motion.button
+        type="button"
+        onClick={handleTap}
+        whileHover={{ scale: 1.04, y: -3 }}
+        whileTap={{ scale: 0.94 }}
+        animate={
+          bounceKey > 0
+            ? {
+                y: [0, 6, -24, 3, 0],
+                rotate: [0, -5, 5, -2, 0],
+                scaleX: [1, 1.08, 0.94, 1.03, 1],
+                scaleY: [1, 0.92, 1.08, 0.97, 1],
+              }
+            : undefined
+        }
+        transition={
+          bounceKey > 0
+            ? { duration: 0.65, ease: "easeOut" }
+            : { type: "spring", stiffness: 350, damping: 25 }
+        }
+        aria-label="Interaksi dengan maskot Upi"
+        className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 hover:bg-white/90 backdrop-blur-xs border-2 border-primary-200/50 hover:border-primary-400 shadow-kid-card hover:shadow-kid-card-hover transition-all duration-200 flex flex-col items-center cursor-pointer group focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-400"
+      >
+        <Mascot mood={mood} size={210} floating={bounceKey === 0} />
+
+        {/* Petunjuk Interaksi Halus */}
+        <AnimatePresence>
+          {showHint && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="mt-2 text-[11px] font-bold text-primary-500/80 group-hover:text-primary-600 flex items-center gap-1 transition-colors"
+            >
+              <span>Sentuh / Klik Upi!</span>
+              <span className="text-sun-500">✨</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
+    </div>
+  );
+};
 
 export default function Home() {
   const router = useRouter();
@@ -546,9 +693,7 @@ export default function Home() {
             >
               {/* Blob Background Dekoratif */}
               <div className="absolute w-64 h-64 sm:w-80 sm:h-80 bg-primary-100/70 rounded-full blur-2xl -z-10 animate-pulse" />
-              <div className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 backdrop-blur-xs border-2 border-primary-200/50 shadow-kid-card flex flex-col items-center">
-                <Mascot mood="wave" size={210} floating />
-              </div>
+              <HeroMascotInteractive />
             </motion.div>
           </div>
         </section>
