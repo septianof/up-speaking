@@ -20,7 +20,7 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Transition } from "framer-motion";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -97,43 +97,107 @@ const SpeechBubbleSvg: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const HERO_SPEECH_MESSAGES = [
-  "Hello! Let's speak English! ✨",
-  "Semangat tesnya ya! Kamu hebat! 🚀",
-  "You've got this! Show your best! 💪",
-  "Chirp chirp! Siap placement test? 🐥",
-  "Senang bertemu kamu! Have fun! 🌟",
-  "High five! Yuk tunjukkan yang terbaik! 🙌",
+interface MascotAction {
+  speech: string;
+  mood: MascotMood;
+  durationMs: number;
+  animate: {
+    y: number[];
+    rotate: number[];
+    scaleX?: number[];
+    scaleY?: number[];
+    scale?: number[];
+  };
+  transition: Transition;
+}
+
+const MASCOT_ACTIONS: MascotAction[] = [
+  // Aksi 1: Lompat Memutar 360° (Spin Flip Jump) + Say Hi!
+  {
+    speech: "Hi! 👋",
+    mood: "cheer",
+    durationMs: 850,
+    animate: {
+      y: [0, 8, -60, 4, 0],
+      rotate: [0, -15, 360, 360, 0],
+      scaleX: [1, 1.15, 0.88, 1.05, 1],
+      scaleY: [1, 0.85, 1.15, 0.95, 1],
+    },
+    transition: { duration: 0.85, ease: "easeOut" },
+  },
+  // Aksi 2: Loncat-loncat Membal 2 Kali (Double Hop Bounce)
+  {
+    speech: "Let's Speak! 🚀",
+    mood: "cheer",
+    durationMs: 750,
+    animate: {
+      y: [0, -36, 0, -22, 0],
+      rotate: [0, -10, 10, -5, 0],
+      scaleX: [1, 0.92, 1.08, 0.96, 1],
+      scaleY: [1, 1.08, 0.92, 1.04, 1],
+    },
+    transition: { duration: 0.75, ease: "easeInOut" },
+  },
+  // Aksi 3: Goyang Ceria & Kepak Sayap (Happy Wiggle & Flutter)
+  {
+    speech: "You rock! 🌟",
+    mood: "wave",
+    durationMs: 750,
+    animate: {
+      y: [0, -14, 0, -10, 0],
+      rotate: [0, -18, 18, -14, 14, -6, 6, 0],
+      scale: [1, 1.1, 0.95, 1.06, 1],
+    },
+    transition: { duration: 0.75, ease: "easeInOut" },
+  },
 ];
 
+const idleTransition: Transition = {
+  duration: 4.5,
+  repeat: Infinity,
+  ease: "easeInOut",
+};
+
 const HeroMascotInteractive: React.FC = () => {
-  const [mood, setMood] = useState<MascotMood>("wave");
+  const [clickCount, setClickCount] = useState(0);
+  const [isActing, setIsActing] = useState(false);
+  const [actionKey, setActionKey] = useState(0);
   const [speechText, setSpeechText] = useState<string | null>(null);
-  const [bounceKey, setBounceKey] = useState(0);
-  const [showHint, setShowHint] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [mood, setMood] = useState<MascotMood>("wave");
+  const actionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const speechTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
+      if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
     };
   }, []);
 
+  const currentAction = MASCOT_ACTIONS[clickCount % MASCOT_ACTIONS.length];
+
   const handleTap = () => {
-    setShowHint(false);
-    setBounceKey((prev) => prev + 1);
-    setMood("cheer");
+    const nextCount = clickCount + 1;
+    const action = MASCOT_ACTIONS[clickCount % MASCOT_ACTIONS.length];
+    setClickCount(nextCount);
+    setActionKey((k) => k + 1);
+    setIsActing(true);
+    setMood(action.mood);
+    setSpeechText(action.speech);
 
-    // Pilih pesan acak yang berbeda dari sebelumnya
-    const candidates = HERO_SPEECH_MESSAGES.filter((msg) => msg !== speechText);
-    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-    setSpeechText(chosen);
+    if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
+    if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
 
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
+    // Kembalikan ke gerakan idle setelah durasi aksi selesai
+    actionTimerRef.current = setTimeout(() => {
+      setIsActing(false);
       setMood("wave");
+    }, action.durationMs + 100);
+
+    // Balon ucapan bertahan selama 2.2 detik
+    speechTimerRef.current = setTimeout(() => {
       setSpeechText(null);
-    }, 2800);
+    }, 2200);
   };
 
   return (
@@ -142,54 +206,51 @@ const HeroMascotInteractive: React.FC = () => {
       <AnimatePresence>
         {speechText && (
           <motion.div
-            key={speechText}
-            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            key={speechText + actionKey}
+            initial={{ opacity: 0, y: 10, scale: 0.7 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.8 }}
-            transition={{ type: "spring", stiffness: 450, damping: 25 }}
-            className="absolute -top-14 sm:-top-16 z-30 px-4 py-2 rounded-2xl bg-white border-2 border-primary-200 shadow-md text-text-primary text-xs sm:text-sm font-bold flex items-center gap-1.5 whitespace-nowrap pointer-events-none"
+            exit={{ opacity: 0, y: -8, scale: 0.7 }}
+            transition={{ type: "spring", stiffness: 450, damping: 22 }}
+            className="absolute -top-12 sm:-top-14 z-30 px-4 py-1.5 rounded-2xl bg-white border-2 border-primary-300 shadow-md text-text-primary text-sm font-black flex items-center gap-1.5 whitespace-nowrap pointer-events-none"
           >
             <span>{speechText}</span>
             {/* Ekor balon ucapan */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-primary-200" />
-            <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-primary-300" />
+            <div className="absolute -bottom-[5.5px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Partikel Sparkle Burst saat di-tap */}
+      {/* Partikel Sparkle Burst saat berakrobat */}
       <AnimatePresence>
-        {bounceKey > 0 && (
+        {actionKey > 0 && (
           <motion.div
-            key={bounceKey}
+            key={actionKey}
             className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center"
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Partikel 1 */}
             <motion.div
               initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
-              animate={{ x: -45, y: -45, scale: 1.3, rotate: -40 }}
+              animate={{ x: -50, y: -50, scale: 1.3, rotate: -40 }}
               transition={{ duration: 0.65, ease: "easeOut" }}
               className="absolute text-sun-400 w-5 h-5 drop-shadow-xs"
             >
               <SparkleStar />
             </motion.div>
-            {/* Partikel 2 */}
             <motion.div
               initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
-              animate={{ x: 45, y: -40, scale: 1.2, rotate: 35 }}
+              animate={{ x: 50, y: -45, scale: 1.2, rotate: 35 }}
               transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
               className="absolute text-amber-400 w-5 h-5 drop-shadow-xs"
             >
               <SparkleStar />
             </motion.div>
-            {/* Partikel 3 */}
             <motion.div
               initial={{ x: 0, y: 0, scale: 0 }}
-              animate={{ x: 0, y: -60, scale: 1.1 }}
+              animate={{ x: 0, y: -70, scale: 1.1 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
               className="absolute text-sun-300 w-4 h-4 drop-shadow-xs"
             >
@@ -199,47 +260,41 @@ const HeroMascotInteractive: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Kartu Wadah Maskot Interaktif */}
-      <motion.button
+      {/* Tombol Interaktif Frameless untuk Maskot */}
+      <button
         type="button"
         onClick={handleTap}
-        whileHover={{ scale: 1.04, y: -3 }}
-        whileTap={{ scale: 0.94 }}
-        animate={
-          bounceKey > 0
-            ? {
-                y: [0, 6, -24, 3, 0],
-                rotate: [0, -5, 5, -2, 0],
-                scaleX: [1, 1.08, 0.94, 1.03, 1],
-                scaleY: [1, 0.92, 1.08, 0.97, 1],
-              }
-            : undefined
-        }
-        transition={
-          bounceKey > 0
-            ? { duration: 0.65, ease: "easeOut" }
-            : { type: "spring", stiffness: 350, damping: 25 }
-        }
         aria-label="Interaksi dengan maskot Upi"
-        className="relative p-6 sm:p-8 rounded-[36px] bg-white/70 hover:bg-white/90 backdrop-blur-xs border-2 border-primary-200/50 hover:border-primary-400 shadow-kid-card hover:shadow-kid-card-hover transition-all duration-200 flex flex-col items-center cursor-pointer group focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-400"
+        className="relative p-2 flex flex-col items-center cursor-pointer select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-400 rounded-full"
       >
-        <Mascot mood={mood} size={210} floating={bounceKey === 0} />
+        <motion.div
+          key={actionKey}
+          animate={
+            isActing
+              ? currentAction.animate
+              : {
+                  y: [0, -8, 0],
+                  rotate: [-2, 2, -2],
+                  scaleX: [1, 1.015, 1],
+                  scaleY: [1, 0.985, 1],
+                }
+          }
+          transition={isActing ? currentAction.transition : idleTransition}
+        >
+          <Mascot mood={mood} size={220} floating={false} />
+        </motion.div>
 
-        {/* Petunjuk Interaksi Halus */}
-        <AnimatePresence>
-          {showHint && (
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="mt-2 text-[11px] font-bold text-primary-500/80 group-hover:text-primary-600 flex items-center gap-1 transition-colors"
-            >
-              <span>Sentuh / Klik Upi!</span>
-              <span className="text-sun-500">✨</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {/* Bayangan lantai dinamis di bawah kaki */}
+        <motion.div
+          animate={
+            isActing
+              ? { scale: [1, 0.55, 1], opacity: [0.22, 0.08, 0.22] }
+              : { scale: [1, 0.9, 1], opacity: [0.18, 0.12, 0.18] }
+          }
+          transition={isActing ? currentAction.transition : idleTransition}
+          className="w-32 h-3.5 rounded-full bg-slate-900/12 blur-[2px] -mt-2 pointer-events-none"
+        />
+      </button>
     </div>
   );
 };
