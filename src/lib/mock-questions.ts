@@ -1,4 +1,4 @@
-import { QuestionItem, TargetLevel } from "@/types/student";
+import { QuestionItem } from "@/types/student";
 
 export const INITIAL_QUESTIONS: QuestionItem[] = [
   {
@@ -242,86 +242,7 @@ export const INITIAL_QUESTIONS: QuestionItem[] = [
     ],
   },
 ];
-
-export const MOCK_QUESTIONS = INITIAL_QUESTIONS;
-
-const QUESTIONS_STORAGE_KEY = "up_speaking_mock_questions";
-
 export function getMockQuestions(): QuestionItem[] {
-  if (typeof window === "undefined") return INITIAL_QUESTIONS;
-  try {
-    const raw = localStorage.getItem(QUESTIONS_STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(QUESTIONS_STORAGE_KEY, JSON.stringify(INITIAL_QUESTIONS));
-      return INITIAL_QUESTIONS;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return INITIAL_QUESTIONS;
-  }
-}
-
-export function saveMockQuestions(questions: QuestionItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(QUESTIONS_STORAGE_KEY, JSON.stringify(questions));
-  } catch {
-    // ignore
-  }
-}
-
-export function addMockQuestion(item: {
-  questionText: string;
-  targetLevel: TargetLevel;
-  options: { id: string; optionText: string }[];
-  correctOptionId: string;
-}): QuestionItem {
-  const current = getMockQuestions();
-  const newItem: QuestionItem = {
-    id: `q-${Date.now().toString().slice(-4)}`,
-    questionText: item.questionText.trim(),
-    targetLevel: item.targetLevel,
-    options: item.options,
-    correctOptionId: item.correctOptionId,
-  };
-  const updated = [newItem, ...current];
-  saveMockQuestions(updated);
-  return newItem;
-}
-
-export function deleteMockQuestion(id: string): void {
-  const current = getMockQuestions();
-  const updated = current.filter((q) => q.id !== id);
-  saveMockQuestions(updated);
-}
-
-export function updateMockQuestion(
-  id: string,
-  updatedData: {
-    questionText: string;
-    targetLevel: TargetLevel;
-    options: { id: string; optionText: string }[];
-    correctOptionId: string;
-  }
-): QuestionItem | null {
-  const current = getMockQuestions();
-  let updatedItem: QuestionItem | null = null;
-
-  const updated = current.map((q) => {
-    if (q.id === id) {
-      updatedItem = {
-        ...q,
-        questionText: updatedData.questionText.trim(),
-        targetLevel: updatedData.targetLevel,
-        options: updatedData.options,
-        correctOptionId: updatedData.correctOptionId,
-      };
-      return updatedItem;
-    }
-    return q;
-  });
-
-  saveMockQuestions(updated);
-  return updatedItem;
+  return INITIAL_QUESTIONS;
 }
 

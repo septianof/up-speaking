@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { LoginModal } from "@/components/student/LoginModal";
-import { Mascot, MascotMood } from "@/components/student/Mascot";
+import { Mascot } from "@/components/student/Mascot";
+import { HeroMascotInteractive } from "@/components/student/HeroMascotInteractive";
+import {
+  InstagramIcon,
+  TikTokIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  CloudSvg,
+  SpeechBubbleSvg,
+  SparkleStar,
+} from "@/components/student/LandingIcons";
+import { LANDING_NAV_LINKS, LANDING_FAQS } from "@/lib/landing-data";
 import { getActiveSession, saveSession, clearSession } from "@/lib/session";
 import { StudentSession } from "@/types/student";
 import { SITE_CONFIG } from "@/lib/site-config";
@@ -20,284 +31,7 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { motion, AnimatePresence, type Transition } from "framer-motion";
-
-const InstagramIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-  </svg>
-);
-
-const TikTokIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.48 6.3 6.3 0 0 0 1.86-4.47V8.71a8.21 8.21 0 0 0 4.91 1.64v-3.5a4.79 4.79 0 0 1-1-.16Z" />
-  </svg>
-);
-
-const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const WhatsAppIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-  </svg>
-);
-
-const CloudSvg: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 120 60"
-    fill="currentColor"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M20 50 C10 50 0 42 0 32 C0 24 6 18 14 16 C16 8 26 2 38 2 C48 2 56 7 60 14 C64 10 72 8 80 8 C92 8 102 16 104 26 C114 26 120 34 120 42 C120 50 112 50 102 50 Z" />
-  </svg>
-);
-
-const SparkleStar: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" />
-  </svg>
-);
-
-const SpeechBubbleSvg: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 40 36"
-    fill="currentColor"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M6 0 C2.7 0 0 2.7 0 6 L0 22 C0 25.3 2.7 28 6 28 L24 28 L34 36 L32 28 L34 28 C37.3 28 40 25.3 40 22 L40 6 C40 2.7 37.3 0 34 0 Z" />
-  </svg>
-);
-
-interface MascotAction {
-  speech: string;
-  mood: MascotMood;
-  durationMs: number;
-  animate: {
-    y: number[];
-    rotate: number[];
-    scaleX?: number[];
-    scaleY?: number[];
-    scale?: number[];
-  };
-  transition: Transition;
-}
-
-const MASCOT_ACTIONS: MascotAction[] = [
-  // Aksi 1: Lompat Memutar 360° (Spin Flip Jump) + Say Hi!
-  {
-    speech: "Hi! 👋",
-    mood: "cheer",
-    durationMs: 850,
-    animate: {
-      y: [0, 8, -60, 4, 0],
-      rotate: [0, -15, 360, 360, 0],
-      scaleX: [1, 1.15, 0.88, 1.05, 1],
-      scaleY: [1, 0.85, 1.15, 0.95, 1],
-    },
-    transition: { duration: 0.85, ease: "easeOut" },
-  },
-  // Aksi 2: Loncat-loncat Membal 2 Kali (Double Hop Bounce)
-  {
-    speech: "Let's Speak! 🚀",
-    mood: "cheer",
-    durationMs: 750,
-    animate: {
-      y: [0, -36, 0, -22, 0],
-      rotate: [0, -10, 10, -5, 0],
-      scaleX: [1, 0.92, 1.08, 0.96, 1],
-      scaleY: [1, 1.08, 0.92, 1.04, 1],
-    },
-    transition: { duration: 0.75, ease: "easeInOut" },
-  },
-  // Aksi 3: Goyang Ceria & Kepak Sayap (Happy Wiggle & Flutter)
-  {
-    speech: "You rock! 🌟",
-    mood: "wave",
-    durationMs: 750,
-    animate: {
-      y: [0, -14, 0, -10, 0],
-      rotate: [0, -18, 18, -14, 14, -6, 6, 0],
-      scale: [1, 1.1, 0.95, 1.06, 1],
-    },
-    transition: { duration: 0.75, ease: "easeInOut" },
-  },
-];
-
-const idleTransition: Transition = {
-  duration: 4.5,
-  repeat: Infinity,
-  ease: "easeInOut",
-};
-
-const HeroMascotInteractive: React.FC = () => {
-  const [clickCount, setClickCount] = useState(0);
-  const [isActing, setIsActing] = useState(false);
-  const [actionKey, setActionKey] = useState(0);
-  const [speechText, setSpeechText] = useState<string | null>(null);
-  const [mood, setMood] = useState<MascotMood>("wave");
-  const actionTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const speechTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
-      if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
-    };
-  }, []);
-
-  const currentAction = MASCOT_ACTIONS[clickCount % MASCOT_ACTIONS.length];
-
-  const handleTap = () => {
-    const nextCount = clickCount + 1;
-    const action = MASCOT_ACTIONS[clickCount % MASCOT_ACTIONS.length];
-    setClickCount(nextCount);
-    setActionKey((k) => k + 1);
-    setIsActing(true);
-    setMood(action.mood);
-    setSpeechText(action.speech);
-
-    if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
-    if (speechTimerRef.current) clearTimeout(speechTimerRef.current);
-
-    // Kembalikan ke gerakan idle setelah durasi aksi selesai
-    actionTimerRef.current = setTimeout(() => {
-      setIsActing(false);
-      setMood("wave");
-    }, action.durationMs + 100);
-
-    // Balon ucapan bertahan selama 2.2 detik
-    speechTimerRef.current = setTimeout(() => {
-      setSpeechText(null);
-    }, 2200);
-  };
-
-  return (
-    <div className="relative flex flex-col items-center select-none">
-      {/* Balon Ucapan Muncul di Atas Maskot saat di-tap */}
-      <AnimatePresence>
-        {speechText && (
-          <motion.div
-            key={speechText + actionKey}
-            initial={{ opacity: 0, y: 10, scale: 0.7 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.7 }}
-            transition={{ type: "spring", stiffness: 450, damping: 22 }}
-            className="absolute -top-12 sm:-top-14 z-30 px-4 py-1.5 rounded-2xl bg-white border-2 border-primary-300 shadow-md text-text-primary text-sm font-black flex items-center gap-1.5 whitespace-nowrap pointer-events-none"
-          >
-            <span>{speechText}</span>
-            {/* Ekor balon ucapan */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-primary-300" />
-            <div className="absolute -bottom-[5.5px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[7px] border-t-white" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Partikel Sparkle Burst saat berakrobat */}
-      <AnimatePresence>
-        {actionKey > 0 && (
-          <motion.div
-            key={actionKey}
-            className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.div
-              initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
-              animate={{ x: -50, y: -50, scale: 1.3, rotate: -40 }}
-              transition={{ duration: 0.65, ease: "easeOut" }}
-              className="absolute text-sun-400 w-5 h-5 drop-shadow-xs"
-            >
-              <SparkleStar />
-            </motion.div>
-            <motion.div
-              initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
-              animate={{ x: 50, y: -45, scale: 1.2, rotate: 35 }}
-              transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
-              className="absolute text-amber-400 w-5 h-5 drop-shadow-xs"
-            >
-              <SparkleStar />
-            </motion.div>
-            <motion.div
-              initial={{ x: 0, y: 0, scale: 0 }}
-              animate={{ x: 0, y: -70, scale: 1.1 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
-              className="absolute text-sun-300 w-4 h-4 drop-shadow-xs"
-            >
-              <SparkleStar />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Tombol Interaktif Frameless untuk Maskot */}
-      <button
-        type="button"
-        onClick={handleTap}
-        aria-label="Interaksi dengan maskot Upi"
-        className="relative p-2 flex flex-col items-center cursor-pointer select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-400 rounded-full"
-      >
-        <motion.div
-          key={actionKey}
-          animate={
-            isActing
-              ? currentAction.animate
-              : {
-                  y: [0, -8, 0],
-                  rotate: [-2, 2, -2],
-                  scaleX: [1, 1.015, 1],
-                  scaleY: [1, 0.985, 1],
-                }
-          }
-          transition={isActing ? currentAction.transition : idleTransition}
-        >
-          <Mascot mood={mood} size={220} floating={false} />
-        </motion.div>
-
-        {/* Bayangan lantai dinamis di bawah kaki */}
-        <motion.div
-          animate={
-            isActing
-              ? { scale: [1, 0.55, 1], opacity: [0.22, 0.08, 0.22] }
-              : { scale: [1, 0.9, 1], opacity: [0.18, 0.12, 0.18] }
-          }
-          transition={isActing ? currentAction.transition : idleTransition}
-          className="w-32 h-3.5 rounded-full bg-slate-900/12 blur-[2px] -mt-2 pointer-events-none"
-        />
-      </button>
-    </div>
-  );
-};
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const router = useRouter();
@@ -318,12 +52,7 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const navLinks = [
-    { label: "Beranda", href: "#hero" },
-    { label: "Alur Tes", href: "#alur" },
-    { label: "Ketentuan", href: "#ketentuan" },
-    { label: "FAQ", href: "#faq" },
-  ];
+  const navLinks = LANDING_NAV_LINKS;
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
@@ -422,24 +151,7 @@ export default function Home() {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const faqs = [
-    {
-      q: "Apakah ada batasan waktu saat mengerjakan tes?",
-      a: "Tidak ada batas waktu mundur (countdown)! Jam di atas hanya mencatat total waktu pengerjaanmu. Kamu bisa membaca dan menjawab soal dengan tenang dan teliti.",
-    },
-    {
-      q: "Bagaimana jika koneksi internet tiba-tiba terputus?",
-      a: "Jangan panik! Jawabanmu otomatis tersimpan aman di HP/komputermu. Kamu tetap bisa lanjut menjawab, dan jawaban akan tersimpan otomatis saat internet terhubung kembali.",
-    },
-    {
-      q: "Bolehkah saya mengubah jawaban sebelum mengumpulkan?",
-      a: "Tentu saja boleh! Kamu bebas kembali ke nomor sebelumnya dan mengganti pilihan jawaban kapan saja sebelum menekan tombol 'Kumpulkan'.",
-    },
-    {
-      q: "Kapan hasil placement test dapat diketahui?",
-      a: "Setelah kamu mengumpulkan jawaban, lembar tes akan dinilai langsung oleh tim pengajar Up Speaking untuk menentukan hasil penempatan kelas yang paling tepat.",
-    },
-  ];
+  const faqs = LANDING_FAQS;
 
   return (
     <div className="min-h-screen bg-sky-soft text-text-primary font-kid flex flex-col justify-between selection:bg-sun-100 selection:text-primary-800">

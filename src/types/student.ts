@@ -9,6 +9,19 @@ export interface QuestionOption {
   optionText: string;
 }
 
+export interface ApiOption {
+  id: string;
+  optionText: string;
+}
+
+export interface ApiQuestion {
+  id: string;
+  questionText: string;
+  targetLevel: TargetLevel;
+  options: ApiOption[];
+  correctOptionId: string;
+}
+
 export interface QuestionItem {
   id: string;
   questionText: string;

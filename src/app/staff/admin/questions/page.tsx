@@ -16,21 +16,8 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Pagination } from "@/components/ui/Pagination";
 import { QuestionFormModal } from "@/components/staff/QuestionFormModal";
-import { QuestionItem, TargetLevel } from "@/types/student";
+import { QuestionItem, TargetLevel, ApiOption, ApiQuestion } from "@/types/student";
 import { fetcher } from "@/lib/fetcher";
-
-interface ApiOption {
-  id: string;
-  optionText: string;
-}
-
-interface ApiQuestion {
-  id: string;
-  questionText: string;
-  targetLevel: TargetLevel;
-  options: ApiOption[];
-  correctOptionId: string;
-}
 
 export default function AdminQuestionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
