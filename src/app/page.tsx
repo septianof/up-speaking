@@ -345,7 +345,7 @@ export default function Home() {
                 </span>
                 <span className="block text-4xl sm:text-5xl lg:text-6xl font-black text-text-primary">
                   Placement{" "}
-                  <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2 sm:decoration-4">
+                  <span className="text-primary-500 underline decoration-sun-400 decoration-wavy decoration-2 sm:decoration-4 underline-offset-6 sm:underline-offset-8 [text-decoration-skip-ink:none]">
                     Test
                   </span>
                 </span>
