@@ -11,7 +11,7 @@
 ---
 
 ## 2. Problem Statement
-Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani peserta didik jenjang *Elementary* (SD) dan *High School* (SMP, SMA, dan Umum). Saat ini, penentuan level awal siswa (*student placement test*) masih diselenggarakan secara manual menggunakan lembar kertas. Proses manual ini menimbulkan tiga permasalahan utama:
+Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani peserta didik jenjang *Elementary* dan *High School*. Saat ini, penentuan level awal siswa (*student placement test*) masih diselenggarakan secara manual menggunakan lembar kertas. Proses manual ini menimbulkan tiga permasalahan utama:
 
 1. **Beban Administratif & Kerentanan Human Error:**
    - Pemeriksaan lembar jawaban dan perhitungan skor manual rentan terhadap salah hitung (*clerical error*), yang dapat menyebabkan kesalahan fatal pada penentuan level awal siswa.
@@ -25,7 +25,7 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 ## 3. Target Users and Roles
 
 ### 1. Student (Siswa):
-- Siswa jenjang *Elementary* (SD) dan *High School* (SMP, SMA, Umum).
+- Siswa jenjang *Elementary* dan *High School*.
 - Mengakses tes melalui browser web menggunakan **Nama Lengkap + Nomor HP** (yang didaftarkan oleh Admin).
 - Begitu login berhasil, langsung diarahkan ke lembar soal pilihan ganda acak dengan timer hitung maju (*elapsed timer*). Seluruh soal aktif yang ada di bank soal jenjangnya akan diujikan.
 - Dapat melanjutkan pengerjaan secara offline jika internet tiba-tiba terputus, dan mengirimkan (*submit*) lembar jawaban saat terhubung online.
@@ -40,8 +40,8 @@ Up Speaking Learning Centre adalah lembaga kursus bahasa Inggris yang melayani p
 
 ### 3. Tutor:
 - Terbagi berdasarkan spesialisasi jenjang:
-  - *Tutor Elementary* (khusus siswa SD).
-  - *Tutor High School* (khusus siswa SMP, SMA, dan Umum).
+  - *Tutor Elementary* (khusus siswa jenjang *Elementary*).
+  - *Tutor High School* (khusus siswa jenjang *High School*).
 - Login menggunakan akun yang telah dibuatkan oleh Admin.
 - Mengelola bank soal khusus jenjang yang diampunya (tambah, edit, hapus butir soal).
 - Meninjau hasil tes siswa (persentase skor otomatis, durasi pengerjaan *elapsed time*, detail jawaban) dan menetapkan level final (*Beginner*, *Intermediate*, *Advanced*) secara objektif.

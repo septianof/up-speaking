@@ -29,7 +29,7 @@
 ### 👨‍🏫 2. Portal Staf & Pengajar (Staff & Tutor Management)
 - **Smart Redirect (`/staff`):** Akses cepat yang otomatis mengarahkan staf ke halaman login atau dashboard spesifik sesuai peran (*Admin* vs *Tutor*).
 - **Dashboard Admin:** Pemantauan metrik peserta secara real-time, pendaftaran siswa baru, manajemen akun tutor, dan penelusuran aktivitas sesi.
-- **Dashboard Tutor Berdasarkan Jenjang:** Pemisahan akses ketat (*Role-Based Access Control*) antara Tutor Elementary (SD) dan High School (SMP/SMA).
+- **Dashboard Tutor Berdasarkan Jenjang:** Pemisahan akses ketat (*Role-Based Access Control*) antara Tutor Elementary dan High School.
 - **Bank Soal Dinamis:** Pengelolaan butir soal interaktif dengan opsi jawaban fleksibel (2 hingga 5 opsi) dan penetapan kunci jawaban instan.
 - **Lembar Penilaian & Evaluasi Terpadu:** Tutor dapat memeriksa lembar jawaban siswa secara mendalam, mencocokkan acuan skor lembaga, dan menetapkan level final (*Beginner*, *Intermediate*, *Advanced*) disertai catatan pembinaan.
 - **Ekspor Dokumen Resmi:** Cetak laporan rekapitulasi penempatan ke dalam format **Excel (`.xlsx`)** dan dokumen cetak **PDF (`.pdf`)** berstandar resmi lembaga.

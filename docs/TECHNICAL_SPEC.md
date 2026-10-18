@@ -100,7 +100,7 @@ Mencatat siswa yang didaftarkan oleh Admin.
 | `id` | `UUID` | **Primary Key** (default: `gen_random_uuid()`). |
 | `full_name` | `VARCHAR(150)` | Nama lengkap siswa. |
 | `phone_number` | `VARCHAR(20)` | Nomor HP siswa / orang tua. |
-| `target_level` | `VARCHAR(30)` | Jenjang pendidikan: `'ELEMENTARY'` (SD) atau `'HIGH_SCHOOL'` (SMP/SMA/Umum). |
+| `target_level` | `VARCHAR(30)` | Jenjang pendidikan: `'ELEMENTARY'` atau `'HIGH_SCHOOL'`. |
 | `created_at` | `TIMESTAMPTZ` | Waktu pendaftaran siswa. |
 
 #### 3. Tabel: `test_sessions` (Sesi Ujian Siswa)
