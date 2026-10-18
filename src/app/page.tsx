@@ -338,10 +338,10 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 w-full flex flex-col items-center">
-        {/* HERO SECTION (Full Viewport on Desktop) */}
+        {/* HERO SECTION (Full Viewport on Desktop, Natural Flow on Mobile/Tablet) */}
         <section
           id="hero"
-          className="w-full max-w-5xl mx-auto px-6 pt-8 pb-14 sm:py-16 md:min-h-[calc(100vh-68px)] md:py-0 flex flex-col-reverse md:flex-row items-center justify-between gap-10 scroll-mt-24"
+          className="w-full max-w-5xl mx-auto px-6 pt-10 pb-16 sm:py-20 lg:min-h-[calc(100vh-68px)] lg:py-0 flex flex-col-reverse md:flex-row items-center justify-between gap-10 scroll-mt-24"
         >
           {/* Teks Hero */}
           <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
