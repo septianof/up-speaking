@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     // 1. Verifikasi status sesi
     const { data: session, error: sessionError } = await supabase
       .from('test_sessions')
-      .select('id, student_id, device_token, status')
+      .select('id, student_id, device_token, status, score_percentage, elapsed_seconds')
       .eq('id', sessionId)
       .single()
 
@@ -79,13 +79,17 @@ export async function POST(request: Request) {
       )
     }
 
+    // Jika sesi sudah pernah diselesaikan, tanggapi dengan status sukses agar client langsung diarahkan ke hasil
     if (session.status !== 'IN_PROGRESS') {
       return NextResponse.json(
         {
-          error: 'Sesi tes sudah pernah dikumpulkan sebelumnya',
+          success: true,
           status: session.status,
+          scorePercentage: session.score_percentage,
+          elapsedSeconds: session.elapsed_seconds,
+          alreadyCompleted: true,
         },
-        { status: 409 }
+        { status: 200 }
       )
     }
 
@@ -101,20 +105,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Simpan final responses jika disertakan
+    // 2. Simpan final responses secara paralel (Promise.all) untuk respon instan tanpa antrean serial
     if (finalResponses && finalResponses.length > 0) {
-      for (const item of finalResponses) {
-        await supabase
-          .from('test_responses')
-          .update({
-            selected_option_id: item.selectedOptionId,
-            synced_at: new Date().toISOString(),
-          })
-          .match({
-            session_id: sessionId,
-            question_id: item.questionId,
-          })
-      }
+      await Promise.all(
+        finalResponses.map((item) =>
+          supabase
+            .from('test_responses')
+            .update({
+              selected_option_id: item.selectedOptionId,
+              synced_at: new Date().toISOString(),
+            })
+            .match({
+              session_id: sessionId,
+              question_id: item.questionId,
+            })
+        )
+      )
     }
 
     // 3. Hitung skor otomatis di server

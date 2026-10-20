@@ -54,7 +54,6 @@ export default function TestPage() {
     hasPendingSync,
     deviceConflict,
     syncAnswer,
-    flushPendingSync,
     syncElapsedSeconds,
   } = useOfflineSync({
     sessionId: session?.sessionId,
@@ -223,13 +222,14 @@ export default function TestPage() {
 
   // Open confirmation modal
   const handleOpenSubmit = () => {
+    if (isSubmitting) return;
     setSubmitError(null);
     setIsSubmitModalOpen(true);
   };
 
   // Final confirm submit
   const handleConfirmSubmit = async () => {
-    if (!session) return;
+    if (!session || isSubmitting) return;
 
     if (!isOnline) {
       setSubmitError(
@@ -242,9 +242,6 @@ export default function TestPage() {
     setSubmitError(null);
 
     try {
-      // Pastikan antrean sync terkirim habis
-      await flushPendingSync(answers);
-
       const finalResponses = questions.map((q) => ({
         questionId: q.id,
         selectedOptionId: answers[q.id] || null,
@@ -271,6 +268,10 @@ export default function TestPage() {
         }
         setSubmitError(data.error || "Gagal mengumpulkan lembar jawaban.");
         return;
+      }
+
+      if (typeof window !== "undefined" && session.sessionId) {
+        localStorage.removeItem(`up_speaking_sync_queue_${session.sessionId}`);
       }
 
       const completedSession: StudentSession = {
@@ -422,19 +423,17 @@ export default function TestPage() {
 
             {/* Navigation Stepper Action Bar */}
             <div className="flex items-center justify-between gap-2 bg-surface-white p-3 sm:p-4 rounded-[24px] border-2 border-primary-100 shadow-kid-card overflow-hidden">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  variant="kidSoft"
-                  size="md"
-                  disabled={currentIndex === 0}
-                  onClick={() => handleNavigate(currentIndex - 1)}
-                  className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
-                  aria-label="Soal sebelumnya"
-                >
-                  <ChevronLeft className="w-4 h-4 shrink-0" />
-                  <span className="hidden sm:inline">Sebelumnya</span>
-                </Button>
-              </motion.div>
+              <Button
+                variant="kidSoft"
+                size="md"
+                disabled={currentIndex === 0 || isSubmitting}
+                onClick={() => handleNavigate(currentIndex - 1)}
+                className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
+                aria-label="Soal sebelumnya"
+              >
+                <ChevronLeft className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </Button>
 
               {/* Middle Palette Trigger Button */}
               <button
@@ -452,31 +451,30 @@ export default function TestPage() {
               </button>
 
               {currentIndex < totalQuestions - 1 ? (
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    variant="kidBlue"
-                    size="md"
-                    onClick={() => handleNavigate(currentIndex + 1)}
-                    className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
-                    aria-label="Soal selanjutnya"
-                  >
-                    <span className="hidden sm:inline">Selanjutnya</span>
-                    <ChevronRight className="w-4 h-4 shrink-0" />
-                  </Button>
-                </motion.div>
+                <Button
+                  variant="kidBlue"
+                  size="md"
+                  disabled={isSubmitting}
+                  onClick={() => handleNavigate(currentIndex + 1)}
+                  className="gap-1 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm min-w-0"
+                  aria-label="Soal selanjutnya"
+                >
+                  <span className="hidden sm:inline">Selanjutnya</span>
+                  <ChevronRight className="w-4 h-4 shrink-0" />
+                </Button>
               ) : (
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    variant="kid"
-                    size="md"
-                    onClick={handleOpenSubmit}
-                    className="gap-1.5 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C] min-w-0"
-                    aria-label="Kumpulkan tes"
-                  >
-                    <span>Kumpulkan</span>
-                    <Send className="w-3.5 h-3.5 shrink-0" />
-                  </Button>
-                </motion.div>
+                <Button
+                  variant="kid"
+                  size="md"
+                  onClick={handleOpenSubmit}
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                  className="gap-1.5 px-3 sm:px-5 shrink-0 h-11 text-xs sm:text-sm shadow-[0_4px_0_0_#B91C1C] min-w-0"
+                  aria-label="Kumpulkan tes"
+                >
+                  <span>Kumpulkan</span>
+                  <Send className="w-3.5 h-3.5 shrink-0" />
+                </Button>
               )}
             </div>
           </div>
@@ -507,7 +505,9 @@ export default function TestPage() {
       {/* Submit Confirmation Modal */}
       <SubmitConfirmModal
         isOpen={isSubmitModalOpen}
-        onClose={() => setIsSubmitModalOpen(false)}
+        onClose={() => {
+          if (!isSubmitting) setIsSubmitModalOpen(false);
+        }}
         onConfirm={handleConfirmSubmit}
         totalQuestions={totalQuestions}
         answeredCount={answeredIndices.length}

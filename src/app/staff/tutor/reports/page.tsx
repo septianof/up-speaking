@@ -25,7 +25,7 @@ export default function TutorReportsPage() {
 
   // SWR: Otomatis cache-first dengan revalidasi fokus
   const { data, isLoading, isValidating, mutate } = useSWR<{ reports: ReportItem[] }>(
-    `/api/admin/reports?level=${tutorLevel}`,
+    `/api/tutor/reports?level=${tutorLevel}`,
     fetcher,
     { revalidateOnFocus: true }
   );
