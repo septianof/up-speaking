@@ -43,17 +43,26 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
     setSuccessMessage(null);
   }, [initialStudent, isOpen]);
 
-  // Sanitasi Nama Lengkap: hanya huruf dan spasi
+  // Sanitasi Nama Lengkap: hanya huruf, spasi, dan karakter nama umum
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = e.target.value.replace(/[^a-zA-Z\s]/g, "");
     setFullName(sanitized);
     if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
   };
 
-  // Sanitasi No HP: hanya angka
+  // Normalisasi nomor HP: konversi 628xxx / +628xxx → 08xxx, lalu strip non-digit
+  const normalizePhone = (raw: string): string => {
+    const digits = raw.replace(/\D/g, "");
+    if (digits.startsWith("628")) return "0" + digits.slice(2);
+    if (digits.startsWith("62")) return "0" + digits.slice(2);
+    if (digits.startsWith("8")) return "0" + digits;
+    return digits;
+  };
+
+  // Sanitasi & normalisasi No HP saat user mengetik
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = e.target.value.replace(/\D/g, "");
-    setPhone(sanitized);
+    const normalized = normalizePhone(e.target.value);
+    setPhone(normalized);
     if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
   };
 
@@ -71,7 +80,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
     } else if (!phone.startsWith("08")) {
       newErrors.phone = "Nomor HP harus diawali '08'";
     } else if (phone.length < 10 || phone.length > 14) {
-      newErrors.phone = "Nomor HP harus terdiri dari 10 - 14 digit";
+      newErrors.phone = "Nomor HP harus terdiri dari 10 – 14 digit";
     }
 
     setErrors(newErrors);
@@ -187,12 +196,12 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
             </label>
             <Input
               type="tel"
-              placeholder="08xxxxxxxxxx"
+              placeholder="08xxxxxxxxxx atau 628xxxxxxxxxx"
               value={phone}
               onChange={handlePhoneChange}
               error={errors.phone}
               className="text-sm"
-              maxLength={14}
+              maxLength={16}
             />
           </div>
 

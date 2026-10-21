@@ -6,16 +6,36 @@ import { normalizeSingleRelation } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Menormalisasi nomor HP ke format standar Indonesia (diawali '08').
+ * Menangani input: '628xxx', '+628xxx', '8xxx', dan '08xxx'.
+ */
+function normalizePhoneNumber(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('628')) return '0' + digits.slice(2)
+  if (digits.startsWith('62')) return '0' + digits.slice(2)
+  if (digits.startsWith('8')) return '0' + digits
+  return digits
+}
+
+const phoneSchema = z
+  .string()
+  .min(1, 'Nomor HP wajib diisi')
+  .transform((val) => normalizePhoneNumber(val.trim()))
+  .pipe(
+    z
+      .string()
+      .min(10, 'Nomor HP harus terdiri dari 10–14 digit')
+      .max(14, 'Nomor HP harus terdiri dari 10–14 digit')
+      .regex(/^08[0-9]+$/, 'Nomor HP harus diawali 08 dan berupa angka')
+  )
+
 const createStudentSchema = z.object({
   fullName: z
     .string()
     .min(2, 'Nama lengkap minimal 2 karakter')
     .max(150, 'Nama terlalu panjang'),
-  phoneNumber: z
-    .string()
-    .min(8, 'Nomor HP minimal 8 digit')
-    .max(20, 'Nomor HP maksimal 20 digit')
-    .regex(/^08[0-9]+$/, 'Nomor HP harus diawali 08 dan berupa angka'),
+  phoneNumber: phoneSchema,
   targetLevel: z.enum(['ELEMENTARY', 'HIGH_SCHOOL']),
 })
 
@@ -25,11 +45,7 @@ const updateStudentSchema = z.object({
     .string()
     .min(2, 'Nama lengkap minimal 2 karakter')
     .max(150, 'Nama terlalu panjang'),
-  phoneNumber: z
-    .string()
-    .min(8, 'Nomor HP minimal 8 digit')
-    .max(20, 'Nomor HP maksimal 20 digit')
-    .regex(/^08[0-9]+$/, 'Nomor HP harus diawali 08 dan berupa angka'),
+  phoneNumber: phoneSchema,
   targetLevel: z.enum(['ELEMENTARY', 'HIGH_SCHOOL']),
 })
 
@@ -158,20 +174,21 @@ export async function POST(request: Request) {
       )
     }
 
+    // phoneNumber sudah dinormalisasi oleh Zod transform (628xxx → 08xxx)
     const { fullName, phoneNumber, targetLevel } = parsed.data
     const supabase = createAdminClient()
 
-    // Cek apakah nomor HP sudah terdaftar pada jenjang yang sama
+    // Cek duplikat berdasarkan kombinasi nama lengkap + nomor HP (lintas jenjang)
     const { data: existing } = await supabase
       .from('students')
       .select('id')
-      .eq('phone_number', phoneNumber.trim())
-      .eq('target_level', targetLevel)
+      .ilike('full_name', fullName.trim())
+      .eq('phone_number', phoneNumber)
       .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Nomor HP ini sudah terdaftar untuk jenjang yang dipilih' },
+        { error: 'Siswa dengan nama dan nomor HP ini sudah terdaftar di sistem.' },
         { status: 409 }
       )
     }
@@ -180,7 +197,7 @@ export async function POST(request: Request) {
       .from('students')
       .insert({
         full_name: fullName.trim(),
-        phone_number: phoneNumber.trim(),
+        phone_number: phoneNumber,
         target_level: targetLevel,
       })
       .select('*')
@@ -231,6 +248,7 @@ export async function PUT(request: Request) {
       )
     }
 
+    // phoneNumber sudah dinormalisasi oleh Zod transform (628xxx → 08xxx)
     const { id, fullName, phoneNumber, targetLevel } = parsed.data
     const supabase = createAdminClient()
 
@@ -248,18 +266,18 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Cek apakah nomor HP sudah terdaftar untuk siswa LAIN pada jenjang yang sama
+    // Cek duplikat nama + HP untuk siswa LAIN (lintas jenjang)
     const { data: existing } = await supabase
       .from('students')
       .select('id')
-      .eq('phone_number', phoneNumber.trim())
-      .eq('target_level', targetLevel)
+      .ilike('full_name', fullName.trim())
+      .eq('phone_number', phoneNumber)
       .neq('id', id)
       .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Nomor HP ini sudah terdaftar untuk siswa lain pada jenjang yang dipilih' },
+        { error: 'Siswa lain dengan nama dan nomor HP yang sama sudah ada di sistem.' },
         { status: 409 }
       )
     }
@@ -268,7 +286,7 @@ export async function PUT(request: Request) {
       .from('students')
       .update({
         full_name: fullName.trim(),
-        phone_number: phoneNumber.trim(),
+        phone_number: phoneNumber,
         target_level: targetLevel,
       })
       .eq('id', id)
