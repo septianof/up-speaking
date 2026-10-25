@@ -196,7 +196,7 @@ export const StudentRegisterModal: React.FC<StudentRegisterModalProps> = ({
             </label>
             <Input
               type="tel"
-              placeholder="08xxxxxxxxxx atau 628xxxxxxxxxx"
+              placeholder="08xxxxxxxxxx"
               value={phone}
               onChange={handlePhoneChange}
               error={errors.phone}
