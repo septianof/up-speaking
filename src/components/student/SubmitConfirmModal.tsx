@@ -68,7 +68,7 @@ export const SubmitConfirmModal: React.FC<SubmitConfirmModalProps> = ({
         )}
 
         {/* Action Buttons: Simetris 50:50 */}
-        <div className="grid grid-cols-2 gap-3 pt-2">
+        <div className="grid grid-cols-2 gap-3 pt-2 pb-2">
           <Button
             type="button"
             variant="kidSoft"

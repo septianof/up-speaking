@@ -57,7 +57,12 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto",
+            topSlot && "pt-20 sm:pt-24 pb-8 sm:pb-10"
+          )}
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -80,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
             className={cn(
               "relative w-full bg-surface-white shadow-float text-left z-10 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col my-auto",
               isKid
-                ? cn("rounded-[28px] p-5 sm:p-7 font-kid", topSlot && "mt-16")
+                ? "rounded-[28px] p-5 sm:p-7 pb-6 sm:pb-8 font-kid"
                 : "rounded-2xl p-5 sm:p-6 border border-surface-border",
               maxWidthStyles[maxWidth]
             )}
@@ -135,7 +140,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Body */}
-            <div className="overflow-y-auto flex-1 -mr-1 pr-1">{children}</div>
+            <div className="overflow-y-auto flex-1 -mr-1 pr-1 pb-2">{children}</div>
           </motion.div>
         </div>
       )}
